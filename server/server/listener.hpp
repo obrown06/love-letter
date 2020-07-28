@@ -1,5 +1,5 @@
-#ifndef LISTENER_HPP
-#define LISTENER_HPP
+#ifndef SERVER_LISTENER_HPP
+#define SERVER_LISTENER_HPP
 
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>

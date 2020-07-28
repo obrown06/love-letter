@@ -1,4 +1,5 @@
-#include "./listener.hpp"
+#include "listener.hpp"
+#include "session.hpp"
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/websocket.hpp>
@@ -10,14 +11,12 @@
 #include <boost/make_unique.hpp>
 #include <boost/optional.hpp>
 
+#include "util.hpp"
+
 namespace beast = boost::beast;
 namespace http = beast::http;
 namespace net = boost::asio;
 using tcp = boost::asio::ip::tcp;
-
-void fail(beast::error_code ec, const std::string& action) {
-  std::cerr << action << " failed with the following message: " << ec.message() << "\n";
-}
 
 Listener::Listener(net::io_context& ioc, tcp::endpoint endpoint)
   : ioc_(ioc),
@@ -69,5 +68,12 @@ void Listener::do_accept() {
 }
 
 void Listener::on_accept(beast::error_code ec, tcp::socket socket) {
-  std::cout << "Accepted!\n\n";
+  if (ec) {
+    fail(ec, "accept");
+  } else {
+    std::make_shared<HTTPSession>(std::move(socket))->run();
+  }
+
+  // Accept another connection
+  do_accept();
 }
