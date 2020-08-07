@@ -1,10 +1,13 @@
-#include <sqlite3.h>
+#include "db_init.h"
+#include "util.h"
+
 #include <string>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
 #include <sstream>
 #include <boost/format.hpp>
+
 
 const std::vector<std::pair<std::string, std::string>> kTablesToCreationSQL = {
   {
@@ -18,11 +21,11 @@ const std::vector<std::pair<std::string, std::string>> kTablesToCreationSQL = {
     "GAMES",
     "CREATE TABLE GAMES(" \
       "ID   TEXT PRIMARY KEY    NOT NULL," \
-      "SIZE INT                 NOT NULL);"
+      "NPLAYERS INT                 NOT NULL);"
   },
   {
-    "RANK",
-    "CREATE TABLE RANK(" \
+    "PERFORMANCE",
+    "CREATE TABLE PERFORMANCE(" \
       "ID       TEXT PRIMARY KEY    NOT NULL," \
       "USERNAME INT                 NOT NULL," \
       "GAME_ID  INT                 NOT NULL," \
@@ -32,7 +35,6 @@ const std::vector<std::pair<std::string, std::string>> kTablesToCreationSQL = {
   }
 };
 
-const char kDatabaseFileName[] = "LoveLetter.db";
 const std::string kCheckIfTableExistsSQL = "SELECT name FROM sqlite_master WHERE type='table' AND name='%1%';";
 
 bool TableExists(sqlite3* db, const std::string& table_name) {
@@ -42,16 +44,13 @@ bool TableExists(sqlite3* db, const std::string& table_name) {
     *result = count > 0;
     return 0;
   };
-  int rc = sqlite3_exec(db,
-               (boost::format(kCheckIfTableExistsSQL) % table_name).str().c_str(),
-               check_if_table_exists,
-               &table_exists,
-               NULL);
-  if (rc) {
-    std::stringstream err_msg;
-    err_msg << "Failed to check if table exists, with error: " << sqlite3_errmsg(db);
-    throw std::runtime_error(err_msg.str());
-  }
+  char* sqlite3_errmsg = 0;
+  MaybeThrowException(sqlite3_exec(db,
+                                  (boost::format(kCheckIfTableExistsSQL) % table_name).str().c_str(),
+                                  check_if_table_exists,
+                                  &table_exists,
+                                  &sqlite3_errmsg),
+                      &sqlite3_errmsg);
   return table_exists;
 }
 
@@ -59,12 +58,13 @@ void InitializeTable(sqlite3* db, const std::string& creation_sql) {
   auto unused_callback = [](void* unused, int count, char** data, char **columns) -> int {
     return 0;
   };
-  int rc = sqlite3_exec(db, creation_sql.c_str(), unused_callback, 0, NULL);
-  if (rc) {
-    std::stringstream err_msg;
-    err_msg << "Failed to initialize table, with error: " << sqlite3_errmsg(db);
-    throw std::runtime_error(err_msg.str());
-  }
+  char* sqlite3_errmsg = 0;
+  MaybeThrowException(sqlite3_exec(db,
+                                   creation_sql.c_str(),
+                                   unused_callback,
+                                   0,
+                                   &sqlite3_errmsg),
+                      &sqlite3_errmsg);
   std::cout << "Initializing table!\n";
   return;
 }
@@ -77,11 +77,11 @@ void InitializeTables(sqlite3* db) {
   }
 }
 
-sqlite3* InitializeDB() {
+sqlite3* InitializeDB(const std::string& file_path) {
   sqlite3* db;
   int rc;
-  rc = sqlite3_open(kDatabaseFileName, &db);
-  if (rc) {
+  rc = sqlite3_open(file_path.c_str(), &db);
+  if (rc != SQLITE_OK) {
     std::cerr << "Failed to initialize Database: " << sqlite3_errmsg(db) << "\n";
   } else {
     std::cout << "Opened database successfully!\n";
@@ -93,11 +93,5 @@ sqlite3* InitializeDB() {
     std::cerr << e.what() << "\n";
   }
 
-  sqlite3_close(db);
-
   return db;
-}
-
-int main() {
-  InitializeDB();
 }

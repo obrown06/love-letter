@@ -1,6 +1,9 @@
-#ifndef SERVER_DB_INIT_H
-#define SERVER_DB_INIT_H
+#ifndef SERVER_STORAGE_DB_INIT_H
+#define SERVER_STORAGE_DB_INIT_H
 
-sqlite3* InitializeDB();
+#include <sqlite3.h>
+#include <string>
+
+sqlite3* InitializeDB(const std::string& file_path);
 
 #endif
