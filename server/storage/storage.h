@@ -16,7 +16,7 @@ class Storage {
   // Inserts or updates the database row with `username` as its primary key.
   void InsertOrUpdateAccount(const Account& account);
 
-  //Account LoadAccount(const std::string& username);
+  Account LoadAccount(const std::string& username);
 
  private:
   sqlite3* database_;
