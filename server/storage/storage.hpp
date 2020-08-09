@@ -1,9 +1,11 @@
 #ifndef SERVER_STORAGE_STORAGE_H
 #define SERVER_STORAGE_STORAGE_H
 
+#include "server/models/account.hpp"
+
+#include <memory>
 #include <string>
 #include <sqlite3.h>
-#include "server/models/account.hpp"
 
 class Storage {
  public:
@@ -17,6 +19,8 @@ class Storage {
   void InsertOrUpdateAccount(const Account& account);
 
   Account LoadAccount(const std::string& username);
+
+  std::unique_ptr<std::vector<Account>> LoadAllAccounts();
 
  private:
   sqlite3* database_;
