@@ -1,6 +1,6 @@
-#include "db_init.h"
-#include "util.h"
-#include "exceptions.h"
+#include "server/storage/db_init.hpp"
+#include "server/storage/util.hpp"
+#include "server/storage/exceptions.hpp"
 
 #include <string>
 #include <iostream>

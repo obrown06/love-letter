@@ -3,7 +3,7 @@
 
 #include <string>
 #include <sqlite3.h>
-#include "../models/account.h"
+#include "server/models/account.hpp"
 
 class Storage {
  public:

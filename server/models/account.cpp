@@ -1,4 +1,4 @@
-#include "account.h"
+#include "server/models/account.hpp"
 
 std::string Account::GetUsername() const {
   return username_;

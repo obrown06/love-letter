@@ -1,5 +1,5 @@
-#include "util.h"
-#include "exceptions.h"
+#include "server/storage/util.hpp"
+#include "server/storage/exceptions.hpp"
 
 #include <sqlite3.h>
 #include <sstream>
