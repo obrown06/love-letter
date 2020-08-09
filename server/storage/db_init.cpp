@@ -45,13 +45,8 @@ bool TableExists(sqlite3* db, const std::string& table_name) {
     *result = count > 0;
     return 0;
   };
-  char* sqlite3_errmsg = 0;
-  ThrowSqliteExceptionIfError(sqlite3_exec(db,
-                                  (boost::format(kCheckIfTableExistsSQL) % table_name).str().c_str(),
-                                  check_if_table_exists,
-                                  &table_exists,
-                                  &sqlite3_errmsg),
-                      &sqlite3_errmsg);
+  std::string sql = (boost::format(kCheckIfTableExistsSQL) % table_name).str();
+  ExecuteSql(sql, check_if_table_exists, db, &table_exists);
   return table_exists;
 }
 
@@ -59,13 +54,8 @@ void InitializeTable(sqlite3* db, const std::string& creation_sql) {
   auto unused_callback = [](void* unused, int count, char** data, char **columns) -> int {
     return 0;
   };
-  char* sqlite3_errmsg = 0;
-  ThrowSqliteExceptionIfError(sqlite3_exec(db,
-                                   creation_sql.c_str(),
-                                   unused_callback,
-                                   0,
-                                   &sqlite3_errmsg),
-                      &sqlite3_errmsg);
+  int unused;
+  ExecuteSql(creation_sql, unused_callback, db, &unused);
   std::cout << "Initializing table!\n";
   return;
 }

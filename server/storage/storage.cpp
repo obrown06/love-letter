@@ -29,17 +29,12 @@ Storage::~Storage() {
 }
 
 void Storage::InsertOrUpdateAccount(const Account& account) {
-  char* err_msg;
   std::string sql = (boost::format(kInsertOrReplaceAccountSQL)
                       % account.GetUsername()
                       % account.GetPassword()
                       % account.GetEmail()).str();
-  ThrowSqliteExceptionIfError(sqlite3_exec(database_,
-                                  sql.c_str(),
-                                  unused_callback,
-                                  0,
-                                  &err_msg),
-                      &err_msg);
+  int unused;
+  ExecuteSql(sql, unused_callback, database_, &unused);
 }
 
 Account Storage::LoadAccount(const std::string& username) {
@@ -59,15 +54,8 @@ Account Storage::LoadAccount(const std::string& username) {
     accounts_vec->push_back(Account(username, password, email));
     return 0;
   };
-  char* err_msg;
   std::string sql = (boost::format(kLoadAccountByUsernameSQL) % username).str();
-  ThrowSqliteExceptionIfError(sqlite3_exec(database_,
-                                  sql.c_str(),
-                                  load_all_accounts,
-                                  &accounts,
-                                  &err_msg),
-                      &err_msg);
-
+  ExecuteSql(sql, load_all_accounts, database_, &accounts);
   if (accounts.empty()) {
     throw NotFoundException("No account found with username!");
   } else if (accounts.size() > 1) {
