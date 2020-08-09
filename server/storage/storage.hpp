@@ -18,8 +18,11 @@ class Storage {
   // Inserts or updates the database row with `username` as its primary key.
   void InsertOrUpdateAccount(const Account& account);
 
+  // Loads the account with matching `username`. If no account is found, throws
+  // NotFoundException.
   Account LoadAccount(const std::string& username);
 
+  // Loads all accounts in the DB.
   std::unique_ptr<std::vector<Account>> LoadAllAccounts();
 
  private:

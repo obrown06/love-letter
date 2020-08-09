@@ -84,7 +84,7 @@ int main() {
     Account loaded_account = storage.LoadAccount("nick");
     std::cout << "Found account with username: " << loaded_account.GetUsername() << " and password: " << loaded_account.GetPassword() << " and email: " << loaded_account.GetEmail() << "\n";
     std::unique_ptr<std::vector<Account>> all_accounts = storage.LoadAllAccounts();
-    std::cout << "Number of accounts in total: " << all_accounts->size() << "\n";
+    std::cout << "Number of accounts: " << all_accounts->size() << "\n";
   } catch (std::exception& e) {
     std::cerr << e.what() << "\n";
   }
