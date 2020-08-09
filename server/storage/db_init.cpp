@@ -1,5 +1,6 @@
 #include "db_init.h"
 #include "util.h"
+#include "exceptions.h"
 
 #include <string>
 #include <iostream>
@@ -45,7 +46,7 @@ bool TableExists(sqlite3* db, const std::string& table_name) {
     return 0;
   };
   char* sqlite3_errmsg = 0;
-  MaybeThrowException(sqlite3_exec(db,
+  ThrowSqliteExceptionIfError(sqlite3_exec(db,
                                   (boost::format(kCheckIfTableExistsSQL) % table_name).str().c_str(),
                                   check_if_table_exists,
                                   &table_exists,
@@ -59,7 +60,7 @@ void InitializeTable(sqlite3* db, const std::string& creation_sql) {
     return 0;
   };
   char* sqlite3_errmsg = 0;
-  MaybeThrowException(sqlite3_exec(db,
+  ThrowSqliteExceptionIfError(sqlite3_exec(db,
                                    creation_sql.c_str(),
                                    unused_callback,
                                    0,
@@ -89,7 +90,7 @@ sqlite3* InitializeDB(const std::string& file_path) {
 
   try {
     InitializeTables(db);
-  } catch(std::exception& e) {
+  } catch(SqliteException& e) {
     std::cerr << e.what() << "\n";
   }
 

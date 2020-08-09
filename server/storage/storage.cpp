@@ -1,6 +1,7 @@
 #include "storage.h"
 #include "db_init.h"
 #include "util.h"
+#include "exceptions.h"
 
 #include <iostream>
 #include <boost/format.hpp>
@@ -33,7 +34,7 @@ void Storage::InsertOrUpdateAccount(const Account& account) {
                       % account.GetUsername()
                       % account.GetPassword()
                       % account.GetEmail()).str();
-  MaybeThrowException(sqlite3_exec(database_,
+  ThrowSqliteExceptionIfError(sqlite3_exec(database_,
                                   sql.c_str(),
                                   unused_callback,
                                   0,
@@ -60,7 +61,7 @@ Account Storage::LoadAccount(const std::string& username) {
   };
   char* err_msg;
   std::string sql = (boost::format(kLoadAccountByUsernameSQL) % username).str();
-  MaybeThrowException(sqlite3_exec(database_,
+  ThrowSqliteExceptionIfError(sqlite3_exec(database_,
                                   sql.c_str(),
                                   load_all_accounts,
                                   &accounts,
@@ -68,7 +69,7 @@ Account Storage::LoadAccount(const std::string& username) {
                       &err_msg);
 
   if (accounts.empty()) {
-    throw std::runtime_error("No account found with username!");
+    throw NotFoundException("No account found with username!");
   } else if (accounts.size() > 1) {
     throw std::runtime_error("More than one account found with username!");
   }
