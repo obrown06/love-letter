@@ -1,7 +1,9 @@
+#include "server/handlers/dispatcher.hpp"
+#include "server/server/listener.hpp"
+
 #include <boost/beast/core.hpp>
 #include <boost/beast/version.hpp>
 #include <boost/asio/bind_executor.hpp>
-#include "server/server/listener.hpp"
 #include <cstdlib>
 #include <memory>
 #include <iostream>
@@ -21,7 +23,9 @@ int main(int argc, char* argv[]) {
 
   net::io_context ioc;
 
-  std::make_shared<Listener>(ioc, tcp::endpoint(address, port))->run();
+  auto dispatcher = std::make_unique<HandlerDispatcher>();
+
+  std::make_shared<Listener>(ioc, tcp::endpoint(address, port), dispatcher.get())->run();
 
   net::signal_set signals(ioc, SIGINT, SIGTERM);
   signals.async_wait(

@@ -1,6 +1,7 @@
 #ifndef SERVER_SESSION_HPP
 #define SERVER_SESSION_HPP
 
+#include "server/handlers/dispatcher.hpp"
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
 #include <boost/beast/http.hpp>
@@ -19,7 +20,8 @@ using tcp = boost::asio::ip::tcp;
 class HTTPSession : public std::enable_shared_from_this<HTTPSession>
 {
 public:
-  HTTPSession(tcp::socket&& socket) : stream_(std::move(socket)), queue_(*this) {}
+  HTTPSession(tcp::socket&& socket, HandlerDispatcher* dispatcher) :
+    stream_(std::move(socket)), queue_(*this), dispatcher_(dispatcher) {}
 
   // Start the session
   void run();
@@ -106,6 +108,7 @@ private:
   beast::tcp_stream stream_;
   beast::flat_buffer buffer_;
   Queue queue_;
+  HandlerDispatcher* dispatcher_;
 
   // The parser is stored in an optional container so we can construct it
   // from scratch at the beginning of each new message.

@@ -19,9 +19,10 @@ namespace http = beast::http;
 namespace net = boost::asio;
 using tcp = boost::asio::ip::tcp;
 
-Listener::Listener(net::io_context& ioc, tcp::endpoint endpoint)
+Listener::Listener(net::io_context& ioc, tcp::endpoint endpoint, HandlerDispatcher* dispatcher)
   : ioc_(ioc),
-    acceptor_(net::make_strand(ioc))
+    acceptor_(net::make_strand(ioc)),
+    dispatcher_(dispatcher)
 {
   beast::error_code ec;
 
@@ -72,7 +73,7 @@ void Listener::on_accept(beast::error_code ec, tcp::socket socket) {
   if (ec) {
     fail(ec, "accept");
   } else {
-    std::make_shared<HTTPSession>(std::move(socket))->run();
+    std::make_shared<HTTPSession>(std::move(socket), dispatcher_)->run();
   }
 
   // Accept another connection

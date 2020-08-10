@@ -1,6 +1,8 @@
 #ifndef SERVER_LISTENER_HPP
 #define SERVER_LISTENER_HPP
 
+#include "server/handlers/dispatcher.hpp"
+
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
 #include <boost/beast/http.hpp>
@@ -19,7 +21,7 @@ using tcp = boost::asio::ip::tcp;
 class Listener : public std::enable_shared_from_this<Listener>
 {
 public:
-  Listener(net::io_context& ioc, tcp::endpoint endpoint);
+  Listener(net::io_context& ioc, tcp::endpoint endpoint, HandlerDispatcher* dispatcher);
   void run();
 
 private:
@@ -27,6 +29,7 @@ private:
   void on_accept(beast::error_code ec, tcp::socket socket);
   net::io_context& ioc_;
   tcp::acceptor acceptor_;
+  HandlerDispatcher* dispatcher_;
 };
 
 #endif

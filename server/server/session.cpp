@@ -58,7 +58,7 @@ void HTTPSession::on_read(beast::error_code ec, std::size_t bytes_transferred) {
     return fail(ec, "read");
   }
 
-  handle_request(parser_->release(), queue_);
+  dispatcher_->handle_request(parser_->release(), queue_);
 
   if (!queue_.is_full()) {
     do_read();
