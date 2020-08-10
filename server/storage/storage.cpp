@@ -76,7 +76,7 @@ std::unique_ptr<std::vector<Account>> Storage::LoadAllAccounts() {
   return accounts;
 }
 
-int main() {
+/*int main() {
   try {
     Account account("nick", "nick_pass", "nick@gmail.com");
     Storage storage(kDatabaseFileName);
@@ -89,4 +89,4 @@ int main() {
     std::cerr << e.what() << "\n";
   }
   return 0;
-}
+}*/

@@ -12,11 +12,11 @@ namespace http = beast::http;                   // from <boost/beast/http.hpp>
 
 class BaseHandler {
 public:
-  virtual std::string GetRoute() const;
+  virtual std::string GetRoute() const = 0;
 
   virtual std::pair<http::status, const std::string> HandleRequest(const std::string& target,
                                                                    const http::verb& method,
-                                                                   const std::string& body);
+                                                                   const std::string& body) = 0;
 };
 
 #endif

@@ -1,5 +1,7 @@
 #include "server/handlers/dispatcher.hpp"
+#include "server/handlers/handlers-init.hpp"
 #include "server/server/listener.hpp"
+#include "server/storage/storage.hpp"
 
 #include <boost/beast/core.hpp>
 #include <boost/beast/version.hpp>
@@ -13,6 +15,8 @@ namespace http = beast::http;
 namespace net = boost::asio;
 using tcp = boost::asio::ip::tcp;
 
+const char kDatabaseFileName[] = "LoveLetter.db";
+
 int main(int argc, char* argv[]) {
   if (argc != 3) {
     std::cerr << "Usage: love-letter <address> <port>\n";
@@ -23,7 +27,14 @@ int main(int argc, char* argv[]) {
 
   net::io_context ioc;
 
+  auto storage = std::make_unique<Storage>(kDatabaseFileName);
+
+  // For testing purposes
+  Account account("nick", "nick_pass", "nick@gmail.com");
+  storage->InsertOrUpdateAccount(account);
+
   auto dispatcher = std::make_unique<HandlerDispatcher>();
+  InitAndRegisterHandlers(storage.get(), dispatcher.get());
 
   std::make_shared<Listener>(ioc, tcp::endpoint(address, port), dispatcher.get())->run();
 

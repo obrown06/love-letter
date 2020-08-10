@@ -8,12 +8,16 @@
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 
+#include <iostream>
+
 namespace beast = boost::beast;                 // from <boost/beast.hpp>
 namespace http = beast::http;                   // from <boost/beast/http.hpp>
 
 class HandlerDispatcher {
  public:
    HandlerDispatcher() = default;
+
+   void RegisterHandler(std::shared_ptr<BaseHandler> handler);
 
    template<class Body, class Allocator, class Send>
    void handle_request(
@@ -35,7 +39,7 @@ class HandlerDispatcher {
      if (routes_to_handlers_.find(route) == routes_to_handlers_.end()) {
        return send(not_found(route));
      }
-     BaseHandler* handler = routes_to_handlers_.at(route);
+     std::shared_ptr<BaseHandler> handler = routes_to_handlers_.at(route);
      auto status_and_body = handler->HandleRequest(GetTarget(std::string(req.target())),
                                                    req.method(),
                                                    req.body());
@@ -53,7 +57,7 @@ class HandlerDispatcher {
      return send(found());
    }
  private:
-   std::map<std::string, BaseHandler*> routes_to_handlers_;
+   std::map<std::string, std::shared_ptr<BaseHandler>> routes_to_handlers_;
 };
 
 #endif

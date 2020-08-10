@@ -1,4 +1,5 @@
 #include "server/handlers/util.hpp"
+#include "server/handlers/accounts-handler.hpp"
 
 const char kDelineator = '/';
 
@@ -14,7 +15,7 @@ size_t GetLastIdxOfDelineator(const std::string& url, char delineator) {
 
 std::string GetRoute(const std::string& url) {
   size_t last_idx = GetLastIdxOfDelineator(url, kDelineator);
-  return url.substr(0, last_idx + 1);
+  return url.substr(0, last_idx);
 }
 
 std::string GetTarget(const std::string& url) {
