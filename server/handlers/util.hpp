@@ -3,6 +3,8 @@
 
 #include <string>
 
-std::string GetRoute(const std::string& target);
+std::string GetRoute(const std::string& url);
+
+std::string GetTarget(const std::string& url);
 
 #endif
