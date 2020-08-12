@@ -1,11 +1,10 @@
 #include "server/handlers/accounts-handler.hpp"
 #include "server/models/account.hpp"
 #include "server/storage/exceptions.hpp"
-
-#include <json/json.h>
+#include "server/json-api/accounts.hpp"
+#include "server/json-api/exceptions.hpp"
 
 #include <sstream>
-#include <iostream>
 
 const char kRouteName[] = "/accounts";
 
@@ -28,38 +27,34 @@ AccountsHandler::HandleRequest(const std::string& target,
 
 std::pair<http::status, const std::string>
 AccountsHandler::HandleGET(const std::string& target) {
-  std::stringstream body;
+  std::string body;
   try {
+    std::unique_ptr<std::vector<Account>> accounts_vec;
     if (target.empty()) {
-      auto accounts_vec = storage_->LoadAllAccounts();
-      for (const auto& account : *accounts_vec) {
-        body << "{\n\t\t" << "username: " << account.GetUsername() << "\n}\n";
-      }
+      accounts_vec = storage_->LoadAllAccounts();
     } else {
-      Account account = storage_->LoadAccount(target);
-      body << "{\n\t\t" << "username: " << account.GetUsername() << "\n}\n";
+      accounts_vec = std::make_unique<std::vector<Account>>();
+      accounts_vec->push_back(storage_->LoadAccount(target));
     }
+    body = AccountsToJSON(*accounts_vec);
   }
   catch (NotFoundException& e) {
     return std::make_pair(http::status::not_found, std::string("No account found!"));
   }
   catch (StorageException& e) {
-    return std::make_pair(http::status::internal_server_error, body.str());
+    return std::make_pair(http::status::internal_server_error, body);
   }
-  return std::make_pair(http::status::ok, body.str());
+  return std::make_pair(http::status::ok, body);
 }
 
 std::pair<http::status, const std::string>
 AccountsHandler::HandlePOST(const std::string& body) {
   try {
-    Json::Value json;
-    Json::CharReaderBuilder builder;
-    Json::CharReader * reader = builder.newCharReader();
-    std::string errors;
-    bool parsingSuccessful = reader->parse(body.c_str(), body.c_str() + body.size(), &json, &errors);
-    std::cout << "SUCCESS? " << parsingSuccessful << "\n";
-    Account account(json["username"].asString(), json["password"].asString(), json["email"].asString());
+    Account account = JSONToAccount(body);
     storage_->InsertAccount(account);
+  }
+  catch (InvalidJsonException& e) {
+    return std::make_pair(http::status::bad_request, std::string("Invalid request format!"));
   }
   catch (StorageException& e) {
     return std::make_pair(http::status::bad_request, std::string("Account with username already exists!"));

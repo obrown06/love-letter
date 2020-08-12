@@ -48,7 +48,7 @@ class HandlerDispatcher {
        {
          http::response<http::string_body> res{status_and_body.first, req.version()};
          res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-         res.set(http::field::content_type, "text/html");
+         res.set(http::field::content_type, "text/json");
          res.keep_alive(req.keep_alive());
          res.body() = status_and_body.second;
          res.prepare_payload();
