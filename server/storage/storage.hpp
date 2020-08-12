@@ -15,6 +15,9 @@ class Storage {
 
   ~Storage();
 
+  // Inserts a new database row with `account.GetUsername()` as its primary key.
+  void InsertAccount(const Account& account);
+
   // Inserts or updates the database row with `account.GetUsername()` as its
   // primary key.
   void InsertOrUpdateAccount(const Account& account);

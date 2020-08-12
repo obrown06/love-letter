@@ -9,6 +9,8 @@
 const char kDatabaseFileName[] = "LoveLetter.db";
 const char kInsertOrReplaceAccountSQL[] = "INSERT OR REPLACE INTO ACCOUNTS (USERNAME, PASSWORD, EMAIL) " \
                                       "VALUES ('%1%', '%2%', '%3%');";
+const char kInsertAccountSQL[] = "INSERT INTO ACCOUNTS (USERNAME, PASSWORD, EMAIL) " \
+                                      "VALUES ('%1%', '%2%', '%3%');";
 const char kLoadAccountByUsernameSQL[] = "SELECT * FROM ACCOUNTS WHERE USERNAME='%1%';";
 const char kLoadAllAccounts[] = "SELECT * FROM ACCOUNTS;";
 
@@ -47,6 +49,15 @@ Storage::~Storage() {
 
 void Storage::InsertOrUpdateAccount(const Account& account) {
   std::string sql = (boost::format(kInsertOrReplaceAccountSQL)
+                      % account.GetUsername()
+                      % account.GetPassword()
+                      % account.GetEmail()).str();
+  int unused;
+  ExecuteSql(sql, unused_callback, database_, &unused);
+}
+
+void Storage::InsertAccount(const Account& account) {
+  std::string sql = (boost::format(kInsertAccountSQL)
                       % account.GetUsername()
                       % account.GetPassword()
                       % account.GetEmail()).str();

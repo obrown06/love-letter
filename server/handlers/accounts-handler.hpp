@@ -23,6 +23,7 @@ class AccountsHandler : public BaseHandler {
                                                                      const std::string& body);
   private:
     std::pair<http::status, const std::string> HandleGET(const std::string& target);
+    std::pair<http::status, const std::string> HandlePOST(const std::string& body);
     Storage* storage_;
 };
 
