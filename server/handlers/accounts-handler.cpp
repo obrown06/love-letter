@@ -1,4 +1,6 @@
 #include "server/handlers/accounts-handler.hpp"
+
+#include "server/auth/authenticator.hpp"
 #include "server/models/account.hpp"
 #include "server/storage/exceptions.hpp"
 #include "server/json-api/accounts.hpp"
@@ -13,20 +15,20 @@ std::string AccountsHandler::GetRoute() const {
 }
 
 std::pair<http::status, const std::string>
-AccountsHandler::HandleRequest(const std::string& target,
-                               const http::verb& method,
-                               const std::string& body) {
-  if (method == http::verb::get) {
-    return HandleGET(target);
-  } else if (method == http::verb::post) {
-    return HandlePOST(body);
+AccountsHandler::HandleRequest(const http::request<http::string_body>& req) {
+  if (req.method() == http::verb::get) {
+    return HandleGET(req);
+  } else if (req.method() == http::verb::post) {
+    return HandlePOST(req);
   }
 
   return std::make_pair(http::status::not_implemented, std::string());
 }
 
 std::pair<http::status, const std::string>
-AccountsHandler::HandleGET(const std::string& target) {
+AccountsHandler::HandleGET(const http::request<http::string_body>& req) {
+  authenticator_->Authenticate(req);
+  std::string target = GetTarget(std::string(req.target()));
   std::string body;
   try {
     std::unique_ptr<std::vector<Account>> accounts_vec;
@@ -48,9 +50,9 @@ AccountsHandler::HandleGET(const std::string& target) {
 }
 
 std::pair<http::status, const std::string>
-AccountsHandler::HandlePOST(const std::string& body) {
+AccountsHandler::HandlePOST(const http::request<http::string_body>& req) {
   try {
-    Account account = JSONToAccount(body);
+    Account account = JSONToAccount(req.body());
     storage_->InsertAccount(account);
   }
   catch (InvalidJsonException& e) {

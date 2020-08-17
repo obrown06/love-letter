@@ -17,9 +17,9 @@ public:
   std::string GetPassword() const;
 
 private:
-  const std::string username_;
-  const std::string password_;
-  const std::string email_;
+  std::string username_;
+  std::string password_;
+  std::string email_;
 };
 
 #endif

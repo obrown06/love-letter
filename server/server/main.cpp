@@ -2,6 +2,7 @@
 #include "server/handlers/handlers-init.hpp"
 #include "server/server/listener.hpp"
 #include "server/storage/storage.hpp"
+#include "server/auth/authenticator.hpp"
 
 #include <boost/beast/core.hpp>
 #include <boost/beast/version.hpp>
@@ -28,13 +29,14 @@ int main(int argc, char* argv[]) {
   net::io_context ioc;
 
   auto storage = std::make_unique<Storage>(kDatabaseFileName);
+  auto authenticator = std::make_unique<Authenticator>();
 
   // For testing purposes
   Account account("nick", "nick_pass", "nick@gmail.com");
   storage->InsertOrUpdateAccount(account);
 
   auto dispatcher = std::make_unique<HandlerDispatcher>();
-  InitAndRegisterHandlers(storage.get(), dispatcher.get());
+  InitAndRegisterHandlers(storage.get(), authenticator.get(), dispatcher.get());
 
   std::make_shared<Listener>(ioc, tcp::endpoint(address, port), dispatcher.get())->run();
 
