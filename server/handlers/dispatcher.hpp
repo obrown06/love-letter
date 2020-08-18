@@ -14,6 +14,10 @@
 namespace beast = boost::beast;                 // from <boost/beast.hpp>
 namespace http = beast::http;                   // from <boost/beast/http.hpp>
 
+namespace {
+  const char kLoginRouteName[] = "/login/";
+};
+
 class HandlerDispatcher {
  public:
    HandlerDispatcher() = default;
@@ -25,50 +29,17 @@ class HandlerDispatcher {
      http::request<Body, http::basic_fields<Allocator>>&& req,
      Send&& send)
    {
-     const auto not_found =
-       [&req](beast::string_view target)
-       {
-           http::response<http::string_body> res{http::status::not_found, req.version()};
-           res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-           res.set(http::field::content_type, "text/html");
-           res.keep_alive(req.keep_alive());
-           res.body() = "No page found at the route '" + std::string(target) + "'.";
-           res.prepare_payload();
-           return res;
-       };
      std::string route = GetRoute(std::string(req.target()));
      if (routes_to_handlers_.find(route) == routes_to_handlers_.end()) {
-       return send(not_found(route));
+       std::string not_found_body = "No page found at the route '" + route + "'.";
+       return send(MakeJsonHttpResponse(http::status::not_found, req, not_found_body));
      }
-     const auto not_logged_in =
-       [&req]()
-       {
-           http::response<http::empty_body> res{http::status::see_other, req.version()};
-           res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-           res.set(http::field::location, "/login");
-           res.keep_alive(req.keep_alive());
-           res.prepare_payload();
-           return res;
-       };
      std::shared_ptr<BaseHandler> handler = routes_to_handlers_.at(route);
      try {
-       auto status_and_body = handler->HandleRequest(req);
-       const auto found =
-         [&status_and_body, &req]()
-         {
-           http::response<http::string_body> res{status_and_body.first, req.version()};
-           res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-           res.set(http::field::content_type, "text/json");
-           res.keep_alive(req.keep_alive());
-           res.body() = status_and_body.second;
-           res.prepare_payload();
-           return res;
-         };
-       return send(found());
+       return send(handler->HandleRequest(req));
      }
      catch (NotLoggedInException& e) {
-       std::cout << "returning redirect!";
-       return send(not_logged_in());
+       return send(MakeRedirectResponse(req, kLoginRouteName));
      }
    }
  private:

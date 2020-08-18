@@ -14,7 +14,7 @@ std::string AccountsHandler::GetRoute() const {
   return kRouteName;
 }
 
-std::pair<http::status, const std::string>
+http::response<http::string_body>
 AccountsHandler::HandleRequest(const http::request<http::string_body>& req) {
   if (req.method() == http::verb::get) {
     return HandleGET(req);
@@ -22,15 +22,16 @@ AccountsHandler::HandleRequest(const http::request<http::string_body>& req) {
     return HandlePOST(req);
   }
 
-  return std::make_pair(http::status::not_implemented, std::string());
+  return MakeJsonHttpResponse(http::status::not_implemented, req, std::string());
 }
 
-std::pair<http::status, const std::string>
+http::response<http::string_body>
 AccountsHandler::HandleGET(const http::request<http::string_body>& req) {
   authenticator_->Authenticate(req);
-  std::string target = GetTarget(std::string(req.target()));
   std::string body;
+  http::status status;
   try {
+    std::string target = GetTarget(std::string(req.target()));
     std::unique_ptr<std::vector<Account>> accounts_vec;
     if (target.empty()) {
       accounts_vec = storage_->LoadAllAccounts();
@@ -41,25 +42,25 @@ AccountsHandler::HandleGET(const http::request<http::string_body>& req) {
     body = AccountsToJSON(*accounts_vec);
   }
   catch (NotFoundException& e) {
-    return std::make_pair(http::status::not_found, std::string("No account found!"));
+    return MakeJsonHttpResponse(http::status::not_found, req, std::string("No account found!"));
   }
   catch (StorageException& e) {
-    return std::make_pair(http::status::internal_server_error, body);
+    return MakeJsonHttpResponse(http::status::internal_server_error, req, std::string());
   }
-  return std::make_pair(http::status::ok, body);
+  return MakeJsonHttpResponse(http::status::ok, req, body);
 }
 
-std::pair<http::status, const std::string>
+http::response<http::string_body>
 AccountsHandler::HandlePOST(const http::request<http::string_body>& req) {
   try {
     Account account = JSONToAccount(req.body());
     storage_->InsertAccount(account);
   }
   catch (InvalidJsonException& e) {
-    return std::make_pair(http::status::bad_request, std::string("Invalid request format!"));
+    return MakeJsonHttpResponse(http::status::bad_request, req, std::string("Invalid request format!"));
   }
   catch (StorageException& e) {
-    return std::make_pair(http::status::bad_request, std::string("Account with username already exists!"));
+    return MakeJsonHttpResponse(http::status::bad_request, req, std::string("Account with username already exists!"));
   }
-  return std::make_pair<http::status, const std::string>(http::status::ok, std::string());
+  return MakeJsonHttpResponse(http::status::ok, req, std::string());
 }

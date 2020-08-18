@@ -1,5 +1,5 @@
-#ifndef SERVER_HANDLERS_ACCOUNTS_HANDLER_H
-#define SERVER_HANDLERS_ACCOUNTS_HANDLER_H
+#ifndef SERVER_HANDLERS_LOGIN_HANDLER_H
+#define SERVER_HANDLERS_LOGIN_HANDLER_H
 
 #include "server/auth/authenticator.hpp"
 #include "server/storage/storage.hpp"
@@ -14,9 +14,14 @@
 namespace beast = boost::beast;                 // from <boost/beast.hpp>
 namespace http = beast::http;                   // from <boost/beast/http.hpp>
 
-class AccountsHandler : public BaseHandler {
+class LoginHandler : public BaseHandler {
   public:
-    AccountsHandler(Storage* storage, Authenticator* authenticator) : storage_(storage), authenticator_(authenticator) {}
+    LoginHandler(Storage* storage,
+                 Authenticator* authenticator,
+                 AccountsRegistry* accounts_registry)
+                 : storage_(storage),
+                   authenticator_(authenticator),
+                   accounts_registry_(accounts_registry) {}
 
     virtual std::string GetRoute() const;
 
@@ -28,6 +33,7 @@ class AccountsHandler : public BaseHandler {
     http::response<http::string_body> HandlePOST(const http::request<http::string_body>& req);
     Storage* storage_;
     Authenticator* authenticator_;
+    AccountsRegistry* accounts_registry_;
 };
 
 #endif

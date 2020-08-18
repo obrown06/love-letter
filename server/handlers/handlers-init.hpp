@@ -4,4 +4,5 @@
 
 void InitAndRegisterHandlers(Storage* storage,
                              Authenticator* authenticator,
+                             AccountsRegistry* accounts_registry,
                              HandlerDispatcher* dispatcher);

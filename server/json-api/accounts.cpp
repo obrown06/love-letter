@@ -28,3 +28,15 @@ Account JSONToAccount(const std::string& json) {
   Account account(root["username"].asString(), root["password"].asString(), root["email"].asString());
   return account;
 }
+
+std::pair<std::string, std::string> JSONToUsernamePasswordPair(const std::string& json) {
+  Json::Value root;
+  Json::CharReaderBuilder builder;
+  Json::CharReader * reader = builder.newCharReader();
+  std::string errors;
+  bool parsingSuccessful = reader->parse(json.c_str(), json.c_str() + json.size(), &root, &errors);
+  if (!parsingSuccessful || !root.isMember("username") || !root.isMember("password")) {
+    throw InvalidJsonException(json);
+  }
+  return std::pair<std::string, std::string>(root["username"].asString(), root["password"].asString());
+}

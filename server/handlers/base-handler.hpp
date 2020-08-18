@@ -13,7 +13,7 @@ namespace http = beast::http;                   // from <boost/beast/http.hpp>
 class BaseHandler {
 public:
   virtual std::string GetRoute() const = 0;
-  virtual std::pair<http::status, const std::string>
+  virtual http::response<http::string_body>
   HandleRequest(const http::request<http::string_body>& req) = 0;
 };
 

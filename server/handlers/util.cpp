@@ -22,3 +22,29 @@ std::string GetTarget(const std::string& url) {
   size_t last_idx = GetLastIdxOfDelineator(url, kDelineator);
   return url.substr(last_idx + 1, url.size() - (last_idx + 1));
 }
+
+http::response<http::string_body>
+MakeJsonHttpResponse(const http::status& status,
+                     const http::request<http::string_body>& req,
+                     const std::string& body)
+{
+  http::response<http::string_body> res{status, req.version()};
+  res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+  res.set(http::field::content_type, "text/json");
+  res.keep_alive(req.keep_alive());
+  res.body() = body;
+  res.prepare_payload();
+  return res;
+}
+
+http::response<http::string_body>
+MakeRedirectResponse(const http::request<http::string_body>& req,
+                     const std::string& to)
+{
+  http::response<http::string_body> res{http::status::see_other, req.version()};
+  res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+  res.set(http::field::location, to);
+  res.keep_alive(req.keep_alive());
+  res.prepare_payload();
+  return res;
+}

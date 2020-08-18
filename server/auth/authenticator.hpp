@@ -11,11 +11,11 @@ namespace http = beast::http;                   // from <boost/beast/http.hpp>
 
 class Authenticator {
 public:
-  Authenticator() {};
+  Authenticator(AccountsRegistry* accounts_registry) : registry_(accounts_registry) {};
 
   Account& Authenticate(const http::request<http::string_body>& req);
 private:
-  AccountsRegistry registry_;
+  AccountsRegistry* registry_;
 };
 
 #endif
