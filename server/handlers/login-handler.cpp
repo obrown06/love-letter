@@ -33,7 +33,10 @@ LoginHandler::HandlePOST(const http::request<http::string_body>& req) {
     if (account.GetPassword().compare(username_password_pair.second) != 0) {
       return MakeJsonHttpResponse(http::status::bad_request, req, std::string("Incorrect password!"));
     }
-    accounts_registry_->InsertAccount(account);
+    std::string session_key = accounts_registry_->InsertAccount(account);
+    auto res = MakeRedirectResponse(req, kHomeRouteName);
+    res.set(http::field::set_cookie, "sessionid=" + session_key);
+    return res;
   }
   catch (InvalidJsonException& e) {
     return MakeJsonHttpResponse(http::status::bad_request, req, std::string("Invalid request format!"));
@@ -41,7 +44,4 @@ LoginHandler::HandlePOST(const http::request<http::string_body>& req) {
   catch (NotFoundException& e) {
     return MakeJsonHttpResponse(http::status::bad_request, req, std::string("No account with matching username!"));
   }
-  auto res = MakeRedirectResponse(req, kHomeRouteName);
-  res.set(http::field::set_cookie, "sessionid=testtest");
-  return res;
 }
