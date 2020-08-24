@@ -1,11 +1,12 @@
 import React from 'react';
+
 import ReactDOM from 'react-dom';
-import Header from "components/header.js";
-import commonstyles from "common.module.css";
+import { BrowserRouter as Router } from 'react-router-dom';
+import Routes from 'routes.js';
 
 ReactDOM.render(
-  <React.StrictMode>
-    <Header />
-  </React.StrictMode>,
+  <Router>
+    <Routes />
+  </Router>,
   document.getElementById('root')
 );
