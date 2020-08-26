@@ -1,10 +1,13 @@
 import React from 'react';
+import UserProfile from 'utils/user-profile.js';
 import "common.module.css";
 
 class Home extends React.Component {
   render() {
     return (
-      <div>Home!</div>
+      <div>
+       Welcome, {UserProfile.getUserName()}!
+       </div>
     );
   }
 }

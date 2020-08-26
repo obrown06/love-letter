@@ -1,5 +1,6 @@
 import React from 'react';
 import cookieClient from 'react-cookie';
+import UserProfile from 'utils/user-profile.js';
 import axios from 'axios';
 import { Redirect } from 'react-router-dom';
 
@@ -11,7 +12,7 @@ class LoginForm extends React.Component {
     this.state = {
       username: '',
       password: '',
-      isLoggedIn: false,
+      isLoggedIn: UserProfile.isLoggedIn(),
     }
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -31,7 +32,8 @@ class LoginForm extends React.Component {
       { withCredentials: true }
     ).then(response => {
       if (response.status === 200) {
-        this.setState({ isLoggedIn: true });
+        UserProfile.login(this.state.username, response.headers['set-cookie']);
+        this.setState({ isLoggedIn: UserProfile.isLoggedIn() });
       }
     });
   }
