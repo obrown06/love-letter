@@ -1,6 +1,5 @@
 import React from 'react';
-import Header from "components/header.js";
-import commonstyles from "common.module.css";
+import "common.module.css";
 
 class Home extends React.Component {
   render() {

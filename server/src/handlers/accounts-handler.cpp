@@ -8,7 +8,7 @@
 
 #include <sstream>
 
-const char kRouteName[] = "/accounts";
+const char kRouteName[] = "/api/accounts";
 
 std::string AccountsHandler::GetRoute() const {
   return kRouteName;

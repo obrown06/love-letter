@@ -9,8 +9,8 @@
 
 #include <sstream>
 
-const char kRouteName[] = "/login";
-const char kHomeRouteName[] = "/";
+const char kRouteName[] = "/api/login";
+const char kHomeRouteName[] = "/api/";
 
 std::string LoginHandler::GetRoute() const {
   return kRouteName;
@@ -34,8 +34,8 @@ LoginHandler::HandlePOST(const http::request<http::string_body>& req) {
       return MakeJsonHttpResponse(http::status::bad_request, req, std::string("Incorrect password!"));
     }
     std::string session_key = accounts_registry_->InsertAccount(account);
-    auto res = MakeRedirectResponse(req, kHomeRouteName);
-    res.set(http::field::set_cookie, "sessionid=" + session_key);
+    auto res = MakeJsonHttpResponse(http::status::ok, req, std::string("Success!"));
+    res.set(http::field::set_cookie, "sessionid=" + session_key + "; Path=/");
     return res;
   }
   catch (InvalidJsonException& e) {

@@ -1,5 +1,9 @@
 import React from 'react';
-import styles from "components/login-form.module.css";
+import cookieClient from 'react-cookie';
+import axios from 'axios';
+import { Redirect } from 'react-router-dom';
+
+axios.defaults.withCredentials = true;
 
 class LoginForm extends React.Component {
   constructor(props) {
@@ -7,17 +11,39 @@ class LoginForm extends React.Component {
     this.state = {
       username: '',
       password: '',
+      isLoggedIn: false,
     }
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleChange = this.handleChange.bind(this);
   }
 
   handleChange = ({ target }) => {
     this.setState({ [target.name]: target.value });
   };
 
+  handleSubmit(e) {
+    e.preventDefault();
+    axios.post('http://localhost:3000/api/login/',
+      {
+        username: this.state.username,
+        password: this.state.password
+      },
+      { withCredentials: true }
+    ).then(response => {
+      if (response.status === 200) {
+        this.setState({ isLoggedIn: true });
+      }
+    });
+  }
+
   render() {
+    if (this.state.isLoggedIn) {
+      return <Redirect to="/home" />;
+    }
+
     return (
       <div>
-      <form>
+      <form onSubmit={this.handleSubmit}>
         <label htmlFor="username">username</label>
         <input
           type="text"
@@ -33,6 +59,8 @@ class LoginForm extends React.Component {
           value={this.state.password}
           onChange={this.handleChange}
         />
+
+        <input type="submit" value="Log In" />
       </form>
       </div>
     );
