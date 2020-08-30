@@ -40,6 +40,7 @@ AccountsHandler::HandleGET(const http::request<http::string_body>& req) {
       accounts_vec->push_back(storage_->LoadAccount(target));
     }
     body = AccountsToJSON(*accounts_vec);
+    return MakeJsonHttpResponse(http::status::ok, req, body);
   }
   catch (NotFoundException& e) {
     return MakeJsonHttpResponse(http::status::not_found, req, std::string("No account found!"));
@@ -47,7 +48,6 @@ AccountsHandler::HandleGET(const http::request<http::string_body>& req) {
   catch (StorageException& e) {
     return MakeJsonHttpResponse(http::status::internal_server_error, req, std::string());
   }
-  return MakeJsonHttpResponse(http::status::ok, req, body);
 }
 
 http::response<http::string_body>
@@ -55,6 +55,7 @@ AccountsHandler::HandlePOST(const http::request<http::string_body>& req) {
   try {
     Account account = JSONToAccount(req.body());
     storage_->InsertAccount(account);
+    return MakeJsonHttpResponse(http::status::ok, req, std::string());
   }
   catch (InvalidJsonException& e) {
     return MakeJsonHttpResponse(http::status::bad_request, req, std::string("Invalid request format!"));
@@ -62,5 +63,4 @@ AccountsHandler::HandlePOST(const http::request<http::string_body>& req) {
   catch (StorageException& e) {
     return MakeJsonHttpResponse(http::status::bad_request, req, std::string("Account with username already exists!"));
   }
-  return MakeJsonHttpResponse(http::status::ok, req, std::string());
 }

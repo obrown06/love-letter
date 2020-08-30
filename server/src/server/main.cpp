@@ -4,6 +4,7 @@
 #include "storage/storage.hpp"
 #include "auth/accounts-registry.hpp"
 #include "auth/authenticator.hpp"
+#include "models/games-registry.hpp"
 
 #include <boost/beast/core.hpp>
 #include <boost/beast/version.hpp>
@@ -31,16 +32,18 @@ int main(int argc, char* argv[]) {
 
   auto storage = std::make_unique<Storage>(kDatabaseFileName);
   auto accounts_registry = std::make_unique<AccountsRegistry>();
+  auto games_registry = std::make_unique<GamesRegistry>();
   auto authenticator = std::make_unique<Authenticator>(accounts_registry.get());
 
   // For testing purposes
-  Account account("nick", "nick_pass", "nick@gmail.com");
+  Account account("nick", "meh", "nick@gmail.com");
   storage->InsertOrUpdateAccount(account);
 
   auto dispatcher = std::make_unique<HandlerDispatcher>();
   InitAndRegisterHandlers(storage.get(),
                           authenticator.get(),
                           accounts_registry.get(),
+                          games_registry.get(),
                           dispatcher.get());
 
   std::make_shared<Listener>(ioc, tcp::endpoint(address, port), dispatcher.get())->run();
