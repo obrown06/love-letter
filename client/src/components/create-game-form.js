@@ -1,16 +1,13 @@
 import React from 'react';
 import UserProfile from 'utils/user-profile.js';
-import axios from 'axios';
+import { myaxios } from 'utils/axios.js';
 import { Redirect } from 'react-router-dom';
-
-axios.defaults.withCredentials = true;
 
 class CreateGameForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       game_id: '',
-      isLoggedIn: UserProfile.isLoggedIn(),
       gameCreated: false,
     }
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -22,8 +19,9 @@ class CreateGameForm extends React.Component {
   };
 
   handleSubmit(e) {
+    console.log("SUBMITTING");
     e.preventDefault();
-    axios.post('http://localhost:3000/api/games/',
+    myaxios.post('http://localhost:3000/api/games/',
       {
         game_id: this.state.game_id,
         username: UserProfile.getUserName(),
@@ -37,9 +35,6 @@ class CreateGameForm extends React.Component {
   }
 
   render() {
-    if (!this.state.isLoggedIn) {
-      return;
-    }
 
     if (this.state.gameCreated) {
       return ( <Redirect to={"/games/" + this.state.game_id} /> );

@@ -1,5 +1,6 @@
 #include "handlers/util.hpp"
 #include "handlers/accounts-handler.hpp"
+#include "json-api/auth.hpp"
 
 const char kDelineator = '/';
 
@@ -45,6 +46,17 @@ MakeRedirectResponse(const http::request<http::string_body>& req,
   res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
   res.set(http::field::location, to);
   res.keep_alive(req.keep_alive());
+  res.prepare_payload();
+  return res;
+}
+
+http::response<http::string_body>
+MakeNotLoggedInResponse(const http::request<http::string_body>& req) {
+  http::response<http::string_body> res{http::status::forbidden, req.version()};
+  res.set(http::field::server, BOOST_BEAST_VERSION_STRING);
+  res.set(http::field::content_type, "text/json");
+  res.keep_alive(req.keep_alive());
+  res.body() = GetNotLoggedInJson();
   res.prepare_payload();
   return res;
 }

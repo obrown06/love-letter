@@ -10,7 +10,6 @@
 #include <sstream>
 
 const char kRouteName[] = "/api/login";
-const char kHomeRouteName[] = "/api/";
 
 std::string LoginHandler::GetRoute() const {
   return kRouteName;

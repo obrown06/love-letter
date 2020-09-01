@@ -37,7 +37,7 @@ class HandlerDispatcher {
        return send(handler->HandleRequest(req));
      }
      catch (NotLoggedInException& e) {
-       return send(MakeRedirectResponse(req, kLoginRouteName));
+       return send(MakeNotLoggedInResponse(req));
      }
    }
  private:

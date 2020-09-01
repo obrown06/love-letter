@@ -1,10 +1,9 @@
 import React from 'react';
 import cookieClient from 'react-cookie';
 import UserProfile from 'utils/user-profile.js';
-import axios from 'axios';
+import { myaxios } from 'utils/axios.js';
 import { Redirect } from 'react-router-dom';
 
-axios.defaults.withCredentials = true;
 
 class LoginForm extends React.Component {
   constructor(props) {
@@ -12,7 +11,6 @@ class LoginForm extends React.Component {
     this.state = {
       username: '',
       password: '',
-      isLoggedIn: UserProfile.isLoggedIn(),
     }
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -24,7 +22,7 @@ class LoginForm extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    axios.post('http://localhost:3000/api/login/',
+    myaxios.post('http://localhost:3000/api/login/',
       {
         username: this.state.username,
         password: this.state.password
@@ -32,17 +30,12 @@ class LoginForm extends React.Component {
       { withCredentials: true }
     ).then(response => {
       if (response.status === 200) {
-        UserProfile.login(this.state.username, response.headers['set-cookie']);
-        this.setState({ isLoggedIn: UserProfile.isLoggedIn() });
+        this.props.loginCallback(this.state.username, response.headers['set-cookie']);
       }
     });
   }
 
   render() {
-    /*if (this.state.isLoggedIn) {
-      return <Redirect to="/home" />;
-    }*/
-
     return (
       <div>
       <form onSubmit={this.handleSubmit}>

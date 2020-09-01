@@ -7,6 +7,11 @@ class UserProfile {
     localStorage.setItem('sessionid', sessionId);
   }
 
+  static logout() {
+    localStorage.removeItem('username');
+    localStorage.removeItem('sessionid');
+  }
+
   static isLoggedIn() {
     return localStorage.getItem('username') !== null;
   }

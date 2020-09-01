@@ -22,4 +22,7 @@ http::response<http::string_body>
 MakeRedirectResponse(const http::request<http::string_body>& req,
                      const std::string& to);
 
+http::response<http::string_body>
+MakeNotLoggedInResponse(const http::request<http::string_body>& req);
+
 #endif

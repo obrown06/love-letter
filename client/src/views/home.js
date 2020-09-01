@@ -5,9 +5,12 @@ import "common.module.css";
 
 class Home extends React.Component {
   render() {
+    if (!this.props.loggedIn) {
+      return <div></div>
+    }
     return (
       <div>
-       Welcome, {UserProfile.getUserName()}!
+       Welcome, { UserProfile.getUserName()}!
        <CreateGameForm />
        </div>
     );
