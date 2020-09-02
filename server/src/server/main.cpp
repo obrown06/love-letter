@@ -1,6 +1,7 @@
 #include "handlers/dispatcher.hpp"
 #include "handlers/handlers-init.hpp"
 #include "server/listener.hpp"
+#include "server/websocket-session.hpp"
 #include "storage/storage.hpp"
 #include "auth/accounts-registry.hpp"
 #include "auth/authenticator.hpp"
