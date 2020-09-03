@@ -19,10 +19,14 @@ namespace http = beast::http;
 namespace net = boost::asio;
 using tcp = boost::asio::ip::tcp;
 
-Listener::Listener(net::io_context& ioc, tcp::endpoint endpoint, HandlerDispatcher* dispatcher)
+Listener::Listener(net::io_context& ioc,
+                   tcp::endpoint endpoint,
+                   HandlerDispatcher* dispatcher,
+                   GamesRegistry* registry)
   : ioc_(ioc),
     acceptor_(net::make_strand(ioc)),
-    dispatcher_(dispatcher)
+    dispatcher_(dispatcher),
+    registry_(registry)
 {
   beast::error_code ec;
 
@@ -73,7 +77,7 @@ void Listener::on_accept(beast::error_code ec, tcp::socket socket) {
   if (ec) {
     fail(ec, "accept");
   } else {
-    std::make_shared<HTTPSession>(std::move(socket), dispatcher_)->run();
+    std::make_shared<HTTPSession>(std::move(socket), dispatcher_, registry_)->run();
   }
 
   // Accept another connection

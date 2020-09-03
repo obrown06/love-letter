@@ -12,6 +12,8 @@
 #include <memory>
 #include <iostream>
 
+#include "models/games-registry.hpp"
+
 namespace beast = boost::beast;
 namespace http = beast::http;
 namespace net = boost::asio;
@@ -20,8 +22,8 @@ using tcp = boost::asio::ip::tcp;
 class HTTPSession : public std::enable_shared_from_this<HTTPSession>
 {
 public:
-  HTTPSession(tcp::socket&& socket, HandlerDispatcher* dispatcher) :
-    stream_(std::move(socket)), queue_(*this), dispatcher_(dispatcher) {}
+  HTTPSession(tcp::socket&& socket, HandlerDispatcher* dispatcher, GamesRegistry* registry) :
+    stream_(std::move(socket)), queue_(*this), dispatcher_(dispatcher), registry_(registry) {}
 
   // Start the session
   void run();
@@ -109,6 +111,7 @@ private:
   beast::flat_buffer buffer_;
   Queue queue_;
   HandlerDispatcher* dispatcher_;
+  GamesRegistry* registry_;
 
   // The parser is stored in an optional container so we can construct it
   // from scratch at the beginning of each new message.

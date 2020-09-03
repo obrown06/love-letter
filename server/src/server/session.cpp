@@ -6,7 +6,10 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/version.hpp>
 #include <boost/asio/bind_executor.hpp>
+
+#include "server/websocket-session.hpp"
 #include "util.hpp"
+
 #include <memory>
 #include <iostream>
 
@@ -56,6 +59,14 @@ void HTTPSession::on_read(beast::error_code ec, std::size_t bytes_transferred) {
 
   if (ec) {
     return fail(ec, "read");
+  }
+
+  if (websocket::is_upgrade(parser_->get()))
+  {
+      // Create a WebSocket session by transferring the socket
+      std::make_shared<WebsocketSession>(
+          stream_.release_socket(), registry_)->do_accept(parser_->release());
+      return;
   }
 
   dispatcher_->handle_request(parser_->release(), queue_);

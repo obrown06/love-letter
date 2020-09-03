@@ -47,7 +47,7 @@ int main(int argc, char* argv[]) {
                           games_registry.get(),
                           dispatcher.get());
 
-  std::make_shared<Listener>(ioc, tcp::endpoint(address, port), dispatcher.get())->run();
+  std::make_shared<Listener>(ioc, tcp::endpoint(address, port), dispatcher.get(), games_registry.get())->run();
 
   net::signal_set signals(ioc, SIGINT, SIGTERM);
   signals.async_wait(

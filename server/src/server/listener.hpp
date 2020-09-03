@@ -2,6 +2,7 @@
 #define SERVER_LISTENER_HPP
 
 #include "handlers/dispatcher.hpp"
+#include "models/games-registry.hpp"
 
 #include <boost/asio.hpp>
 #include <boost/beast.hpp>
@@ -21,7 +22,10 @@ using tcp = boost::asio::ip::tcp;
 class Listener : public std::enable_shared_from_this<Listener>
 {
 public:
-  Listener(net::io_context& ioc, tcp::endpoint endpoint, HandlerDispatcher* dispatcher);
+  Listener(net::io_context& ioc,
+           tcp::endpoint endpoint,
+           HandlerDispatcher* dispatcher,
+           GamesRegistry* registry);
   void run();
 
 private:
@@ -30,6 +34,7 @@ private:
   net::io_context& ioc_;
   tcp::acceptor acceptor_;
   HandlerDispatcher* dispatcher_;
+  GamesRegistry* registry_;
 };
 
 #endif

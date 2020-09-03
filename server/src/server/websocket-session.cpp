@@ -1,10 +1,17 @@
 #include "server/websocket-session.hpp"
+#include "models/exceptions.hpp"
 
 void
 WebsocketSession::on_accept(beast::error_code ec)
 {
   if (ec) {
     return fail(ec, "accept");
+  }
+
+  try {
+    registry_->InsertSession(game_id_, this);
+  } catch (NoGameRegisteredException& e){
+    return fail("accept", e.what());
   }
 
   do_read();
@@ -20,6 +27,20 @@ WebsocketSession::do_read()
       shared_from_this()));
 }
 
+void WebsocketSession::send(const std::string& msg)
+{
+  queue_.push_back(msg);
+  if (queue_.size() > 1) {
+    return;
+  }
+
+  ws_.async_write(
+    net::buffer(queue_.front()),
+    beast::bind_front_handler(
+      &WebsocketSession::on_write,
+      shared_from_this()));
+}
+
 void
 WebsocketSession::on_read(
   beast::error_code ec,
@@ -27,19 +48,17 @@ WebsocketSession::on_read(
 {
   boost::ignore_unused(bytes_transferred);
 
-  if (ec == websocket::error::closed) {
-    return;
-  }
-
   if (ec) {
-    fail(ec, "read");
+    return fail(ec, "read");
   }
 
-  ws_.text(ws_.got_text());
-  ws_.async_write(
-    buffer_.data(),
+  registry_->UpdateGameAndBroadcast(game_id_, beast::buffers_to_string(buffer_.data()));
+  buffer_.consume(buffer_.size());
+
+  ws_.async_read(
+    buffer_,
     beast::bind_front_handler(
-      &WebsocketSession::on_write,
+      &WebsocketSession::on_read,
       shared_from_this()));
 }
 
@@ -54,7 +73,12 @@ WebsocketSession::on_write(
     return fail(ec, "write");
   }
 
-  buffer_.consume(buffer_.size());
+  queue_.erase(queue_.begin());
 
-  do_read();
+  if (!queue_.empty()) {
+    ws_.async_write(net::buffer(queue_.front()),
+    beast::bind_front_handler(
+      &WebsocketSession::on_write,
+      shared_from_this()));
+  }
 }

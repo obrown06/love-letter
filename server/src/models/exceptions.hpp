@@ -38,4 +38,15 @@ class DuplicatePlayerException : public std::exception {
    std::string name_;
 };
 
+class NoGameRegisteredException : public std::exception {
+ public:
+   NoGameRegisteredException(const std::string& id) : game_id_(id) {}
+   const char * what () const throw ()
+   {
+     return ("No game is registered with id: " + game_id_).c_str();
+   }
+ private:
+   std::string game_id_;
+};
+
 #endif

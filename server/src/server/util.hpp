@@ -28,6 +28,8 @@ using tcp = boost::asio::ip::tcp;               // from <boost/asio/ip/tcp.hpp>
 
 void fail(beast::error_code ec, const std::string& action);
 
+void fail(const std::string& action, const std::string& reason);
+
 // This function produces an HTTP response for the given request.
 // The type of the response object depends on the contents of the request,
 // so the interface requires the caller to pass a generic lambda for

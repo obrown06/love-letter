@@ -12,17 +12,25 @@
 #include <boost/beast/version.hpp>
 #include <boost/asio/bind_executor.hpp>
 
+#include "handlers/util.hpp"
+#include "models/games-registry.hpp"
 #include "server/util.hpp"
+
+// Forward declaration to keep the compiler happy.
+class GamesRegistry;
 
 class WebsocketSession : public std::enable_shared_from_this<WebsocketSession>
 {
   public:
-    explicit WebsocketSession(tcp::socket&& socket) : ws_(std::move(socket)) {}
+    explicit WebsocketSession(tcp::socket&& socket, GamesRegistry* registry) :
+      ws_(std::move(socket)),
+      registry_(registry) {}
 
     template<class Body, class Allocator>
     void
     do_accept(http::request<Body, http::basic_fields<Allocator>> req)
     {
+      game_id_ = GetTarget(std::string(req.target()));
       ws_.set_option(
         websocket::stream_base::timeout::suggested(
           beast::role_type::server));
@@ -41,6 +49,8 @@ class WebsocketSession : public std::enable_shared_from_this<WebsocketSession>
           shared_from_this()));
     }
 
+    void send(const std::string& msg);
+
   private:
     void on_accept(beast::error_code ec);
 
@@ -52,6 +62,9 @@ class WebsocketSession : public std::enable_shared_from_this<WebsocketSession>
 
     websocket::stream<beast::tcp_stream> ws_;
     beast::flat_buffer buffer_;
+    std::vector<std::string> queue_;
+    GamesRegistry* registry_;
+    std::string game_id_;
 };
 
 #endif
