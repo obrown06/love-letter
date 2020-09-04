@@ -16,11 +16,11 @@ const char kLoadAllAccounts[] = "SELECT * FROM ACCOUNTS;";
 
 namespace {
 
-static int unused_callback(void *NotUsed, int argc, char **argv, char **colname) {
+int unused_callback(void *NotUsed, int argc, char **argv, char **colname) {
   return 0;
 }
 
-static int load_all_accounts_callback(void* accounts, int count, char** data, char** columns) {
+int load_all_accounts_callback(void* accounts, int count, char** data, char** columns) {
   std::vector<Account>* accounts_vec = (std::vector<Account>*) accounts;
   std::string username, password, email;
   for (size_t i = 0; i < count; i++) {
