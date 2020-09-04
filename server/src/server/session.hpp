@@ -12,6 +12,8 @@
 #include <memory>
 #include <iostream>
 
+#include "auth/authenticator.hpp"
+#include "auth/exceptions.hpp"
 #include "models/games-registry.hpp"
 
 namespace beast = boost::beast;
@@ -22,8 +24,15 @@ using tcp = boost::asio::ip::tcp;
 class HTTPSession : public std::enable_shared_from_this<HTTPSession>
 {
 public:
-  HTTPSession(tcp::socket&& socket, HandlerDispatcher* dispatcher, GamesRegistry* registry) :
-    stream_(std::move(socket)), queue_(*this), dispatcher_(dispatcher), registry_(registry) {}
+  HTTPSession(tcp::socket&& socket,
+              HandlerDispatcher* dispatcher,
+              GamesRegistry* registry,
+              Authenticator* authenticator)
+              : stream_(std::move(socket)),
+                queue_(*this),
+                dispatcher_(dispatcher),
+                registry_(registry),
+                authenticator_(authenticator) {}
 
   // Start the session
   void run();
@@ -112,6 +121,7 @@ private:
   Queue queue_;
   HandlerDispatcher* dispatcher_;
   GamesRegistry* registry_;
+  Authenticator* authenticator_;
 
   // The parser is stored in an optional container so we can construct it
   // from scratch at the beginning of each new message.

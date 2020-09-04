@@ -16,13 +16,16 @@
 #include "models/games-registry.hpp"
 #include "server/util.hpp"
 
+#include <iostream>
+
 // Forward declaration to keep the compiler happy.
 class GamesRegistry;
 
 class WebsocketSession : public std::enable_shared_from_this<WebsocketSession>
 {
   public:
-    explicit WebsocketSession(tcp::socket&& socket, GamesRegistry* registry) :
+    explicit WebsocketSession(tcp::socket&& socket,
+                              GamesRegistry* registry) :
       ws_(std::move(socket)),
       registry_(registry) {}
 

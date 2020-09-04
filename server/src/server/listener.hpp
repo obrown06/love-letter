@@ -1,6 +1,7 @@
 #ifndef SERVER_LISTENER_HPP
 #define SERVER_LISTENER_HPP
 
+#include "auth/authenticator.hpp"
 #include "handlers/dispatcher.hpp"
 #include "models/games-registry.hpp"
 
@@ -25,7 +26,8 @@ public:
   Listener(net::io_context& ioc,
            tcp::endpoint endpoint,
            HandlerDispatcher* dispatcher,
-           GamesRegistry* registry);
+           GamesRegistry* registry,
+           Authenticator* authenticator);
   void run();
 
 private:
@@ -35,6 +37,7 @@ private:
   tcp::acceptor acceptor_;
   HandlerDispatcher* dispatcher_;
   GamesRegistry* registry_;
+  Authenticator* authenticator_;
 };
 
 #endif

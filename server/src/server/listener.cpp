@@ -22,11 +22,13 @@ using tcp = boost::asio::ip::tcp;
 Listener::Listener(net::io_context& ioc,
                    tcp::endpoint endpoint,
                    HandlerDispatcher* dispatcher,
-                   GamesRegistry* registry)
+                   GamesRegistry* registry,
+                   Authenticator* authenticator)
   : ioc_(ioc),
     acceptor_(net::make_strand(ioc)),
     dispatcher_(dispatcher),
-    registry_(registry)
+    registry_(registry),
+    authenticator_(authenticator)
 {
   beast::error_code ec;
 
@@ -77,7 +79,7 @@ void Listener::on_accept(beast::error_code ec, tcp::socket socket) {
   if (ec) {
     fail(ec, "accept");
   } else {
-    std::make_shared<HTTPSession>(std::move(socket), dispatcher_, registry_)->run();
+    std::make_shared<HTTPSession>(std::move(socket), dispatcher_, registry_, authenticator_)->run();
   }
 
   // Accept another connection
