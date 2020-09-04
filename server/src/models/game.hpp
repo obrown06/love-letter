@@ -25,6 +25,7 @@ public:
   void ProcessUpdate(const GameUpdate& update);
 private:
   void AddPlayer(const std::string& name);
+  void Start();
   void CheckGameNotStarted() const;
   std::string id_;
   std::string creator_;

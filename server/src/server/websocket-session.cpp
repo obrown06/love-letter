@@ -66,7 +66,7 @@ WebsocketSession::on_read(
       beast::bind_front_handler(
         &WebsocketSession::on_read,
         shared_from_this()));
-  } catch (std::exception& e){
+  } catch (std::exception& e) {
     return fail("read", e.what());
   }
 }

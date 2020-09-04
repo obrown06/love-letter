@@ -6,7 +6,8 @@
 struct GameUpdate {
   enum UpdateType {
     UPDATE_UNSPECIFIED,
-    JOIN_GAME_REQUEST
+    JOIN_GAME_REQUEST,
+    START_GAME_REQUEST,
   };
   UpdateType update_type;
   std::string player_id;

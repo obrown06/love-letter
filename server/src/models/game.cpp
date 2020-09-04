@@ -1,6 +1,8 @@
 #include "models/game.hpp"
 #include "models/exceptions.hpp"
 
+#include <iostream>
+
 std::string Game::GetId() const {
   return id_;
 }
@@ -17,6 +19,8 @@ void Game::ProcessUpdate(const GameUpdate& update) {
   switch(update.update_type) {
     case GameUpdate::UpdateType::JOIN_GAME_REQUEST:
       return AddPlayer(update.player_id);
+    case GameUpdate::UpdateType::START_GAME_REQUEST:
+      return Start();
   }
 }
 
@@ -26,6 +30,11 @@ void Game::AddPlayer(const std::string& player_id) {
     throw DuplicatePlayerException(player_id, id_);
   }
   players_.push_back(player_id);
+}
+
+void Game::Start() {
+  CheckGameNotStarted();
+  state_ = State::IN_PROGRESS;
 }
 
 void Game::CheckGameNotStarted() const {

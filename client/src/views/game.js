@@ -5,11 +5,16 @@ import axios from 'axios';
 axios.defaults.withCredentials = true;
 
 const UpdateType = {
-  JOIN_GAME_REQUEST: 1
+  JOIN_GAME_REQUEST: 1,
+  START_GAME_REQUEST: 2
 };
 
 class Game extends React.Component {
-  ws = new WebSocket('ws://localhost:8000/' + this.props.match.params.gameId);
+  constructor(props) {
+    super(props);
+    this.handleStartGame = this.handleStartGame.bind(this);
+    this.ws = new WebSocket('ws://localhost:8000/' + this.props.match.params.gameId);
+  }
 
   componentDidMount() {
     this.ws.onopen = () => {
@@ -30,10 +35,23 @@ class Game extends React.Component {
     }
   }
 
+  handleStartGame(e) {
+    e.preventDefault();
+    this.ws.send(JSON.stringify({
+      game_id: this.props.match.params.gameId,
+      player_id: UserProfile.getUserName(),
+      update_type: 2
+    }));
+  }
+
   render() {
     return (
       <div>
       THIS IS A GAME
+      <form onSubmit={this.handleStartGame}>
+
+        <input type="submit" value="Start Game" />
+      </form>
       </div>
     );
   }
