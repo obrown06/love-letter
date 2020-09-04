@@ -1,6 +1,9 @@
 #include "server/websocket-session.hpp"
 #include "models/exceptions.hpp"
 
+WebsocketSession::~WebsocketSession() {
+  registry_->RemoveSession(game_id_, this);
+}
 void
 WebsocketSession::on_accept(beast::error_code ec)
 {

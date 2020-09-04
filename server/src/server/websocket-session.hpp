@@ -29,6 +29,8 @@ class WebsocketSession : public std::enable_shared_from_this<WebsocketSession>
       ws_(std::move(socket)),
       registry_(registry) {}
 
+    ~WebsocketSession();
+
     template<class Body, class Allocator>
     void
     do_accept(http::request<Body, http::basic_fields<Allocator>> req)
