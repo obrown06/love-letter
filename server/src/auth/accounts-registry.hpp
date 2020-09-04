@@ -13,7 +13,7 @@ class AccountsRegistry {
   public:
     AccountsRegistry() {};
 
-    Account& GetAccount(const std::string& session_key);
+    Account GetAccount(const std::string& session_key);
     std::string InsertAccount(const Account& account);
     void RemoveAccount(const std::string& session_key);
   private:

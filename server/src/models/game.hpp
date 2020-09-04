@@ -1,6 +1,8 @@
 #ifndef SERVER_MODELS_GAME_HPP
 #define SERVER_MODELS_GAME_HPP
 
+#include "models/game-update.hpp"
+
 #include <string>
 #include <vector>
 
@@ -19,8 +21,10 @@ public:
 
   std::string GetId() const;
   std::string GetCreator() const;
-  void AddPlayer(const std::string& name);
+  Game::State GetState() const;
+  void ProcessUpdate(const GameUpdate& update);
 private:
+  void AddPlayer(const std::string& name);
   void CheckGameNotStarted() const;
   std::string id_;
   std::string creator_;

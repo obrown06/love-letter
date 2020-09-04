@@ -13,7 +13,7 @@ class Authenticator {
 public:
   Authenticator(AccountsRegistry* accounts_registry) : registry_(accounts_registry) {};
 
-  Account& Authenticate(const http::request<http::string_body>& req);
+  Account Authenticate(const http::request<http::string_body>& req);
 private:
   AccountsRegistry* registry_;
 };

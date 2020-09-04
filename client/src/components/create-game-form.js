@@ -19,12 +19,11 @@ class CreateGameForm extends React.Component {
   };
 
   handleSubmit(e) {
-    console.log("SUBMITTING");
     e.preventDefault();
     myaxios.post('http://localhost:3000/api/games/',
       {
         game_id: this.state.game_id,
-        username: UserProfile.getUserName(),
+        creator: UserProfile.getUserName(),
       },
       { withCredentials: true }
     ).then(response => {

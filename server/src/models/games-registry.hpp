@@ -14,7 +14,7 @@ class GamesRegistry {
 public:
   GamesRegistry() {};
 
-  void UpdateGameAndBroadcast(const std::string& game_id, const std::string& msg);
+  void UpdateGameAndBroadcast(const GameUpdate& game_update);
   void InsertGame(const Game& game);
   void InsertSession(const std::string& game_id, WebsocketSession* session);
   void RemoveSession(const std::string& game_id, WebsocketSession* session);

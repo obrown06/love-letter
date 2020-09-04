@@ -4,7 +4,7 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/uuid/uuid_io.hpp>
 
-Account& AccountsRegistry::GetAccount(const std::string& session_key) {
+Account AccountsRegistry::GetAccount(const std::string& session_key) {
   try {
     boost::uuids::uuid uuid = boost::lexical_cast<boost::uuids::uuid>(session_key);
     if (!IsAccountRegistered(uuid)) {

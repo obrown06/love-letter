@@ -1,5 +1,6 @@
 #include "server/websocket-session.hpp"
 #include "models/exceptions.hpp"
+#include "json-api/game-updates.hpp"
 
 WebsocketSession::~WebsocketSession() {
   registry_->RemoveSession(game_id_, this);
@@ -55,14 +56,19 @@ WebsocketSession::on_read(
     return fail(ec, "read");
   }
 
-  registry_->UpdateGameAndBroadcast(game_id_, beast::buffers_to_string(buffer_.data()));
-  buffer_.consume(buffer_.size());
+  try {
+    GameUpdate update = JSONToGameUpdate(beast::buffers_to_string(buffer_.data()));
+    registry_->UpdateGameAndBroadcast(update);
+    buffer_.consume(buffer_.size());
 
-  ws_.async_read(
-    buffer_,
-    beast::bind_front_handler(
-      &WebsocketSession::on_read,
-      shared_from_this()));
+    ws_.async_read(
+      buffer_,
+      beast::bind_front_handler(
+        &WebsocketSession::on_read,
+        shared_from_this()));
+  } catch (std::exception& e){
+    return fail("read", e.what());
+  }
 }
 
 void
@@ -84,4 +90,8 @@ WebsocketSession::on_write(
       &WebsocketSession::on_write,
       shared_from_this()));
   }
+}
+
+Account WebsocketSession::GetAccount() {
+  return account_;
 }

@@ -6,7 +6,7 @@
 
 const char kSessionCookieName[] = "sessionid";
 
-Account& Authenticator::Authenticate(const http::request<http::string_body>& req) {
+Account Authenticator::Authenticate(const http::request<http::string_body>& req) {
   std::string sanitized_list = SanitizeHTTPParam(std::string(req[http::field::cookie]));
   for (const auto& param : http::param_list{sanitized_list}) {
     if (param.first.compare(kSessionCookieName) == 0) {

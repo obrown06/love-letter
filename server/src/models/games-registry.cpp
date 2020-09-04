@@ -1,6 +1,8 @@
 #include "models/games-registry.hpp"
 #include "models/exceptions.hpp"
 
+#include "json-api/games.hpp"
+
 #include <utility>
 
 void GamesRegistry::InsertGame(const Game& game) {
@@ -27,11 +29,14 @@ void GamesRegistry::RemoveSession(const std::string& game_id, WebsocketSession* 
   registry_.at(game_id).second.erase(session);
 }
 
-void GamesRegistry::UpdateGameAndBroadcast(const std::string& game_id, const std::string& msg) {
-  if (registry_.find(game_id) == registry_.end()) {
-    throw NoGameRegisteredException(game_id);
+void GamesRegistry::UpdateGameAndBroadcast(const GameUpdate& game_update) {
+  if (registry_.find(game_update.game_id) == registry_.end()) {
+    throw NoGameRegisteredException(game_update.game_id);
   }
-  for (auto* session : registry_.at(game_id).second) {
-    session->send(msg);
+  Game& game = registry_.at(game_update.game_id).first;
+  game.ProcessUpdate(game_update);
+  std::string json = GameToJSON(game);
+  for (auto* session : registry_.at(game.GetId()).second) {
+    session->send(json);
   }
 }

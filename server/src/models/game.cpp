@@ -9,12 +9,23 @@ std::string Game::GetCreator() const {
   return creator_;
 }
 
-void Game::AddPlayer(const std::string& name) {
-  CheckGameNotStarted();
-  if (std::find(players_.begin(), players_.end(), name) != players_.end()) {
-    throw DuplicatePlayerException(name, id_);
+Game::State Game::GetState() const {
+  return state_;
+}
+
+void Game::ProcessUpdate(const GameUpdate& update) {
+  switch(update.update_type) {
+    case GameUpdate::UpdateType::JOIN_GAME_REQUEST:
+      return AddPlayer(update.player_id);
   }
-  players_.push_back(name);
+}
+
+void Game::AddPlayer(const std::string& player_id) {
+  CheckGameNotStarted();
+  if (std::find(players_.begin(), players_.end(), player_id) != players_.end()) {
+    throw DuplicatePlayerException(player_id, id_);
+  }
+  players_.push_back(player_id);
 }
 
 void Game::CheckGameNotStarted() const {

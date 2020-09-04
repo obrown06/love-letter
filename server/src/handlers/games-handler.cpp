@@ -29,7 +29,6 @@ http::response<http::string_body>
 GamesHandler::HandleCreateGameRequest(const http::request<http::string_body>& req) {
   try {
     Game game = JSONToGame(req.body());
-    game.AddPlayer(game.GetCreator());
     registry_->InsertGame(game);
     return MakeJsonHttpResponse(http::status::ok, req, std::string("Created game!"));
   }

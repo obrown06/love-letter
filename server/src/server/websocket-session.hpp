@@ -13,6 +13,7 @@
 #include <boost/asio/bind_executor.hpp>
 
 #include "handlers/util.hpp"
+#include "models/account.hpp"
 #include "models/games-registry.hpp"
 #include "server/util.hpp"
 
@@ -25,9 +26,11 @@ class WebsocketSession : public std::enable_shared_from_this<WebsocketSession>
 {
   public:
     explicit WebsocketSession(tcp::socket&& socket,
-                              GamesRegistry* registry) :
+                              GamesRegistry* registry,
+                              const Account& account) :
       ws_(std::move(socket)),
-      registry_(registry) {}
+      registry_(registry),
+      account_(account) {}
 
     ~WebsocketSession();
 
@@ -56,6 +59,8 @@ class WebsocketSession : public std::enable_shared_from_this<WebsocketSession>
 
     void send(const std::string& msg);
 
+    Account GetAccount();
+
   private:
     void on_accept(beast::error_code ec);
 
@@ -70,6 +75,7 @@ class WebsocketSession : public std::enable_shared_from_this<WebsocketSession>
     std::vector<std::string> queue_;
     GamesRegistry* registry_;
     std::string game_id_;
+    Account account_;
 };
 
 #endif
