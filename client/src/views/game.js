@@ -1,6 +1,7 @@
 import React from 'react';
 import UserProfile from 'utils/user-profile.js';
 import axios from 'axios';
+import { Redirect } from 'react-router-dom';
 
 axios.defaults.withCredentials = true;
 
@@ -45,6 +46,11 @@ class Game extends React.Component {
   }
 
   render() {
+    if (!this.props.loggedIn) {
+      return (
+        <Redirect to="/login" />
+      );
+    }
     return (
       <div>
       THIS IS A GAME

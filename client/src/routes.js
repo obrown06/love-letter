@@ -28,6 +28,10 @@ class Routes extends React.Component {
     });
   }
 
+  handleRedirectToLogin() {
+    this.setState({ redirectToLogin: true });
+  }
+
   handleLogin(username, sessionId) {
     UserProfile.login(username, sessionId);
     this.setState({ loggedIn : UserProfile.isLoggedIn() });
@@ -41,7 +45,10 @@ class Routes extends React.Component {
   render() {
     return (
       <div>
-        <Header logoutCallback={this.handleLogout}/>
+        <Header
+          loggedIn = {this.state.loggedIn}
+          redirectToLoginCallback={this.handleRedirectToLogin}
+          logoutCallback={this.handleLogout}/>
         <Switch>
           <Route exact path="/home" render={props => (
             <Home
