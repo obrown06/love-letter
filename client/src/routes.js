@@ -20,7 +20,7 @@ class Routes extends React.Component {
     this.handleLogout = this.handleLogout.bind(this);
 
     myaxios.interceptors.response.use(res => res, error => {
-      console.log("in error!");
+      console.log("logging out!");
       if (!checkAuthenticated(error.response)) {
         this.handleLogout();
       }
@@ -41,7 +41,7 @@ class Routes extends React.Component {
   render() {
     return (
       <div>
-        <Header />
+        <Header logoutCallback={this.handleLogout}/>
         <Switch>
           <Route exact path="/home" render={props => (
             <Home
