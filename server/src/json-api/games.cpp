@@ -20,6 +20,11 @@ std::string GameToJSON(const Game& game) {
   root["game_id"] = game.GetId();
   root["creator"] = game.GetCreator();
   root["state"] = game.GetState();
+  for (const auto& player : game.GetPlayers()) {
+    Json::Value player_node;
+    player_node["player_id"] = player.player_id;
+    root["players"].append(player_node);
+  }
   Json::StreamWriterBuilder builder;
   return Json::writeString(builder, root);
 }

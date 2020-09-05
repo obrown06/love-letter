@@ -15,6 +15,10 @@ Game::State Game::GetState() const {
   return state_;
 }
 
+std::vector<Game::PlayerInfo> Game::GetPlayers() const {
+  return players_;
+}
+
 void Game::ProcessUpdate(const GameUpdate& update) {
   switch(update.update_type) {
     case GameUpdate::UpdateType::JOIN_GAME_REQUEST:
@@ -26,10 +30,14 @@ void Game::ProcessUpdate(const GameUpdate& update) {
 
 void Game::AddPlayer(const std::string& player_id) {
   CheckGameNotStarted();
-  if (std::find(players_.begin(), players_.end(), player_id) != players_.end()) {
+  if (std::find_if(players_.begin(), players_.end(), [&](const PlayerInfo& info) {
+    return info.player_id == player_id;
+  }) != players_.end()) {
     throw DuplicatePlayerException(player_id, id_);
   }
-  players_.push_back(player_id);
+  PlayerInfo info;
+  info.player_id = player_id;
+  players_.push_back(info);
 }
 
 void Game::Start() {
