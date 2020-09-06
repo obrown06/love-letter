@@ -47,7 +47,6 @@ class Routes extends React.Component {
       <div>
         <Header
           loggedIn = {this.state.loggedIn}
-          redirectToLoginCallback={this.handleRedirectToLogin}
           logoutCallback={this.handleLogout}/>
         <Switch>
           <Route exact path="/home" render={props => (

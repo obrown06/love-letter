@@ -22,6 +22,14 @@ public:
 
   enum Card {
     CARD_UNSPECIFIED,
+    PRINCESS,
+    COUNTESS,
+    KING,
+    PRINCE,
+    HANDMAID,
+    BARON,
+    PRIEST,
+    GUARD
   };
 
   struct PlayerInfo {
@@ -34,16 +42,25 @@ public:
   std::string GetId() const;
   std::string GetCreator() const;
   Game::State GetState() const;
-  void ProcessUpdate(const GameUpdate& update);
   std::vector<Game::PlayerInfo> GetPlayers() const;
+  int GetRound() const;
+  int GetTokensToWin() const;
+  int GetNCardsInCenter() const;
+  
+  void ProcessUpdate(const GameUpdate& update);
 private:
   void AddPlayer(const std::string& name);
   void Start();
   void CheckGameNotStarted() const;
+  void ShuffleCardsAndDeal();
   std::string id_;
   std::string creator_;
   std::vector<Game::PlayerInfo> players_;
   State state_;
+  int n_tokens_to_win_;
+  int round_;
+  std::string player_with_turn_;
+  std::vector<Card> deck_;
 };
 
 #endif

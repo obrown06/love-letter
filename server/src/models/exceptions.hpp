@@ -49,4 +49,15 @@ class NoGameRegisteredException : public std::exception {
    std::string game_id_;
 };
 
+class PlayerSizeException : public std::exception {
+ public:
+   PlayerSizeException(const std::string& id) : id_(id) {}
+   const char * what () const throw ()
+   {
+     return ("Game " + id_ + " has too few or too many players. Games must have at least 2 players and no more than 8!").c_str();
+   }
+ private:
+   std::string id_;
+};
+
 #endif
