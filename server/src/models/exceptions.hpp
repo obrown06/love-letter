@@ -26,6 +26,17 @@ class GameAlreadyStartedException : public std::exception {
    std::string id_;
 };
 
+class GameNotInProgressException : public std::exception {
+ public:
+   GameNotInProgressException(const std::string& id) : id_(id) {}
+   const char * what () const throw ()
+   {
+     return ("Game " + id_ + " is not in progress!").c_str();
+   }
+ private:
+   std::string id_;
+};
+
 class DuplicatePlayerException : public std::exception {
  public:
    DuplicatePlayerException(const std::string& name, const std::string& game_id) : game_id_(game_id), name_(name) {}
@@ -35,6 +46,44 @@ class DuplicatePlayerException : public std::exception {
    }
  private:
    std::string game_id_;
+   std::string name_;
+};
+
+class NoSuchPlayerException : public std::exception {
+ public:
+   NoSuchPlayerException(const std::string& name, const std::string& game_id) : game_id_(game_id), name_(name) {}
+   const char * what () const throw ()
+   {
+     return ("Player " + name_ + " is not registered for game: " + game_id_).c_str();
+   }
+ private:
+   std::string game_id_;
+   std::string name_;
+};
+
+class IllegalActionException : public std::exception {
+ public:
+   IllegalActionException(const std::string& name,
+                          const GameUpdate::Action::ActionType& action_type)
+                            : action_type_(action_type),
+                              name_(name) {}
+   const char * what () const throw ()
+   {
+     return ("Player " + name_ + " is not allowed to take action: " + GameUpdate::Action::GetActionString(action_type_)).c_str();
+   }
+ private:
+   GameUpdate::Action::ActionType action_type_;
+   std::string name_;
+};
+
+class OutOfTurnException : public std::exception {
+ public:
+   OutOfTurnException(const std::string& name) : name_(name) {}
+   const char * what () const throw ()
+   {
+     return ("Player " + name_ + " tried to act out of turn!").c_str();
+   }
+ private:
    std::string name_;
 };
 

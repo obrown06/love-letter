@@ -63,14 +63,53 @@ void Game::ProcessUpdate(const GameUpdate& update) {
       return AddPlayer(update.player_id);
     case GameUpdate::UpdateType::START_GAME_REQUEST:
       return Start();
+    case GameUpdate::UpdateType::ACTION_REQUEST:
+      return PerformAction(update.action, update.player_id);
   }
+}
+
+void Game::ValidateAction(const GameUpdate::Action& action, const std::string& actor_id) {
+  CheckGameInProgress();
+  if (GetPlayer(actor_id) != nullptr) {
+    throw NoSuchPlayerException(actor_id, id_);
+  }
+  if (actor_id != next_actor_) {
+    throw OutOfTurnException(actor_id);
+  }
+  if (action.action_type != next_action_type_) {
+    throw IllegalActionException(actor_id, action.action_type);
+  }
+}
+
+void Game::PerformAction(const GameUpdate::Action& action, const std::string& actor_id) {
+  ValidateAction(action, actor_id);
+  switch(action.action_type) {
+    case GameUpdate::Action::ActionType::DRAW_ACTION:
+      Draw(actor_id);
+      break;
+  }
+}
+
+void Game::Draw(const std::string& player_id) {
+  Game::PlayerInfo* player = GetPlayer(player_id);
+  player->held_cards.push_back(deck_.back());
+  deck_.pop_back();
+  next_action_type_ = GameUpdate::Action::ActionType::DISCARD_ACTION;
+}
+
+Game::PlayerInfo* Game::GetPlayer(const std::string& player_id) {
+  auto iter = std::find_if(players_.begin(), players_.end(), [&](const PlayerInfo& info) {
+    return info.player_id == player_id;
+  });
+  if (iter != players_.end()) {
+    return &(*iter);
+  }
+  return nullptr;
 }
 
 void Game::AddPlayer(const std::string& player_id) {
   CheckGameNotStarted();
-  if (std::find_if(players_.begin(), players_.end(), [&](const PlayerInfo& info) {
-    return info.player_id == player_id;
-  }) != players_.end()) {
+  if (GetPlayer(player_id) != nullptr) {
     throw DuplicatePlayerException(player_id, id_);
   }
   PlayerInfo info;
@@ -95,11 +134,17 @@ void Game::Start() {
     n_tokens_to_win_ = 4;
   }
 
+  for (auto& player : players_) {
+    player.still_in_round = true;
+  }
+
   ShuffleCardsAndDeal();
 
   round_ = kInitialRound;
 
   player_with_turn_ = players_[0].player_id;
+  next_actor_ = player_with_turn_;
+  next_action_type_ = GameUpdate::Action::DRAW_ACTION;
 }
 
 void Game::ShuffleCardsAndDeal() {
@@ -123,5 +168,11 @@ void Game::ShuffleCardsAndDeal() {
 void Game::CheckGameNotStarted() const {
   if (state_ != State::WAITING) {
     throw GameAlreadyStartedException(id_);
+  }
+}
+
+void Game::CheckGameInProgress() const {
+  if (state_ != State::WAITING) {
+    throw GameNotInProgressException(id_);
   }
 }

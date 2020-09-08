@@ -16,5 +16,8 @@ GameUpdate JSONToGameUpdate(const std::string& json) {
   update.game_id = root["game_id"].asString();
   update.player_id = root["player_id"].asString();
   update.update_type = static_cast<GameUpdate::UpdateType>(root["update_type"].asInt());
+  if (update.update_type == GameUpdate::ACTION_REQUEST) {
+    update.action.action_type = static_cast<GameUpdate::Action::ActionType>(root["action_type"].asInt());
+  }
   return update;
 }
