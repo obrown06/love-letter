@@ -37,8 +37,8 @@ public:
           player_id(player_id) {}
 
         void ExecuteMove(const GameUpdate::Move& move);
-        bool IsTurnComplete();
-        GameUpdate::Move* GetLastMove();
+        bool IsComplete();
+        GameUpdate::Move* GetMutableLatestMove();
         std::vector<GameUpdate::Move> previous_moves;
         std::string player_id;
       };
@@ -52,16 +52,17 @@ public:
 
       void ExecuteMove(const GameUpdate::Move& move);
       void ValidateMove(const GameUpdate::Move& move, const std::string& player_id);
-      bool IsRoundComplete() const;
+      bool IsComplete() const;
+      int GetDeckSize() const;
       std::vector<RoundPlayer> GetWinners() const;
-
+      std::vector<RoundPlayer> GetPlayers() const;
 
     private:
       void MaybeUpdateRoundState();
       void AdvanceTurn();
       std::vector<const RoundPlayer*> GetPlayersInRound() const;
       void DrawCard(const std::string& drawing_player_id);
-      Turn* GetCurrentTurn();
+      Turn* GetMutableLatestTurn();
       RoundPlayer* GetPlayer(const std::string& player_id);
       std::vector<RoundPlayer> players_;
       std::vector<Card> deck_;
@@ -72,9 +73,10 @@ public:
   std::string GetCreator() const;
   Game::State GetState() const;
   std::vector<Game::GamePlayer> GetPlayers() const;
-  Round* GetCurrentRound();
+  Round GetLatestRound() const;
   int GetTokensToWin() const;
   std::vector<Game::GamePlayer*> GetWinners();
+  bool IsComplete() const;
 
   void ProcessUpdate(const GameUpdate& update);
 private:
@@ -83,11 +85,11 @@ private:
   void AddPlayer(const std::string& name);
   void Start();
   void MaybeUpdateGameState();
-  bool IsGameComplete() const;
   void AdvanceRound();
   void CheckGameInProgress() const;
   void CheckGameNotStarted() const;
   Game::GamePlayer* GetPlayer(const std::string& player_id);
+  Round* GetMutableLatestRound();
   std::string id_;
   std::string creator_;
   std::vector<Game::GamePlayer> players_;

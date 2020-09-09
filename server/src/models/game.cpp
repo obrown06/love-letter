@@ -41,8 +41,12 @@ Game::State Game::GetState() const {
   return state_;
 }
 
-Game::Round* Game::GetCurrentRound() {
+Game::Round* Game::GetMutableLatestRound() {
   return &rounds_.at(rounds_.size() - 1);
+}
+
+Game::Round Game::GetLatestRound() const {
+  return rounds_.at(rounds_.size() - 1);
 }
 
 int Game::GetTokensToWin() const {
@@ -89,27 +93,27 @@ void Game::ValidateMove(const GameUpdate::Move& move, const std::string& player_
   if (GetPlayer(player_id) != nullptr) {
     throw NoSuchPlayerException(player_id, id_);
   }
-  GetCurrentRound()->ValidateMove(move, player_id);
+  GetMutableLatestRound()->ValidateMove(move, player_id);
 }
 
 void Game::ExecuteMove(const GameUpdate::Move& move, const std::string& player_id) {
   ValidateMove(move, player_id);
-  GetCurrentRound()->ExecuteMove(move);
+  GetMutableLatestRound()->ExecuteMove(move);
   MaybeUpdateGameState();
 }
 
 void Game::MaybeUpdateGameState() {
-  if (!GetCurrentRound()->IsRoundComplete()) {
+  if (!GetMutableLatestRound()->IsComplete()) {
     return;
   }
-  for (const auto& winner : GetCurrentRound()->GetWinners()) {
+  for (const auto& winner : GetMutableLatestRound()->GetWinners()) {
     auto it = std::find_if(players_.begin(), players_.end(), [&winner](const Game::GamePlayer& player) {
       return player.player_id == winner.player_id;
     });
     it->ntokens_held++;
   }
 
-  if (!IsGameComplete()) {
+  if (!IsComplete()) {
     AdvanceRound();
   }
 }
@@ -118,7 +122,7 @@ void Game::AdvanceRound() {
   rounds_.push_back(Round(players_));
 }
 
-bool Game::IsGameComplete() const {
+bool Game::IsComplete() const {
   return (std::find_if(players_.begin(), players_.end(), [this](const Game::GamePlayer& player) {
     return player.ntokens_held >= GetTokensToWin();
   }) != players_.end());
@@ -195,17 +199,8 @@ Game::Round::Round(const std::vector<Game::GamePlayer>& round_players) {
   }
 }
 
-void Game::Round::ValidateMove(const GameUpdate::Move& move,
-                               const std::string& player_id) {
-  Game::Round::RoundPlayer* player = GetPlayer(player_id);
-  if (player_id != GetCurrentTurn()->player_id) {
-    throw MoveOutOfTurnException(player_id);
-  }
-  // TODO implement turn-based validation
-}
-
-Game::Round::Turn* Game::Round::GetCurrentTurn() {
-  return &turns_.at(turns_.size() - 1);
+int Game::Round::GetDeckSize() const {
+  return deck_.size();
 }
 
 Game::Round::RoundPlayer* Game::Round::GetPlayer(const std::string& player_id) {
@@ -218,49 +213,25 @@ Game::Round::RoundPlayer* Game::Round::GetPlayer(const std::string& player_id) {
   return nullptr;
 }
 
-void Game::Round::ExecuteMove(const GameUpdate::Move& move) {
-  switch (move.move_type) {
-    case GameUpdate::Move::DRAW_CARD:
-      DrawCard(GetCurrentTurn()->player_id);
-      break;
+Game::Round::Turn* Game::Round::GetMutableLatestTurn() {
+  return &turns_.at(turns_.size() - 1);
+}
+
+void Game::Round::ValidateMove(const GameUpdate::Move& move,
+                               const std::string& player_id) {
+  Game::Round::RoundPlayer* player = GetPlayer(player_id);
+  if (player_id != GetMutableLatestTurn()->player_id) {
+    throw MoveOutOfTurnException(player_id);
   }
-  GetCurrentTurn()->ExecuteMove(move);
-  MaybeUpdateRoundState();
+  // TODO implement turn-based validation
 }
 
-void Game::Round::DrawCard(const std::string& drawing_player_id) {
-  Game::Round::RoundPlayer* player = GetPlayer(drawing_player_id);
-  player->held_cards.push_back(deck_.back());
-  deck_.pop_back();
-}
-
-void Game::Round::MaybeUpdateRoundState() {
-  if (GetCurrentTurn()->IsTurnComplete() && !IsRoundComplete()) {
-    AdvanceTurn();
-  }
-}
-
-bool Game::Round::IsRoundComplete() const {
+bool Game::Round::IsComplete() const {
   return deck_.size() == 0 || GetPlayersInRound().size() <= 1;
 }
 
-void Game::Round::AdvanceTurn() {
-  auto it = std::find_if(players_.begin(), players_.end(), [this](const Game::Round::RoundPlayer& player) {
-    return player.player_id == this->GetCurrentTurn()->player_id;
-  });
-  auto advance = [this](std::vector<Game::Round::RoundPlayer>::iterator& it) {
-    it++;
-    if (it == players_.end()) {
-      it = players_.begin();
-    }
-  };
-  advance(it);
-  while (true) {
-    if (it->still_in_round) {
-      turns_.push_back(Turn(it->player_id));
-      return;
-    }
-  }
+std::vector<Game::Round::RoundPlayer> Game::Round::GetPlayers() const {
+  return players_;
 }
 
 std::vector<Game::Round::RoundPlayer> Game::Round::GetWinners() const {
@@ -317,6 +288,47 @@ std::vector<const Game::Round::RoundPlayer*> Game::Round::GetPlayersInRound() co
   return players_in_round;
 }
 
+void Game::Round::ExecuteMove(const GameUpdate::Move& move) {
+  switch (move.move_type) {
+    case GameUpdate::Move::DRAW_CARD:
+      DrawCard(GetMutableLatestTurn()->player_id);
+      break;
+  }
+  GetMutableLatestTurn()->ExecuteMove(move);
+  MaybeUpdateRoundState();
+}
+
+void Game::Round::DrawCard(const std::string& drawing_player_id) {
+  Game::Round::RoundPlayer* player = GetPlayer(drawing_player_id);
+  player->held_cards.push_back(deck_.back());
+  deck_.pop_back();
+}
+
+void Game::Round::MaybeUpdateRoundState() {
+  if (GetMutableLatestTurn()->IsComplete() && !IsComplete()) {
+    AdvanceTurn();
+  }
+}
+
+void Game::Round::AdvanceTurn() {
+  auto it = std::find_if(players_.begin(), players_.end(), [this](const Game::Round::RoundPlayer& player) {
+    return player.player_id == this->GetMutableLatestTurn()->player_id;
+  });
+  auto advance = [this](std::vector<Game::Round::RoundPlayer>::iterator& it) {
+    it++;
+    if (it == players_.end()) {
+      it = players_.begin();
+    }
+  };
+  advance(it);
+  while (true) {
+    if (it->still_in_round) {
+      turns_.push_back(Turn(it->player_id));
+      return;
+    }
+  }
+}
+
 // Game::Round::Turn
 
 
@@ -324,10 +336,10 @@ void Game::Round::Turn::ExecuteMove(const GameUpdate::Move& move) {
   previous_moves.push_back(move);
 }
 
-bool Game::Round::Turn::IsTurnComplete() {
-  return GetLastMove()->move_type == GameUpdate::Move::MoveType::SELECT_PLAYER;
+bool Game::Round::Turn::IsComplete() {
+  return GetMutableLatestMove()->move_type == GameUpdate::Move::MoveType::SELECT_PLAYER;
 }
 
-GameUpdate::Move* Game::Round::Turn::GetLastMove() {
+GameUpdate::Move* Game::Round::Turn::GetMutableLatestMove() {
   return &previous_moves.at(previous_moves.size() - 1);
 }
