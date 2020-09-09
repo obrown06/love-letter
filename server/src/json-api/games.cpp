@@ -21,18 +21,11 @@ std::string GameToJSON(const Game& game) {
   root["creator"] = game.GetCreator();
   root["state"] = game.GetState();
   if (game.GetState() == Game::IN_PROGRESS) {
-    root["current_round"] = game.GetRound();
     root["tokens_to_win"] = game.GetTokensToWin();
-    root["n_cards_in_center"] = game.GetNCardsInCenter();
   }
   for (const auto& player : game.GetPlayers()) {
     Json::Value player_node;
     player_node["player_id"] = player.player_id;
-    for (const auto& held_card : player.held_cards) {
-      Json::Value card_node;
-      card_node["type"] = static_cast<int>(held_card);
-      player_node["held_cards"].append(card_node);
-    }
     root["players"].append(player_node);
   }
   Json::StreamWriterBuilder builder;

@@ -61,18 +61,29 @@ class NoSuchPlayerException : public std::exception {
    std::string name_;
 };
 
-class IllegalActionException : public std::exception {
+class MoveOutOfTurnException : public std::exception {
  public:
-   IllegalActionException(const std::string& name,
-                          const GameUpdate::Action::ActionType& action_type)
-                            : action_type_(action_type),
+   MoveOutOfTurnException(const std::string& name) : name_(name) {}
+   const char * what () const throw ()
+   {
+     return ("Player " + name_ + " is allowed to move!").c_str();
+   }
+ private:
+   std::string name_;
+};
+
+class IllegalMoveException : public std::exception {
+ public:
+   IllegalMoveException(const std::string& name,
+                          const GameUpdate::Move::MoveType& move_type)
+                            : move_type_(move_type),
                               name_(name) {}
    const char * what () const throw ()
    {
-     return ("Player " + name_ + " is not allowed to take action: " + GameUpdate::Action::GetActionString(action_type_)).c_str();
+     return ("Player " + name_ + " is not allowed to take move: " + GameUpdate::Move::GetMoveTypeString(move_type_)).c_str();
    }
  private:
-   GameUpdate::Action::ActionType action_type_;
+   GameUpdate::Move::MoveType move_type_;
    std::string name_;
 };
 
