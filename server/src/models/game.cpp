@@ -197,6 +197,9 @@ Game::Round::Round(const std::vector<Game::GamePlayer>& round_players) {
     deck_.push_back(Card(shuffled_deck.back()));
     shuffled_deck.pop_back();
   }
+
+  turns_.push_back(Turn(players_[0].player_id));
+
 }
 
 int Game::Round::GetDeckSize() const {
@@ -217,17 +220,12 @@ Game::Round::Turn* Game::Round::GetMutableLatestTurn() {
   return &turns_.at(turns_.size() - 1);
 }
 
-void Game::Round::ValidateMove(const GameUpdate::Move& move,
-                               const std::string& player_id) {
-  Game::Round::RoundPlayer* player = GetPlayer(player_id);
-  if (player_id != GetMutableLatestTurn()->player_id) {
-    throw MoveOutOfTurnException(player_id);
-  }
-  // TODO implement turn-based validation
-}
-
 bool Game::Round::IsComplete() const {
   return deck_.size() == 0 || GetPlayersInRound().size() <= 1;
+}
+
+Game::Round::Turn Game::Round::GetLatestTurn() const {
+  return turns_.at(turns_.size() - 1);
 }
 
 std::vector<Game::Round::RoundPlayer> Game::Round::GetPlayers() const {
@@ -288,6 +286,15 @@ std::vector<const Game::Round::RoundPlayer*> Game::Round::GetPlayersInRound() co
   return players_in_round;
 }
 
+void Game::Round::ValidateMove(const GameUpdate::Move& move,
+                               const std::string& player_id) {
+  Game::Round::RoundPlayer* player = GetPlayer(player_id);
+  if (player_id != GetMutableLatestTurn()->player_id) {
+    throw MoveOutOfTurnException(player_id);
+  }
+  // TODO implement turn-based validation
+}
+
 void Game::Round::ExecuteMove(const GameUpdate::Move& move) {
   switch (move.move_type) {
     case GameUpdate::Move::DRAW_CARD:
@@ -331,15 +338,22 @@ void Game::Round::AdvanceTurn() {
 
 // Game::Round::Turn
 
-
-void Game::Round::Turn::ExecuteMove(const GameUpdate::Move& move) {
-  previous_moves.push_back(move);
-}
-
 bool Game::Round::Turn::IsComplete() {
   return GetMutableLatestMove()->move_type == GameUpdate::Move::MoveType::SELECT_PLAYER;
 }
 
 GameUpdate::Move* Game::Round::Turn::GetMutableLatestMove() {
   return &previous_moves.at(previous_moves.size() - 1);
+}
+
+GameUpdate::Move::MoveType Game::Round::Turn::GetNextMoveType() const {
+  if (previous_moves.size() == 0) {
+    return GameUpdate::Move::MoveType::DRAW_CARD;
+  }
+  GameUpdate::Move::MoveType latest_move_type = previous_moves.at(previous_moves.size() - 1).move_type;
+  return GameUpdate::Move::GetNextMoveType(latest_move_type);
+}
+
+void Game::Round::Turn::ExecuteMove(const GameUpdate::Move& move) {
+  previous_moves.push_back(move);
 }

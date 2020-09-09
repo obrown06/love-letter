@@ -1,6 +1,8 @@
 #ifndef SERVER_MODELS_EXCEPTIONS_H
 #define SERVER_MODELS_EXCEPTIONS_H
 
+#include "models/game-update.hpp"
+
 #include <exception>
 #include <string>
 
@@ -118,6 +120,17 @@ class PlayerSizeException : public std::exception {
    }
  private:
    std::string id_;
+};
+
+class NoNextMoveException : public std::exception {
+ public:
+   NoNextMoveException(const GameUpdate::Move::MoveType& type) : type_(type) {}
+   const char * what () const throw ()
+   {
+     return ("MoveType " + GameUpdate::Move::GetMoveTypeString(type_) + " has no next move").c_str();
+   }
+ private:
+   GameUpdate::Move::MoveType type_;
 };
 
 #endif

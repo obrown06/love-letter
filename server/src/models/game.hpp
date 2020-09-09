@@ -39,6 +39,7 @@ public:
         void ExecuteMove(const GameUpdate::Move& move);
         bool IsComplete();
         GameUpdate::Move* GetMutableLatestMove();
+        GameUpdate::Move::MoveType GetNextMoveType() const;
         std::vector<GameUpdate::Move> previous_moves;
         std::string player_id;
       };
@@ -56,6 +57,7 @@ public:
       int GetDeckSize() const;
       std::vector<RoundPlayer> GetWinners() const;
       std::vector<RoundPlayer> GetPlayers() const;
+      Turn GetLatestTurn() const;
 
     private:
       void MaybeUpdateRoundState();

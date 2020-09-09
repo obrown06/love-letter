@@ -2,9 +2,16 @@
 #include "models/exceptions.hpp"
 #include "json-api/game-updates.hpp"
 
+#include <iostream>
+
 WebsocketSession::~WebsocketSession() {
-  registry_->RemoveSession(game_id_, this);
+  try {
+    registry_->RemoveSession(game_id_, this);
+  } catch (NoGameRegisteredException& e){
+    fail("destructor", e.what());
+  }
 }
+
 void
 WebsocketSession::on_accept(beast::error_code ec)
 {
@@ -60,15 +67,15 @@ WebsocketSession::on_read(
     GameUpdate update = JSONToGameUpdate(beast::buffers_to_string(buffer_.data()));
     registry_->UpdateGameAndBroadcast(update);
     buffer_.consume(buffer_.size());
-
-    ws_.async_read(
-      buffer_,
-      beast::bind_front_handler(
-        &WebsocketSession::on_read,
-        shared_from_this()));
   } catch (std::exception& e) {
-    return fail("read", e.what());
+    fail("read", e.what());
   }
+
+  ws_.async_read(
+    buffer_,
+    beast::bind_front_handler(
+      &WebsocketSession::on_read,
+      shared_from_this()));
 }
 
 void

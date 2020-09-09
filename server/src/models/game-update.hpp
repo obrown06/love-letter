@@ -22,6 +22,7 @@ struct GameUpdate {
       SELECT_PLAYER,
     };
     static std::string GetMoveTypeString(const MoveType& move_type);
+    static MoveType GetNextMoveType(const MoveType& move_type);
     MoveType move_type;
     std::string selected_player_id;
     boost::optional<Card> selected_card;

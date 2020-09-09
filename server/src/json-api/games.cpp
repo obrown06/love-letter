@@ -37,6 +37,14 @@ std::string GameToJSON(const Game& game) {
       player_node["still_in_round"] = player.still_in_round;
       latest_round["players"].append(player_node);
     }
+
+    const auto turn = round.GetLatestTurn();
+    Json::Value turn_node;
+    turn_node["player_id"] = turn.player_id;
+    const auto next_move_type = turn.GetNextMoveType();
+    turn_node["next_move_type"] = next_move_type;
+    latest_round["current_turn"] = turn_node;
+
     root["rounds"].append(latest_round);
   }
   for (const auto& player : game.GetPlayers()) {
