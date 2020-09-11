@@ -2,6 +2,7 @@
 #define SERVER_MODELS_EXCEPTIONS_H
 
 #include "models/game-update.hpp"
+#include "models/card.hpp"
 
 #include <exception>
 #include <string>
@@ -131,6 +132,18 @@ class NoNextMoveException : public std::exception {
    }
  private:
    GameUpdate::Move::MoveType type_;
+};
+
+class NoCardException : public std::exception {
+ public:
+   NoCardException(const std::string& player_id, const Card::Type& type) : player_id_(player_id), type_(type) {}
+   const char * what () const throw ()
+   {
+     return ("Player " + player_id_ + " doesn't have a card with type: " + Card::GetCardTypeString(type_)).c_str();
+   }
+ private:
+   Card::Type type_;
+   std::string player_id_;
 };
 
 #endif

@@ -13,6 +13,18 @@ namespace {
     { Card::PRIEST, 2 },
     { Card::GUARD, 1 },
   };
+
+  const std::string kCardStrings[] = {
+    "CARD_UNSPECIFIED",
+    "PRINCESS",
+    "COUNTESS",
+    "KING",
+    "PRINCE",
+    "HANDMAID",
+    "BARON",
+    "PRIEST",
+    "GUARD",
+  };
 };
 
 Card::Type Card::GetType() const {
@@ -21,4 +33,8 @@ Card::Type Card::GetType() const {
 
 int Card::GetValue() const {
   return card_types_to_values.at(type_);
+}
+
+std::string Card::GetCardTypeString(const Card::Type& card_type) {
+  return kCardStrings[static_cast<int>(card_type)];
 }

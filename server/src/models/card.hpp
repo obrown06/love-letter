@@ -1,6 +1,8 @@
 #ifndef SERVER_MODELS_CARD_HPP
 #define SERVER_MODELS_CARD_HPP
 
+#include <string>
+
 class Card {
 public:
   enum Type {
@@ -16,6 +18,7 @@ public:
   };
 
   Card(const Card::Type& type) : type_(type) {}
+  static std::string GetCardTypeString(const Card::Type& type);
 
   Type GetType() const;
   int GetValue() const;

@@ -49,6 +49,7 @@ public:
         std::vector<Card> discarded_cards;
         std::vector<Card> held_cards;
         bool still_in_round;
+        bool immune;
       };
 
       void ExecuteMove(const GameUpdate::Move& move);
@@ -60,12 +61,30 @@ public:
       Turn GetLatestTurn() const;
 
     private:
-      void MaybeUpdateRoundState();
-      void AdvanceTurn();
       std::vector<const RoundPlayer*> GetPlayersInRound() const;
-      void DrawCard(const std::string& drawing_player_id);
       Turn* GetMutableLatestTurn();
       RoundPlayer* GetPlayer(const std::string& player_id);
+      void MaybeUpdateRoundState();
+      void AdvanceTurn();
+      void MakeNewTurn(const std::string& player_id);
+      void DrawCard(const std::string& drawing_player_id);
+      void DiscardCardAndApplyEffect(const std::string& discarding_player_id, const Card& card);
+      void DiscardCard(const std::string& discarding_player_id, const Card& card);
+      void ApplyEffect(const std::string& discarding_player_id,
+                       const Card& card,
+                       const boost::optional<std::string>& selected_player_id);
+      void ApplyEffectPRINCESS(const std::string& discarding_player_id);
+      void ApplyEffectKING(const std::string& discarding_player_id,
+                           const boost::optional<std::string>& selected_player_id);
+      void ApplyEffectPRINCE(const std::string& discarding_player_id,
+                           const boost::optional<std::string>& selected_player_id);
+      void ApplyEffectHANDMAID(const std::string& discarding_player_id);
+      void ApplyEffectBARON(const std::string& discarding_player_id,
+                            const boost::optional<std::string>& selected_player_id);
+      void ApplyEffectPRIEST(const std::string& discarding_player_id,
+                             const boost::optional<std::string>& selected_player_id);
+      void ApplyEffectGUARD(const std::string& discarding_player_id,
+                            const boost::optional<std::string>& selected_player_id);
       std::vector<RoundPlayer> players_;
       std::vector<Card> deck_;
       std::vector<Turn> turns_;
