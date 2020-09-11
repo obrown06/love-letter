@@ -4,7 +4,7 @@
 #include <set>
 
 namespace {
-  const std::map<Card::Type, int> card_types_to_values = {
+  const std::map<Card::Type, int> kCardTypesToValues = {
     { Card::PRINCESS, 8 },
     { Card::COUNTESS, 7 },
     { Card::KING, 6 },
@@ -15,13 +15,20 @@ namespace {
     { Card::GUARD, 1 },
   };
 
-  const std::set<Card::Type> card_types_requiring_player_selection = {
+  const std::set<Card::Type> kCardTypesRequiringPlayerSelection = {
     Card::KING,
     Card::PRINCE,
     Card::BARON,
     Card::PRIEST,
     Card::GUARD
   };
+
+  const std::set<Card::Type> kCardTypesDiscardPreventedByCountess = {
+    Card::KING,
+    Card::PRINCE,
+  };
+
+  const Card::Type kCardTypeRequiringPlayerSelectionIncludingSelf = Card::PRINCE;
 
   const std::string kCardStrings[] = {
     "CARD_UNSPECIFIED",
@@ -41,13 +48,28 @@ Card::Type Card::GetType() const {
 }
 
 int Card::GetValue() const {
-  return card_types_to_values.at(type_);
+  return kCardTypesToValues.at(type_);
 }
 
-bool Card::RequiresPlayerSelection() const {
-  return card_types_requiring_player_selection.find(type_) != card_types_requiring_player_selection.end();
+bool Card::RequiresSelectMove(bool exists_another_player_to_select) const {
+  if (exists_another_player_to_select) {
+    return kCardTypesRequiringPlayerSelection.find(type_) != kCardTypesRequiringPlayerSelection.end();
+  }
+  return type_ == kCardTypeRequiringPlayerSelectionIncludingSelf;
 }
 
 std::string Card::GetCardTypeString(const Card::Type& card_type) {
   return kCardStrings[static_cast<int>(card_type)];
+}
+
+std::vector<Card> Card::GetDiscardableCards(const std::vector<Card>& cards) {
+  std::vector<Card> discardable_cards = cards;
+  if (std::find_if(discardable_cards.begin(), discardable_cards.end(), [](const Card& card) {
+    return card.GetType() == Card::COUNTESS;
+  }) != discardable_cards.end()) {
+    discardable_cards.erase(std::remove_if(discardable_cards.begin(), discardable_cards.end(), [](const Card& card) {
+      return kCardTypesDiscardPreventedByCountess.find(card.GetType()) != kCardTypesDiscardPreventedByCountess.end();
+    }));
+  }
+  return discardable_cards;
 }

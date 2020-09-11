@@ -32,24 +32,25 @@ public:
     public:
       Round(const std::vector<Game::GamePlayer>& round_players);
 
-      struct Turn {
-        Turn(const std::string& player_id):
-          player_id(player_id) {}
-
-        void ExecuteMove(const GameUpdate::Move& move);
-        bool IsComplete();
-        GameUpdate::Move* GetMutableLatestMove();
-        GameUpdate::Move::MoveType GetNextMoveType() const;
-        std::vector<GameUpdate::Move> previous_moves;
-        std::string player_id;
-      };
-
       struct RoundPlayer {
         std::string player_id;
         std::vector<Card> discarded_cards;
         std::vector<Card> held_cards;
         bool still_in_round;
         bool immune;
+        std::vector<Card> GetDiscardableCards() const;
+      };
+
+      struct Turn {
+        Turn(const RoundPlayer* player):
+          player(player) {}
+
+        void ExecuteMove(const GameUpdate::Move& move);
+        bool IsComplete(std::vector<const RoundPlayer*> players_in_round);
+        GameUpdate::Move* GetMutableLatestMove();
+        GameUpdate::Move::MoveType GetNextMoveType() const;
+        std::vector<GameUpdate::Move> previous_moves;
+        const RoundPlayer* player;
       };
 
       void ExecuteMove(const GameUpdate::Move& move);
@@ -58,6 +59,7 @@ public:
       int GetDeckSize() const;
       std::vector<RoundPlayer> GetWinners() const;
       std::vector<RoundPlayer> GetPlayers() const;
+      std::vector<RoundPlayer> GetSelectablePlayers() const;
       Turn GetLatestTurn() const;
 
     private:
@@ -96,7 +98,7 @@ public:
   std::vector<Game::GamePlayer> GetPlayers() const;
   Round GetLatestRound() const;
   int GetTokensToWin() const;
-  std::vector<Game::GamePlayer*> GetWinners();
+  std::vector<Game::GamePlayer> GetWinners();
   bool IsComplete() const;
 
   void ProcessUpdate(const GameUpdate& update);

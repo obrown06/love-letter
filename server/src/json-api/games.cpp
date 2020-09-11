@@ -40,9 +40,18 @@ std::string GameToJSON(const Game& game) {
 
     const auto turn = round.GetLatestTurn();
     Json::Value turn_node;
-    turn_node["player_id"] = turn.player_id;
+    turn_node["player_id"] = turn.player->player_id;
     const auto next_move_type = turn.GetNextMoveType();
     turn_node["next_move_type"] = next_move_type;
+    if (next_move_type == GameUpdate::Move::MoveType::DISCARD_CARD) {
+      for (const auto& discardable_card : turn.player->GetDiscardableCards()) {
+        turn_node["discardable_cards"].append(static_cast<int>(discardable_card.GetType()));
+      }
+    } else if (next_move_type == GameUpdate::Move::MoveType::SELECT_PLAYER) {
+      for (const auto& selectable_player : round.GetSelectablePlayers()) {
+        turn_node["selectable_player"].append(selectable_player.player_id);
+      }
+    }
     latest_round["current_turn"] = turn_node;
 
     root["rounds"].append(latest_round);
