@@ -57,7 +57,7 @@ std::vector<Game::GamePlayer> Game::GetPlayers() const {
   return players_;
 }
 
-Game::GamePlayer* Game::GetPlayer(const std::string& player_id) {
+Game::GamePlayer* Game::GetMutablePlayer(const std::string& player_id) {
   auto iter = std::find_if(players_.begin(), players_.end(), [&](const GamePlayer& player) {
     return player.player_id == player_id;
   });
@@ -69,7 +69,7 @@ Game::GamePlayer* Game::GetPlayer(const std::string& player_id) {
 
 void Game::AddPlayer(const std::string& player_id) {
   CheckGameNotStarted();
-  if (GetPlayer(player_id) != nullptr) {
+  if (GetMutablePlayer(player_id) != nullptr) {
     throw DuplicatePlayerException(player_id, id_);
   }
   Game::GamePlayer player;
@@ -90,7 +90,7 @@ void Game::ProcessUpdate(const GameUpdate& update) {
 
 void Game::ValidateMove(const GameUpdate::Move& move, const std::string& player_id) {
   CheckGameInProgress();
-  if (GetPlayer(player_id) != nullptr) {
+  if (GetMutablePlayer(player_id) != nullptr) {
     throw NoSuchPlayerException(player_id, id_);
   }
   GetMutableLatestRound()->ValidateMove(move, player_id);
@@ -191,6 +191,7 @@ Game::Round::Round(const std::vector<Game::GamePlayer>& round_players) {
   }
 
   // Remove one extra card from deck to prevent card counting.
+  extra_card_ = shuffled_deck.back();
   shuffled_deck.pop_back();
 
   for (auto& card_type : shuffled_deck) {
@@ -205,7 +206,7 @@ int Game::Round::GetDeckSize() const {
   return deck_.size();
 }
 
-Game::Round::RoundPlayer* Game::Round::GetPlayer(const std::string& player_id) {
+Game::Round::RoundPlayer* Game::Round::GetMutablePlayer(const std::string& player_id) {
   auto iter = std::find_if(players_.begin(), players_.end(), [&](const Game::Round::RoundPlayer& player) {
     return player.player_id == player_id;
   });
@@ -301,7 +302,7 @@ std::vector<Game::Round::RoundPlayer> Game::Round::GetWinners() const {
 
 void Game::Round::ValidateMove(const GameUpdate::Move& move,
                                const std::string& player_id) {
-  Game::Round::RoundPlayer* player = GetPlayer(player_id);
+  Game::Round::RoundPlayer* player = GetMutablePlayer(player_id);
   if (player_id != GetMutableLatestTurn()->player->player_id) {
     throw MoveOutOfTurnException(player_id);
   }
@@ -309,32 +310,44 @@ void Game::Round::ValidateMove(const GameUpdate::Move& move,
 }
 
 void Game::Round::ExecuteMove(const GameUpdate::Move& move) {
+  auto latest_turn = GetMutableLatestTurn();
   switch (move.move_type) {
     case GameUpdate::Move::DRAW_CARD:
-      DrawCard(GetMutableLatestTurn()->player->player_id);
+      DrawCard(latest_turn->player->player_id);
       break;
     case GameUpdate::Move::DISCARD_CARD:
-      DiscardCardAndApplyEffect(GetMutableLatestTurn()->player->player_id, move.selected_card.get());
+      DiscardCardAndApplyEffect(latest_turn->player->player_id, move.selected_card.get());
       break;
+    case GameUpdate::Move::SELECT_PLAYER:
+      ApplyEffect(latest_turn->player->player_id,
+                  latest_turn->GetMutableLatestMove()->selected_card.get(),
+                  move.selected_player_id,
+                  move.selected_card->GetType());
   }
   GetMutableLatestTurn()->ExecuteMove(move);
   MaybeUpdateRoundState();
 }
 
 void Game::Round::DrawCard(const std::string& drawing_player_id) {
-  Game::Round::RoundPlayer* player = GetPlayer(drawing_player_id);
-  player->held_cards.push_back(deck_.back());
-  deck_.pop_back();
+  Game::Round::RoundPlayer* player = GetMutablePlayer(drawing_player_id);
+  if (deck_.empty()) {
+    player->held_cards.push_back(extra_card_.get());
+    extra_card_ = boost::none;
+  } else {
+    player->held_cards.push_back(deck_.back());
+    deck_.pop_back();
+  }
 }
 
 void Game::Round::DiscardCardAndApplyEffect(const std::string& discarding_player_id, const Card& card) {
   DiscardCard(discarding_player_id, card);
-  boost::optional<std::string> selected_player_id;
-  ApplyEffect(discarding_player_id, card, selected_player_id);
+  boost::optional<std::string> unused_selected_player_id;
+  boost::optional<Card::Type> unused_predicted_card_type;
+  ApplyEffect(discarding_player_id, card, unused_selected_player_id, unused_predicted_card_type);
 }
 
 void Game::Round::DiscardCard(const std::string& discarding_player_id, const Card& card) {
-  Game::Round::RoundPlayer* player = GetPlayer(discarding_player_id);
+  Game::Round::RoundPlayer* player = GetMutablePlayer(discarding_player_id);
   auto it = std::find_if(player->held_cards.begin(), player->held_cards.end(), [&card] (const Card& held_card) {
     return held_card.GetType() == card.GetType();
   });
@@ -347,29 +360,29 @@ void Game::Round::DiscardCard(const std::string& discarding_player_id, const Car
 
 void Game::Round::ApplyEffect(const std::string& discarding_player_id,
                               const Card& card,
-                              const boost::optional<std::string>& selected_player_id) {
+                              const boost::optional<std::string>& selected_player_id,
+                              const boost::optional<Card::Type>& predicted_card_type) {
   switch (card.GetType()) {
     case Card::Type::PRINCESS:
       return ApplyEffectPRINCESS(discarding_player_id);
     case Card::Type::KING:
       return ApplyEffectKING(discarding_player_id, selected_player_id);
     case Card::Type::PRINCE:
-      return ApplyEffectPRINCE(discarding_player_id, selected_player_id);
+      return ApplyEffectPRINCE(selected_player_id);
     case Card::Type::HANDMAID:
       return ApplyEffectHANDMAID(discarding_player_id);
     case Card::Type::BARON:
       return ApplyEffectBARON(discarding_player_id, selected_player_id);
     case Card::Type::GUARD:
-      return ApplyEffectGUARD(discarding_player_id, selected_player_id);
+      return ApplyEffectGUARD(selected_player_id, predicted_card_type);
     case Card::Type::PRIEST:
-      return ApplyEffectPRIEST(discarding_player_id, selected_player_id);
     case Card::Type::COUNTESS:
       return;
   }
 }
 
 void Game::Round::ApplyEffectPRINCESS(const std::string& discarding_player_id) {
-  Game::Round::RoundPlayer* player = GetPlayer(discarding_player_id);
+  Game::Round::RoundPlayer* player = GetMutablePlayer(discarding_player_id);
   player->still_in_round = false;
 }
 
@@ -379,19 +392,31 @@ void Game::Round::ApplyEffectKING(const std::string& discarding_player_id,
   if (!selected_player_id) {
     return;
   }
+  Game::Round::RoundPlayer* discarding_player = GetMutablePlayer(discarding_player_id);
+  Game::Round::RoundPlayer* selected_player = GetMutablePlayer(selected_player_id.get());
+  std::vector<Card> tmp = discarding_player->held_cards;
+  discarding_player->held_cards = selected_player->held_cards;
+  selected_player->held_cards = tmp;
 }
 
-void Game::Round::ApplyEffectPRINCE(const std::string& discarding_player_id,
-                                  const boost::optional<std::string>& selected_player_id)
+void Game::Round::ApplyEffectPRINCE(const boost::optional<std::string>& selected_player_id)
 {
   if (!selected_player_id) {
     return;
+  }
+  auto player = GetMutablePlayer(selected_player_id.get());
+  auto held_card = player->held_cards.front();
+  DiscardCard(selected_player_id.get(), held_card);
+  if (held_card.GetType() == Card::Type::PRINCESS) {
+    player->still_in_round = false;
+  } else {
+    DrawCard(selected_player_id.get());
   }
 }
 
 void Game::Round::ApplyEffectHANDMAID(const std::string& discarding_player_id)
 {
-  Game::Round::RoundPlayer* player = GetPlayer(discarding_player_id);
+  Game::Round::RoundPlayer* player = GetMutablePlayer(discarding_player_id);
   player->immune = true;
 }
 
@@ -401,21 +426,24 @@ void Game::Round::ApplyEffectBARON(const std::string& discarding_player_id,
   if (!selected_player_id) {
     return;
   }
+  Game::Round::RoundPlayer* discarding_player = GetMutablePlayer(discarding_player_id);
+  Game::Round::RoundPlayer* selected_player = GetMutablePlayer(selected_player_id.get());
+  if (discarding_player->held_cards.front().GetValue() > selected_player->held_cards.front().GetValue()) {
+    selected_player->still_in_round = false;
+  } else if (discarding_player->held_cards.front().GetValue() < selected_player->held_cards.front().GetValue()) {
+    discarding_player->still_in_round = false;
+  }
 }
 
-void Game::Round::ApplyEffectPRIEST(const std::string& discarding_player_id,
-                                  const boost::optional<std::string>& selected_player_id)
+void Game::Round::ApplyEffectGUARD(const boost::optional<std::string>& selected_player_id,
+                                   const boost::optional<Card::Type>& predicted_card_type)
 {
   if (!selected_player_id) {
     return;
   }
-}
-
-void Game::Round::ApplyEffectGUARD(const std::string& discarding_player_id,
-                                  const boost::optional<std::string>& selected_player_id)
-{
-  if (!selected_player_id) {
-    return;
+  Game::Round::RoundPlayer* selected_player = GetMutablePlayer(selected_player_id.get());
+  if (selected_player->held_cards.front().GetType() == predicted_card_type.get()) {
+    selected_player->still_in_round = false;
   }
 }
 
@@ -445,7 +473,7 @@ void Game::Round::AdvanceTurn() {
 }
 
 void Game::Round::MakeNewTurn(const std::string& player_id) {
-  Game::Round::RoundPlayer* player = GetPlayer(player_id);
+  Game::Round::RoundPlayer* player = GetMutablePlayer(player_id);
 
   // Satisfy Handmaid rule
   player->immune = false;

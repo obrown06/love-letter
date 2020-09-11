@@ -65,7 +65,7 @@ public:
     private:
       std::vector<const RoundPlayer*> GetPlayersInRound() const;
       Turn* GetMutableLatestTurn();
-      RoundPlayer* GetPlayer(const std::string& player_id);
+      RoundPlayer* GetMutablePlayer(const std::string& player_id);
       void MaybeUpdateRoundState();
       void AdvanceTurn();
       void MakeNewTurn(const std::string& player_id);
@@ -74,21 +74,20 @@ public:
       void DiscardCard(const std::string& discarding_player_id, const Card& card);
       void ApplyEffect(const std::string& discarding_player_id,
                        const Card& card,
-                       const boost::optional<std::string>& selected_player_id);
+                       const boost::optional<std::string>& selected_player_id,
+                       const boost::optional<Card::Type>& predicted_card_type);
       void ApplyEffectPRINCESS(const std::string& discarding_player_id);
       void ApplyEffectKING(const std::string& discarding_player_id,
                            const boost::optional<std::string>& selected_player_id);
-      void ApplyEffectPRINCE(const std::string& discarding_player_id,
-                           const boost::optional<std::string>& selected_player_id);
+      void ApplyEffectPRINCE(const boost::optional<std::string>& selected_player_id);
       void ApplyEffectHANDMAID(const std::string& discarding_player_id);
       void ApplyEffectBARON(const std::string& discarding_player_id,
                             const boost::optional<std::string>& selected_player_id);
-      void ApplyEffectPRIEST(const std::string& discarding_player_id,
-                             const boost::optional<std::string>& selected_player_id);
-      void ApplyEffectGUARD(const std::string& discarding_player_id,
-                            const boost::optional<std::string>& selected_player_id);
+      void ApplyEffectGUARD(const boost::optional<std::string>& selected_player_id,
+                            const boost::optional<Card::Type>& predicted_card_type);
       std::vector<RoundPlayer> players_;
       std::vector<Card> deck_;
+      boost::optional<Card> extra_card_;
       std::vector<Turn> turns_;
   };
 
@@ -111,7 +110,7 @@ private:
   void AdvanceRound();
   void CheckGameInProgress() const;
   void CheckGameNotStarted() const;
-  Game::GamePlayer* GetPlayer(const std::string& player_id);
+  Game::GamePlayer* GetMutablePlayer(const std::string& player_id);
   Round* GetMutableLatestRound();
   std::string id_;
   std::string creator_;
