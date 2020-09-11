@@ -22,6 +22,7 @@ public:
 
   Type GetType() const;
   int GetValue() const;
+  bool RequiresPlayerSelection() const;
 
 private:
   Type type_;

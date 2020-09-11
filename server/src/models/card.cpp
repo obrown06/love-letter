@@ -1,6 +1,7 @@
 #include "models/card.hpp"
 
 #include <map>
+#include <set>
 
 namespace {
   const std::map<Card::Type, int> card_types_to_values = {
@@ -12,6 +13,14 @@ namespace {
     { Card::BARON, 3 },
     { Card::PRIEST, 2 },
     { Card::GUARD, 1 },
+  };
+
+  const std::set<Card::Type> card_types_requiring_player_selection = {
+    Card::KING,
+    Card::PRINCE,
+    Card::BARON,
+    Card::PRIEST,
+    Card::GUARD
   };
 
   const std::string kCardStrings[] = {
@@ -33,6 +42,10 @@ Card::Type Card::GetType() const {
 
 int Card::GetValue() const {
   return card_types_to_values.at(type_);
+}
+
+bool Card::RequiresPlayerSelection() const {
+  return card_types_requiring_player_selection.find(type_) != card_types_requiring_player_selection.end();
 }
 
 std::string Card::GetCardTypeString(const Card::Type& card_type) {

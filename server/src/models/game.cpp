@@ -248,6 +248,7 @@ std::vector<Game::Round::RoundPlayer> Game::Round::GetWinners() const {
     }
     if (player->held_cards[0].GetValue() >= highest_card_value) {
       candidates.push_back(player);
+      highest_card_value = player->held_cards[0].GetValue();
     }
   }
 
@@ -263,8 +264,10 @@ std::vector<Game::Round::RoundPlayer> Game::Round::GetWinners() const {
     for (const auto& card : candidates[i]->discarded_cards) {
       sum += card.GetValue();
     }
-    if (candidates_with_sums.size() == 0 || candidates_with_sums[0].second < sum) {
+    if (candidates_with_sums.size() > 0 && candidates_with_sums[0].second < sum) {
       candidates_with_sums.clear();
+    }
+    if (candidates_with_sums.size() == 0 || candidates_with_sums[0].second <= sum) {
       candidates_with_sums.push_back(std::make_pair(candidates[i], sum));
     }
   }
@@ -424,14 +427,16 @@ void Game::Round::AdvanceTurn() {
   advance(it);
   while (true) {
     if (it->still_in_round) {
-      MakeNewTurn(it->player_id);
-      return;
+      return MakeNewTurn(it->player_id);
     }
+    advance(it);
   }
 }
 
 void Game::Round::MakeNewTurn(const std::string& player_id) {
   Game::Round::RoundPlayer* player = GetPlayer(player_id);
+
+  // Satisfy Handmaid rule
   player->immune = false;
   turns_.push_back(Turn(player_id));
 }
@@ -439,7 +444,17 @@ void Game::Round::MakeNewTurn(const std::string& player_id) {
 // Game::Round::Turn
 
 bool Game::Round::Turn::IsComplete() {
-  return GetMutableLatestMove()->move_type == GameUpdate::Move::MoveType::SELECT_PLAYER;
+  if (previous_moves.size() == 0) {
+    return false;
+  }
+  GameUpdate::Move::MoveType latest_move_type = GetMutableLatestMove()->move_type;
+
+  if (latest_move_type == GameUpdate::Move::MoveType::SELECT_PLAYER) {
+    return true;
+  } else if (latest_move_type == GameUpdate::Move::MoveType::DRAW_CARD) {
+    return false;
+  }
+  return GetMutableLatestMove()->selected_card.get().RequiresPlayerSelection();
 }
 
 GameUpdate::Move* Game::Round::Turn::GetMutableLatestMove() {
