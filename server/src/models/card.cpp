@@ -3,6 +3,8 @@
 #include <map>
 #include <set>
 
+#include <boost/format.hpp>
+
 namespace {
   const std::map<Card::Type, int> kCardTypesToValues = {
     { Card::PRINCESS, 8 },
@@ -41,6 +43,14 @@ namespace {
     "PRIEST",
     "GUARD",
   };
+
+  const std::map<Card::Type, std::string> kActionStrings = {
+    { Card::KING, " traded with %1%" },
+    { Card::PRINCE, " forced %1% to discard their hand" },
+    { Card::BARON, " compared hands with %1%" },
+    { Card::PRIEST, " peeked at %1%'s hand" },
+    { Card::GUARD, " accused %1% of being the %2% " }
+  };
 };
 
 Card::Type Card::GetType() const {
@@ -60,6 +70,16 @@ bool Card::RequiresSelectMove(bool exists_another_player_to_select) const {
 
 std::string Card::GetCardTypeString(const Card::Type& card_type) {
   return kCardStrings[static_cast<int>(card_type)];
+}
+
+std::string Card::GetActionString(const Card::Type& card_type,
+                                  const std::string& selected_player_id,
+                                  const boost::optional<Card>& selected_card) {
+  auto fmt = boost::format(kActionStrings.at(card_type)) % selected_player_id;
+  if (selected_card) {
+    fmt % Card::GetCardTypeString(selected_card->GetType());
+  }
+  return fmt.str();
 }
 
 std::vector<Card> Card::GetDiscardableCards(const std::vector<Card>& cards) {

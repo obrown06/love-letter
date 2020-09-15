@@ -24,6 +24,7 @@ public:
   };
 
   struct GamePlayer {
+    GamePlayer(const std::string& player_id) : player_id(player_id), ntokens_held() {};
     std::string player_id;
     int ntokens_held;
   };
@@ -46,9 +47,12 @@ public:
           player(player) {}
 
         void ExecuteMove(const GameUpdate::Move& move);
-        bool IsComplete(std::vector<const RoundPlayer*> players_in_round);
+        bool IsComplete(std::vector<const RoundPlayer*> players_in_round) const;
+        const std::vector<GameUpdate::Move>& GetMoves() const;
         GameUpdate::Move* GetMutableLatestMove();
+        const GameUpdate::Move& GetLatestMove() const;
         GameUpdate::Move::MoveType GetNextMoveType() const;
+        std::string GetSummary() const;
         std::vector<GameUpdate::Move> previous_moves;
         const RoundPlayer* player;
       };
@@ -60,10 +64,11 @@ public:
       std::vector<RoundPlayer> GetWinners() const;
       std::vector<RoundPlayer> GetPlayers() const;
       std::vector<RoundPlayer> GetSelectablePlayers() const;
-      Turn GetLatestTurn() const;
+      const std::vector<Turn>& GetTurns() const;
+      std::string GetSummary() const;
+      std::vector<const RoundPlayer*> GetPlayersInRound() const;
 
     private:
-      std::vector<const RoundPlayer*> GetPlayersInRound() const;
       Turn* GetMutableLatestTurn();
       RoundPlayer* GetMutablePlayer(const std::string& player_id);
       void MaybeUpdateRoundState();
@@ -95,9 +100,10 @@ public:
   std::string GetCreator() const;
   Game::State GetState() const;
   std::vector<Game::GamePlayer> GetPlayers() const;
-  Round GetLatestRound() const;
+  const std::vector<Game::Round>& GetRounds() const;
   int GetTokensToWin() const;
-  std::vector<Game::GamePlayer> GetWinners();
+  std::vector<Game::GamePlayer> GetWinners() const;
+  std::string GetSummary() const;
   bool IsComplete() const;
 
   void ProcessUpdate(const GameUpdate& update);

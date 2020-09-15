@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include <boost/optional.hpp>
+
 class Card {
 public:
   enum Type {
@@ -21,6 +23,10 @@ public:
   Card(const Card::Type& type) : type_(type) {}
 
   static std::string GetCardTypeString(const Card::Type& type);
+  static std::string GetActionString(const Card::Type& card_type,
+                                     const std::string& selected_player_id,
+                                     const boost::optional<Card>& selected_card);
+
   static std::vector<Card> GetDiscardableCards(const std::vector<Card>& cards);
 
   Type GetType() const;

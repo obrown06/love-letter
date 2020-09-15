@@ -1,8 +1,6 @@
 #include "json-api/games.hpp"
 #include "json-api/exceptions.hpp"
 
-#include <json/json.h>
-
 GameUpdate JSONToGameUpdate(const std::string& json) {
   Json::Value root;
   Json::CharReaderBuilder builder;

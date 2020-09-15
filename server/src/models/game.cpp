@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iostream>
 #include <random>
+#include <sstream>
 
 namespace {
 
@@ -27,6 +28,9 @@ namespace {
     Card::GUARD,
     Card::GUARD
   };
+
+  const std::string kGameSummaryMessage = "Game won by: ";
+  const std::string kRoundSummaryMessage = "Round won by: ";
 };
 
 std::string Game::GetId() const {
@@ -45,8 +49,8 @@ Game::Round* Game::GetMutableLatestRound() {
   return &rounds_.at(rounds_.size() - 1);
 }
 
-Game::Round Game::GetLatestRound() const {
-  return rounds_.at(rounds_.size() - 1);
+const std::vector<Game::Round>& Game::GetRounds() const {
+  return rounds_;
 }
 
 int Game::GetTokensToWin() const {
@@ -72,8 +76,7 @@ void Game::AddPlayer(const std::string& player_id) {
   if (GetMutablePlayer(player_id) != nullptr) {
     throw DuplicatePlayerException(player_id, id_);
   }
-  Game::GamePlayer player;
-  player.player_id = player_id;
+  Game::GamePlayer player(player_id);
   players_.push_back(player);
 }
 
@@ -115,6 +118,8 @@ void Game::MaybeUpdateGameState() {
 
   if (!IsComplete()) {
     AdvanceRound();
+  } else {
+    state_ = Game::State::COMPLETE;
   }
 }
 
@@ -128,7 +133,7 @@ bool Game::IsComplete() const {
   }) != players_.end());
 }
 
-std::vector<Game::GamePlayer> Game::GetWinners() {
+std::vector<Game::GamePlayer> Game::GetWinners() const {
   std::vector<Game::GamePlayer> winners;
   for (auto& player : players_) {
     if (player.ntokens_held > GetTokensToWin()) {
@@ -136,6 +141,19 @@ std::vector<Game::GamePlayer> Game::GetWinners() {
     }
   }
   return winners;
+}
+
+std::string Game::GetSummary() const {
+  auto winners = GetWinners();
+  std::stringstream ss;
+  ss << kGameSummaryMessage;
+  for (size_t i = 0; i < winners.size(); i++) {
+    ss << winners[i].player_id;
+    if (i < winners.size() - 1) {
+      ss << ", ";
+    }
+  }
+  return ss.str();
 }
 
 void Game::Start() {
@@ -224,8 +242,21 @@ bool Game::Round::IsComplete() const {
   return deck_.size() == 0 || GetPlayersInRound().size() <= 1;
 }
 
-Game::Round::Turn Game::Round::GetLatestTurn() const {
-  return turns_.at(turns_.size() - 1);
+const std::vector<Game::Round::Turn>& Game::Round::GetTurns() const {
+  return turns_;
+}
+
+std::string Game::Round::GetSummary() const {
+  auto winners = GetWinners();
+  std::stringstream ss;
+  ss << kRoundSummaryMessage;
+  for (size_t i = 0; i < winners.size(); i++) {
+    ss << winners[i].player_id;
+    if (i < winners.size() - 1) {
+      ss << ", ";
+    }
+  }
+  return ss.str();
 }
 
 std::vector<Game::Round::RoundPlayer> Game::Round::GetPlayers() const {
@@ -482,7 +513,7 @@ void Game::Round::MakeNewTurn(const std::string& player_id) {
 
 // Game::Round::Turn
 
-bool Game::Round::Turn::IsComplete(std::vector<const Game::Round::RoundPlayer*> players_in_round) {
+bool Game::Round::Turn::IsComplete(std::vector<const Game::Round::RoundPlayer*> players_in_round) const {
   bool player_in_round = std::find_if(players_in_round.begin(), players_in_round.end(),
    [this](const Game::Round::RoundPlayer* player) {
     return player->player_id == this->player->player_id;
@@ -496,7 +527,7 @@ bool Game::Round::Turn::IsComplete(std::vector<const Game::Round::RoundPlayer*> 
   if (previous_moves.size() == 0) {
     return false;
   }
-  GameUpdate::Move::MoveType latest_move_type = GetMutableLatestMove()->move_type;
+  GameUpdate::Move::MoveType latest_move_type = GetLatestMove().move_type;
 
   if (latest_move_type == GameUpdate::Move::MoveType::SELECT_PLAYER) {
     return true;
@@ -511,11 +542,15 @@ bool Game::Round::Turn::IsComplete(std::vector<const Game::Round::RoundPlayer*> 
     return player->player_id != this->player->player_id && !player->immune;
   }) != players_in_round.end();
 
-  return GetMutableLatestMove()->selected_card.get().RequiresSelectMove(another_non_immune_player_in_round);
+  return GetLatestMove().selected_card.get().RequiresSelectMove(another_non_immune_player_in_round);
 }
 
 GameUpdate::Move* Game::Round::Turn::GetMutableLatestMove() {
   return &previous_moves.at(previous_moves.size() - 1);
+}
+
+const GameUpdate::Move& Game::Round::Turn::GetLatestMove() const {
+  return previous_moves.at(previous_moves.size() - 1);
 }
 
 GameUpdate::Move::MoveType Game::Round::Turn::GetNextMoveType() const {
@@ -524,6 +559,36 @@ GameUpdate::Move::MoveType Game::Round::Turn::GetNextMoveType() const {
   }
   GameUpdate::Move::MoveType latest_move_type = previous_moves.at(previous_moves.size() - 1).move_type;
   return GameUpdate::Move::GetNextMoveType(latest_move_type);
+}
+
+const std::vector<GameUpdate::Move>& Game::Round::Turn::GetMoves() const {
+  return previous_moves;
+}
+
+std::string Game::Round::Turn::GetSummary() const {
+  auto discard_move = std::find_if(previous_moves.begin(),
+                                   previous_moves.end(),
+  [](const GameUpdate::Move& move) {
+    return move.move_type == GameUpdate::Move::DISCARD_CARD;
+  });
+  std::stringstream ss;
+  ss << player->player_id
+     << " played the "
+     << Card::GetCardTypeString(discard_move->selected_card->GetType())
+     << " card";
+  auto select_move = std::find_if(previous_moves.begin(),
+                                   previous_moves.end(),
+  [](const GameUpdate::Move& move) {
+    return move.move_type == GameUpdate::Move::SELECT_PLAYER;
+  });
+  if (select_move != previous_moves.end()) {
+    ss << " and "
+       << Card::GetActionString(discard_move->selected_card->GetType(),
+                                      *select_move->selected_player_id,
+                                      select_move->selected_card);
+  }
+  ss << ".";
+  return ss.str();
 }
 
 void Game::Round::Turn::ExecuteMove(const GameUpdate::Move& move) {

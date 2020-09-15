@@ -1,7 +1,5 @@
-#include "json-api/games.hpp"
 #include "json-api/exceptions.hpp"
-
-#include <json/json.h>
+#include "json-api/games.hpp"
 
 Game JSONToGame(const std::string& json) {
   Json::Value root;
@@ -22,25 +20,70 @@ std::string GameToJSON(const Game& game) {
   root["state"] = game.GetState();
   if (game.GetState() == Game::IN_PROGRESS) {
     root["tokens_to_win"] = game.GetTokensToWin();
-    const auto& round = game.GetLatestRound();
-    Json::Value latest_round;
-    latest_round["deck_size"] = round.GetDeckSize();
-    for (const auto& player : round.GetPlayers()) {
-      Json::Value player_node;
-      player_node["player_id"] = player.player_id;
-      for (const auto& discarded_card : player.discarded_cards) {
-        player_node["discarded_cards"].append(static_cast<int>(discarded_card.GetType()));
-      }
-      for (const auto& held_card : player.held_cards) {
-        player_node["held_cards"].append(static_cast<int>(held_card.GetType()));
-      }
-      player_node["still_in_round"] = player.still_in_round;
-      latest_round["players"].append(player_node);
+    for (const auto& round : game.GetRounds()) {
+      root["rounds"].append(RoundToJSON(round));
     }
+  } else if (game.GetState() == Game::COMPLETE) {
+    for (const auto& winner : game.GetWinners()) {
+      Json::Value winner_node;
+      winner_node["player_id"] = winner.player_id;
+      root["winners"].append(winner_node);
+    }
+    root["summary"] = game.GetSummary();
+  }
+  for (const auto& player : game.GetPlayers()) {
+    Json::Value player_node;
+    player_node["player_id"] = player.player_id;
+    if (game.GetState() != Game::WAITING) {
+      player_node["tokens_held"] = player.ntokens_held;
+    }
+    root["players"].append(player_node);
+  }
+  Json::StreamWriterBuilder builder;
+  return Json::writeString(builder, root);
+}
 
-    const auto turn = round.GetLatestTurn();
-    Json::Value turn_node;
-    turn_node["player_id"] = turn.player->player_id;
+Json::Value RoundToJSON(const Game::Round& round) {
+  Json::Value round_node;
+  round_node["deck_size"] = round.GetDeckSize();
+  for (const auto& player : round.GetPlayers()) {
+    Json::Value player_node;
+    player_node["player_id"] = player.player_id;
+    for (const auto& discarded_card : player.discarded_cards) {
+      player_node["discarded_cards"].append(static_cast<int>(discarded_card.GetType()));
+    }
+    for (const auto& held_card : player.held_cards) {
+      player_node["held_cards"].append(static_cast<int>(held_card.GetType()));
+    }
+    player_node["still_in_round"] = player.still_in_round;
+    round_node["players"].append(player_node);
+  }
+
+  for (const auto& turn : round.GetTurns()) {
+    round_node["turns"].append(TurnToJSON(round, turn));
+  }
+
+  if (round.IsComplete()) {
+    round_node["summary"] = round.GetSummary();
+    for (const auto& winner : round.GetWinners()) {
+      Json::Value winner_node;
+      winner_node["player_id"] = winner.player_id;
+      round_node["winners"].append(winner_node);
+    }
+  }
+
+  return round_node;
+}
+
+Json::Value TurnToJSON(const Game::Round& round, const Game::Round::Turn& turn) {
+  Json::Value turn_node;
+  turn_node["player_id"] = turn.player->player_id;
+  for (const auto& move : turn.GetMoves()) {
+    turn_node["moves"].append(MoveToJSON(move));
+  }
+  if (turn.IsComplete(round.GetPlayersInRound())) {
+    turn_node["summary"] = turn.GetSummary();
+  } else {
     const auto next_move_type = turn.GetNextMoveType();
     turn_node["next_move_type"] = next_move_type;
     if (next_move_type == GameUpdate::Move::MoveType::DISCARD_CARD) {
@@ -52,15 +95,18 @@ std::string GameToJSON(const Game& game) {
         turn_node["selectable_player"].append(selectable_player.player_id);
       }
     }
-    latest_round["current_turn"] = turn_node;
+  }
+  return turn_node;
+}
 
-    root["rounds"].append(latest_round);
+Json::Value MoveToJSON(const GameUpdate::Move& move) {
+  Json::Value move_node;
+  move_node["move_type"] = static_cast<int>(move.move_type);
+  if (move.selected_player_id) {
+    move_node["selected_player_id"] = *move.selected_player_id;
   }
-  for (const auto& player : game.GetPlayers()) {
-    Json::Value player_node;
-    player_node["player_id"] = player.player_id;
-    root["players"].append(player_node);
+  if (move.selected_card) {
+    move_node["selected_card_type"] = static_cast<int>(move.selected_card->GetType());
   }
-  Json::StreamWriterBuilder builder;
-  return Json::writeString(builder, root);
+  return move_node;
 }
