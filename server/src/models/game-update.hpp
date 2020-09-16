@@ -27,6 +27,7 @@ struct GameUpdate {
     MoveType move_type;
     boost::optional<std::string> selected_player_id;
     boost::optional<Card> selected_card;
+    boost::optional<std::string> viewed_player_id;
   };
 
   UpdateType update_type;

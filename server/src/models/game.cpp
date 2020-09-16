@@ -287,22 +287,31 @@ std::vector<Game::Round::RoundPlayer> Game::Round::GetSelectablePlayers() const 
 std::vector<std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>>
 Game::Round::GetViewPlayerPairs() const {
   const auto& turns = GetTurns();
-  const auto& latest_turn = turns.at(turns.size() - 1);
+  const auto latest_turn = turns.at(turns.size() - 1);
   const auto& discarded_card = latest_turn.GetDiscardedCard();
   std::vector<std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>> pairs;
   if (discarded_card.RequiredViewMovesCount() == 0) {
     return pairs;
   }
-  auto viewed_player = std::find_if(players_.begin(),
+  auto selected_player = std::find_if(players_.begin(),
                                     players_.end(),
                                     [&latest_turn](const Game::Round::RoundPlayer& player) {
     return player.player_id == latest_turn.GetSelectedPlayerId();
   });
-  auto pair = std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>(*latest_turn.player, *viewed_player);
-  pairs.push_back(pair);
+  auto player_viewed = [&](const std::string& id) {
+    return std::find_if(latest_turn.previous_moves.begin(),
+                     latest_turn.previous_moves.end(),
+                     [&](const GameUpdate::Move& move) {
+                       return (move.move_type == GameUpdate::Move::MoveType::VIEW_CARD) && (move.viewed_player_id.get() == id);
+                     }) != latest_turn.previous_moves.end();
+  };
+  if (!player_viewed(selected_player->player_id)) {
+    auto pair = std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>(*latest_turn.player, *selected_player);
+    pairs.push_back(pair);
+  }
 
-  if (discarded_card.RequiredViewMovesCount() == 2) {
-    const auto reciprocal_pair = std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>(pair.second, pair.first);
+  if (discarded_card.RequiredViewMovesCount() == 2 && !player_viewed(latest_turn.player->player_id)) {
+    const auto reciprocal_pair = std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>(*selected_player, *latest_turn.player);
     pairs.push_back(reciprocal_pair);
   }
   return pairs;
