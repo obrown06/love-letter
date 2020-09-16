@@ -284,6 +284,30 @@ std::vector<Game::Round::RoundPlayer> Game::Round::GetSelectablePlayers() const 
   return selectable_players;
 }
 
+std::vector<std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>>
+Game::Round::GetViewPlayerPairs() const {
+  const auto& turns = GetTurns();
+  const auto& latest_turn = turns.at(turns.size() - 1);
+  const auto& discarded_card = latest_turn.GetDiscardedCard();
+  std::vector<std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>> pairs;
+  if (discarded_card.RequiredViewMovesCount() == 0) {
+    return pairs;
+  }
+  auto viewed_player = std::find_if(players_.begin(),
+                                    players_.end(),
+                                    [&latest_turn](const Game::Round::RoundPlayer& player) {
+    return player.player_id == latest_turn.GetSelectedPlayerId();
+  });
+  auto pair = std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>(*latest_turn.player, *viewed_player);
+  pairs.push_back(pair);
+
+  if (discarded_card.RequiredViewMovesCount() == 2) {
+    const auto reciprocal_pair = std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>(pair.second, pair.first);
+    pairs.push_back(reciprocal_pair);
+  }
+  return pairs;
+}
+
 std::vector<Game::Round::RoundPlayer> Game::Round::GetWinners() const {
   std::vector<Game::Round::RoundPlayer> winners;
   auto players_in_round = GetPlayersInRound();
@@ -513,36 +537,51 @@ void Game::Round::MakeNewTurn(const std::string& player_id) {
 
 // Game::Round::Turn
 
+const Card& Game::Round::Turn::GetDiscardedCard() const {
+  auto discard_move = std::find_if(previous_moves.begin(),
+                                   previous_moves.end(),
+                                   [] (const GameUpdate::Move& move) {
+      return move.move_type == GameUpdate::Move::MoveType::DISCARD_CARD;
+  });
+  return discard_move->selected_card.get();
+}
+
+std::string Game::Round::Turn::GetSelectedPlayerId() const {
+  auto select_move = std::find_if(previous_moves.begin(),
+                                   previous_moves.end(),
+                                   [] (const GameUpdate::Move& move) {
+      return move.move_type == GameUpdate::Move::MoveType::SELECT_PLAYER;
+  });
+  return select_move->selected_player_id.get();
+}
+
 bool Game::Round::Turn::IsComplete(std::vector<const Game::Round::RoundPlayer*> players_in_round) const {
-  bool player_in_round = std::find_if(players_in_round.begin(), players_in_round.end(),
-   [this](const Game::Round::RoundPlayer* player) {
-    return player->player_id == this->player->player_id;
-  }) != players_in_round.end();
-
-  // If the player is out of the round, the turn is complete
-  if (!player_in_round) {
-    return true;
-  }
-
   if (previous_moves.size() == 0) {
     return false;
   }
   GameUpdate::Move::MoveType latest_move_type = GetLatestMove().move_type;
 
-  if (latest_move_type == GameUpdate::Move::MoveType::SELECT_PLAYER) {
-    return true;
-  } else if (latest_move_type == GameUpdate::Move::MoveType::DRAW_CARD) {
+  if (latest_move_type == GameUpdate::Move::MoveType::DRAW_CARD) {
     return false;
   }
 
-  // If we've gotten here, it means the last move was a discard. We need to find
-  // out whether the most recently discarded card requires a selection.
-  bool another_non_immune_player_in_round = std::find_if(players_in_round.begin(), players_in_round.end(),
-   [this](const Game::Round::RoundPlayer* player) {
-    return player->player_id != this->player->player_id && !player->immune;
-  }) != players_in_round.end();
+  auto discarded_card = GetDiscardedCard();
 
-  return GetLatestMove().selected_card.get().RequiresSelectMove(another_non_immune_player_in_round);
+  if (latest_move_type == GameUpdate::Move::MoveType::DISCARD_CARD) {
+    bool another_non_immune_player_in_round = (std::find_if(players_in_round.begin(), players_in_round.end(),
+     [this](const Game::Round::RoundPlayer* player) {
+      return player->player_id != this->player->player_id && !player->immune;
+    }) != players_in_round.end());
+    return !discarded_card.RequiresSelectMove(another_non_immune_player_in_round);
+  } else if (latest_move_type == GameUpdate::Move::MoveType::SELECT_PLAYER) {
+    return discarded_card.RequiredViewMovesCount() == 0;
+  } else {
+    return discarded_card.RequiredViewMovesCount() == std::count_if(previous_moves.begin(),
+                                                                 previous_moves.end(),
+                                          [] (const GameUpdate::Move& move) {
+                                              return move.move_type == GameUpdate::Move::MoveType::VIEW_CARD;
+                                          });
+  }
 }
 
 GameUpdate::Move* Game::Round::Turn::GetMutableLatestMove() {

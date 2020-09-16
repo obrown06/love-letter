@@ -20,6 +20,7 @@ struct GameUpdate {
       DRAW_CARD,
       DISCARD_CARD,
       SELECT_PLAYER,
+      VIEW_CARD
     };
     static std::string GetMoveTypeString(const MoveType& move_type);
     static MoveType GetNextMoveType(const MoveType& move_type);

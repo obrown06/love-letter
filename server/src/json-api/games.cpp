@@ -92,7 +92,14 @@ Json::Value TurnToJSON(const Game::Round& round, const Game::Round::Turn& turn) 
       }
     } else if (next_move_type == GameUpdate::Move::MoveType::SELECT_PLAYER) {
       for (const auto& selectable_player : round.GetSelectablePlayers()) {
-        turn_node["selectable_player"].append(selectable_player.player_id);
+        turn_node["selectable_players"].append(selectable_player.player_id);
+      }
+    } else if (next_move_type == GameUpdate::Move::MoveType::VIEW_CARD) {
+      for (const auto& [viewer, viewed] : round.GetViewPlayerPairs()) {
+        Json::Value view_node;
+        view_node["viewer_id"] = viewer.player_id;
+        view_node["viewed_id"] = viewed.player_id;
+        turn_node["viewed_players"].append(view_node);
       }
     }
   }

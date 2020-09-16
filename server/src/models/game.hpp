@@ -52,6 +52,8 @@ public:
         GameUpdate::Move* GetMutableLatestMove();
         const GameUpdate::Move& GetLatestMove() const;
         GameUpdate::Move::MoveType GetNextMoveType() const;
+        const Card& GetDiscardedCard() const;
+        std::string GetSelectedPlayerId() const;
         std::string GetSummary() const;
         std::vector<GameUpdate::Move> previous_moves;
         const RoundPlayer* player;
@@ -64,6 +66,7 @@ public:
       std::vector<RoundPlayer> GetWinners() const;
       std::vector<RoundPlayer> GetPlayers() const;
       std::vector<RoundPlayer> GetSelectablePlayers() const;
+      std::vector<std::pair<RoundPlayer, RoundPlayer>> GetViewPlayerPairs() const;
       const std::vector<Turn>& GetTurns() const;
       std::string GetSummary() const;
       std::vector<const RoundPlayer*> GetPlayersInRound() const;
