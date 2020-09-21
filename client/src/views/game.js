@@ -3,6 +3,7 @@ import UserProfile from 'utils/user-profile.js';
 import axios from 'axios';
 import { Redirect } from 'react-router-dom';
 import GameLobby from 'components/game-lobby.js'
+import GameInProgress from 'components/game-in-progress.js'
 
 axios.defaults.withCredentials = true;
 
@@ -69,9 +70,7 @@ class Game extends React.Component {
       );
     } else {
       return (
-        <div>
-        GAME IS STARTED
-        </div>
+        <GameInProgress data={this.state.data}/>
       );
     }
   }
