@@ -2,6 +2,7 @@ import React from 'react';
 import UserProfile from 'utils/user-profile.js';
 import axios from 'axios';
 import { Redirect } from 'react-router-dom';
+import GameLobby from 'components/game-lobby.js'
 
 axios.defaults.withCredentials = true;
 
@@ -10,11 +11,20 @@ const UpdateType = {
   START_GAME_REQUEST: 2
 };
 
+const GameState = {
+  WAITING: 1,
+  IN_PROGRESS: 2,
+  COMPLETE: 3
+};
+
 class Game extends React.Component {
   constructor(props) {
     super(props);
     this.handleStartGame = this.handleStartGame.bind(this);
     this.ws = new WebSocket('ws://localhost:8000/' + this.props.match.params.gameId);
+    this.state = {
+      data: {},
+    };
   }
 
   componentDidMount() {
@@ -29,6 +39,9 @@ class Game extends React.Component {
 
     this.ws.onmessage = evt => {
       console.log(evt.data);
+      this.setState({
+        data: JSON.parse(evt.data),
+      });
     }
 
     this.ws.onclose = () => {
@@ -41,7 +54,7 @@ class Game extends React.Component {
     this.ws.send(JSON.stringify({
       game_id: this.props.match.params.gameId,
       player_id: UserProfile.getUserName(),
-      update_type: 2
+      update_type: UpdateType.START_GAME_REQUEST
     }));
   }
 
@@ -50,16 +63,17 @@ class Game extends React.Component {
       return (
         <Redirect to="/login" />
       );
+    } else if (!this.state.data.state || this.state.data.state == GameState.WAITING) {
+      return (
+        <GameLobby players={this.state.data.players} handleStartGame={this.handleStartGame} />
+      );
+    } else {
+      return (
+        <div>
+        GAME IS STARTED
+        </div>
+      );
     }
-    return (
-      <div>
-      THIS IS A GAME
-      <form onSubmit={this.handleStartGame}>
-
-        <input type="submit" value="Start Game" />
-      </form>
-      </div>
-    );
   }
 }
 
