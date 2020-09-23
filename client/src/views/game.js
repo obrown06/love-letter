@@ -39,6 +39,7 @@ class Game extends React.Component {
     }
 
     this.ws.onmessage = evt => {
+      console.log('recieved ping: ');
       console.log(evt.data);
       this.setState({
         data: JSON.parse(evt.data),

@@ -1,6 +1,10 @@
 import React from 'react';
+import Card from "components/card.js"
+import Deck from 'components/deck.js'
 import GameLobby from 'components/game-lobby.js'
 import PublicPlayer from 'components/public-player.js'
+import RoundIcon from 'components/round-icon.js'
+import TokenIcon from 'components/token-icon.js'
 import UserProfile from 'utils/user-profile.js';
 import styles from "components/game-in-progress.module.css";
 
@@ -22,6 +26,14 @@ class GameInProgress extends React.Component {
     return this.getCurrentTurn().player_id === UserProfile.getUserName();
   }
 
+  getRoundPlayerForUser() {
+    return this.getCurrentRound().players.find(player => player.player_id === UserProfile.getUserName());
+  }
+
+  userInRound() {
+    return this.getRoundPlayerForUser().still_in_round;
+  }
+
   getCurrentTurn() {
     const current_round = this.getCurrentRound();
     return current_round.turns[current_round.turns.length - 1];
@@ -29,7 +41,7 @@ class GameInProgress extends React.Component {
 
   renderPlayer(player) {
     const round_player_info = this.getCurrentRound().players.find((info) => {
-      return info.player_id = player.player_id;
+      return info.player_id === player.player_id;
     });
     return (
       <PublicPlayer
@@ -43,6 +55,12 @@ class GameInProgress extends React.Component {
     );
   }
 
+  renderCard(type) {
+    return (
+      <Card type={type} />
+    );
+  }
+
   render() {
     const players = this.props.data.players.map((player) =>
       <div key={player.player_id}>
@@ -51,10 +69,16 @@ class GameInProgress extends React.Component {
         <br></br>
       </div>
     );
+    const hand = !this.userInRound() ? null :
+                    this.getRoundPlayerForUser().held_cards.map((type) => this.renderCard(type));
     return (
       <div>
-      GAME IN PROGRESS
-      {players}
+        GAME IN PROGRESS
+        {players}
+        <Deck size={this.getCurrentRound().deck_size} />
+        <RoundIcon number={this.props.data.rounds.length} />
+        <TokenIcon number={this.props.data.tokens_to_win} />
+        HAND: {hand}
       </div>
     );
   }
