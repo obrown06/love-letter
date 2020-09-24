@@ -17,6 +17,9 @@ GameUpdate JSONToGameUpdate(const std::string& json) {
   if (update.update_type == GameUpdate::MOVE_REQUEST) {
     GameUpdate::Move move;
     move.move_type = static_cast<GameUpdate::Move::MoveType>(root["move"]["move_type"].asInt());
+    if (move.move_type == GameUpdate::Move::DISCARD_CARD) {
+      move.selected_card = Card(static_cast<Card::Type>(root["move"]["selected_card"].asInt()));
+    }
     update.move = move;
   }
   return update;

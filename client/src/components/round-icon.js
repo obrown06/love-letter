@@ -4,7 +4,7 @@ import styles from "components/public-player.module.css";
 class RoundIcon extends React.Component {
   render() {
     return (
-      <div>
+      <div style={{border: '2px solid black'}}>
         ROUND: {this.props.number}
       </div>
     );

@@ -9,7 +9,8 @@ axios.defaults.withCredentials = true;
 
 const UpdateType = {
   JOIN_GAME_REQUEST: 1,
-  START_GAME_REQUEST: 2
+  START_GAME_REQUEST: 2,
+  MOVE_REQUEST: 3,
 };
 
 const GameState = {
@@ -71,10 +72,14 @@ class Game extends React.Component {
       );
     } else {
       return (
-        <GameInProgress data={this.state.data}/>
+        <GameInProgress
+          ws={this.ws}
+          data={this.state.data}
+          gameId={this.props.match.params.gameId}/>
       );
     }
   }
 }
 
+export { UpdateType };
 export default Game;

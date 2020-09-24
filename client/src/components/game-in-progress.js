@@ -6,12 +6,48 @@ import PublicPlayer from 'components/public-player.js'
 import RoundIcon from 'components/round-icon.js'
 import TokenIcon from 'components/token-icon.js'
 import UserProfile from 'utils/user-profile.js';
+import UpdateType from 'views/game.js'
 import styles from "components/game-in-progress.module.css";
 
+const MoveTypes = {
+  DRAW_CARD: 1,
+  DISCARD_CARD: 2,
+  SELECT_PLAYER: 3,
+  VIEW_PLAYER: 4
+};
+
 class GameInProgress extends React.Component {
+  constructor(props) {
+    super(props);
+    this.drawCard = this.drawCard.bind(this);
+    this.discardCard = this.discardCard.bind(this);
+  }
 
   getCurrentRound() {
     return this.props.data.rounds[this.props.data.rounds.length - 1];
+  }
+
+  drawCard() {
+    this.props.ws.send(JSON.stringify({
+      game_id: this.props.gameId,
+      player_id: UserProfile.getUserName(),
+      update_type: 3,
+      move: {
+        move_type: MoveTypes.DRAW_CARD
+      }
+    }));
+  }
+
+  discardCard(cardType) {
+    this.props.ws.send(JSON.stringify({
+      game_id: this.props.gameId,
+      player_id: UserProfile.getUserName(),
+      update_type: 3,
+      move: {
+        move_type: MoveTypes.DISCARD_CARD,
+        selected_card: cardType
+      }
+    }));
   }
 
   isPlayerSelectable(player) {
@@ -20,6 +56,19 @@ class GameInProgress extends React.Component {
            this.getCurrentTurn().selectable_players.find((selectable_player) => {
              return selectable_player.player_id === player.player_id;
            });
+  }
+
+  isCardSelectable(cardType) {
+    return this.userHasTurn() &&
+           this.getCurrentTurn().discardable_cards &&
+           this.getCurrentTurn().discardable_cards.find((currType) => {
+             return currType === cardType;
+           });
+  }
+
+  isDeckSelectable() {
+    return this.userHasTurn() &&
+           this.getCurrentTurn().next_move_type === MoveTypes.DRAW_CARD;
   }
 
   userHasTurn() {
@@ -51,13 +100,16 @@ class GameInProgress extends React.Component {
         held_cards={round_player_info.held_cards}
         discarded_cards={round_player_info.discarded_cards}
         selectable={this.isPlayerSelectable(player)}
+        has_turn={this.getCurrentTurn().player_id === player.player_id}
       />
     );
   }
 
   renderCard(type) {
     return (
-      <Card type={type} />
+      <Card
+        selectCallback={this.discardCard}
+        selectable={this.isCardSelectable(type)}type={type} />
     );
   }
 
@@ -75,10 +127,15 @@ class GameInProgress extends React.Component {
       <div>
         GAME IN PROGRESS
         {players}
-        <Deck size={this.getCurrentRound().deck_size} />
+        <Deck
+          selectable={this.isDeckSelectable()}
+          selectCallback={this.drawCard}
+          size={this.getCurrentRound().deck_size} />
         <RoundIcon number={this.props.data.rounds.length} />
         <TokenIcon number={this.props.data.tokens_to_win} />
-        HAND: {hand}
+        <div style={{border: '2px solid black'}}>
+          HAND: {hand}
+        </div>
       </div>
     );
   }

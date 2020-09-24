@@ -93,7 +93,7 @@ void Game::ProcessUpdate(const GameUpdate& update) {
 
 void Game::ValidateMove(const GameUpdate::Move& move, const std::string& player_id) {
   CheckGameInProgress();
-  if (GetMutablePlayer(player_id) != nullptr) {
+  if (GetMutablePlayer(player_id) == nullptr) {
     throw NoSuchPlayerException(player_id, id_);
   }
   GetMutableLatestRound()->ValidateMove(move, player_id);
@@ -183,7 +183,7 @@ void Game::CheckGameNotStarted() const {
 }
 
 void Game::CheckGameInProgress() const {
-  if (state_ != State::WAITING) {
+  if (state_ != State::IN_PROGRESS) {
     throw GameNotInProgressException(id_);
   }
 }
