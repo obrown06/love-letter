@@ -10,14 +10,14 @@ class Card {
 public:
   enum Type {
     CARD_UNSPECIFIED,
-    PRINCESS,
-    COUNTESS,
-    KING,
-    PRINCE,
-    HANDMAID,
-    BARON,
+    GUARD,
     PRIEST,
-    GUARD
+    BARON,
+    HANDMAID,
+    PRINCE,
+    KING,
+    COUNTESS,
+    PRINCESS
   };
 
   Card(const Card::Type& type) : type_(type) {}

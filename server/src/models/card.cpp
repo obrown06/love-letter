@@ -17,6 +17,17 @@ namespace {
     { Card::GUARD, 1 },
   };
 
+  const std::map<Card::Type, std::string> kCardTypesToStrings = {
+    { Card::PRINCESS, "PRINCESS" },
+    { Card::COUNTESS, "COUNTESS" },
+    { Card::KING, "KING" },
+    { Card::PRINCE, "PRINCE" },
+    { Card::HANDMAID, "HANDMAID" },
+    { Card::BARON, "BARON" },
+    { Card::PRIEST, "PRIEST" },
+    { Card::GUARD, "GUARD" },
+  };
+
   const std::set<Card::Type> kCardTypesRequiringSelectMove = {
     Card::KING,
     Card::PRINCE,
@@ -35,19 +46,7 @@ namespace {
     Card::PRINCE,
   };
 
-  const Card::Type kCardTypesRequiringSelectMoveIncludingSelf = Card::PRINCE;
-
-  const std::string kCardStrings[] = {
-    "CARD_UNSPECIFIED",
-    "GUARD",
-    "PRIEST",
-    "BARON",
-    "HANDMAID",
-    "PRINCE",
-    "KING",
-    "COUNTESS",
-    "PRINCESS",
-  };
+  const Card::Type kCardTypeRequiringSelectMoveIncludingSelf = Card::PRINCE;
 
   const std::map<Card::Type, std::string> kActionStrings = {
     { Card::KING, " traded with %1%" },
@@ -70,7 +69,7 @@ bool Card::RequiresSelectMove(bool exists_another_player_to_select) const {
   if (exists_another_player_to_select) {
     return kCardTypesRequiringSelectMove.find(type_) != kCardTypesRequiringSelectMove.end();
   }
-  return type_ == kCardTypesRequiringSelectMoveIncludingSelf;
+  return type_ == kCardTypeRequiringSelectMoveIncludingSelf;
 }
 
 int Card::RequiredViewMovesCount() const {
@@ -81,7 +80,7 @@ int Card::RequiredViewMovesCount() const {
 }
 
 std::string Card::GetCardTypeString(const Card::Type& card_type) {
-  return kCardStrings[static_cast<int>(card_type)];
+  return kCardTypesToStrings.at(card_type);
 }
 
 std::string Card::GetActionString(const Card::Type& card_type,

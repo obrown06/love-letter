@@ -195,6 +195,7 @@ Game::Round::Round(const std::vector<Game::GamePlayer>& round_players) {
     Game::Round::RoundPlayer round_player;
     round_player.player_id = player.player_id;
     round_player.still_in_round = true;
+    round_player.immune = false;
     players_.push_back(round_player);
   }
 
@@ -579,7 +580,7 @@ bool Game::Round::Turn::IsComplete(std::vector<const Game::Round::RoundPlayer*> 
   if (latest_move_type == GameUpdate::Move::MoveType::DISCARD_CARD) {
     bool another_non_immune_player_in_round = (std::find_if(players_in_round.begin(), players_in_round.end(),
      [this](const Game::Round::RoundPlayer* player) {
-      return player->player_id != this->player->player_id && !player->immune;
+      return (player->player_id != this->player->player_id && !player->immune);
     }) != players_in_round.end());
     return !discarded_card.RequiresSelectMove(another_non_immune_player_in_round);
   } else if (latest_move_type == GameUpdate::Move::MoveType::SELECT_PLAYER) {
