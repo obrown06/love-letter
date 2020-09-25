@@ -398,10 +398,14 @@ void Game::Round::ExecuteMove(const GameUpdate::Move& move) {
       break;
     case GameUpdate::Move::SELECT_PLAYER:
       auto discarded_card = latest_turn.GetDiscardedCard();
+      boost::optional<Card::Type> predicted_card_type;
+      if (move.selected_card) {
+        predicted_card_type = move.selected_card->GetType();
+      }
       ApplyEffect(latest_turn.player->player_id,
                   discarded_card,
                   move.selected_player_id,
-                  discarded_card.GetType());
+                  predicted_card_type);
   }
   GetMutableLatestTurn()->ExecuteMove(move);
   MaybeUpdateRoundState();
