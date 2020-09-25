@@ -32,6 +32,7 @@ public:
   Type GetType() const;
   int GetValue() const;
   bool RequiresSelectMove(bool exists_another_player_to_select) const;
+  bool AllowsSelfSelection() const;
   int RequiredViewMovesCount() const;
 
 private:

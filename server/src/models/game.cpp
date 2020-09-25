@@ -239,6 +239,10 @@ Game::Round::Turn* Game::Round::GetMutableLatestTurn() {
   return &turns_.at(turns_.size() - 1);
 }
 
+const Game::Round::Turn& Game::Round::GetLatestTurn() const {
+  return turns_.at(turns_.size() - 1);
+}
+
 bool Game::Round::IsComplete() const {
   return deck_.size() == 0 || GetPlayersInRound().size() <= 1;
 }
@@ -277,10 +281,19 @@ std::vector<const Game::Round::RoundPlayer*> Game::Round::GetPlayersInRound() co
 std::vector<Game::Round::RoundPlayer> Game::Round::GetSelectablePlayers() const {
   std::vector<Game::Round::RoundPlayer> selectable_players;
   std::vector<const Game::Round::RoundPlayer*> players_in_round = GetPlayersInRound();
+  const auto& latest_turn = GetLatestTurn();
+  if (latest_turn.GetLatestMove().move_type != GameUpdate::Move::MoveType::DISCARD_CARD) {
+    return selectable_players;
+  }
+  auto discarded_card = latest_turn.GetDiscardedCard();
   for (auto& player : players_in_round) {
-    if (!player->immune) {
+    if (!player->immune &&
+        (player->player_id != latest_turn.player->player_id || discarded_card.AllowsSelfSelection())) {
       selectable_players.push_back(*player);
     }
+  }
+  if (selectable_players.empty()) {
+    selectable_players.push_back(*latest_turn.player);
   }
   return selectable_players;
 }
@@ -368,26 +381,27 @@ std::vector<Game::Round::RoundPlayer> Game::Round::GetWinners() const {
 void Game::Round::ValidateMove(const GameUpdate::Move& move,
                                const std::string& player_id) {
   Game::Round::RoundPlayer* player = GetMutablePlayer(player_id);
-  if (player_id != GetMutableLatestTurn()->player->player_id) {
+  if (player_id != GetLatestTurn().player->player_id) {
     throw MoveOutOfTurnException(player_id);
   }
   // TODO implement turn-based validation
 }
 
 void Game::Round::ExecuteMove(const GameUpdate::Move& move) {
-  auto latest_turn = GetMutableLatestTurn();
+  const auto& latest_turn = GetLatestTurn();
   switch (move.move_type) {
     case GameUpdate::Move::DRAW_CARD:
-      DrawCard(latest_turn->player->player_id);
+      DrawCard(latest_turn.player->player_id);
       break;
     case GameUpdate::Move::DISCARD_CARD:
-      DiscardCardAndApplyEffect(latest_turn->player->player_id, move.selected_card.get());
+      DiscardCardAndApplyEffect(latest_turn.player->player_id, move.selected_card.get());
       break;
     case GameUpdate::Move::SELECT_PLAYER:
-      ApplyEffect(latest_turn->player->player_id,
-                  latest_turn->GetMutableLatestMove()->selected_card.get(),
+      auto discarded_card = latest_turn.GetDiscardedCard();
+      ApplyEffect(latest_turn.player->player_id,
+                  discarded_card,
                   move.selected_player_id,
-                  move.selected_card->GetType());
+                  discarded_card.GetType());
   }
   GetMutableLatestTurn()->ExecuteMove(move);
   MaybeUpdateRoundState();
@@ -513,14 +527,14 @@ void Game::Round::ApplyEffectGUARD(const boost::optional<std::string>& selected_
 }
 
 void Game::Round::MaybeUpdateRoundState() {
-  if (GetMutableLatestTurn()->IsComplete(GetPlayersInRound()) && !IsComplete()) {
+  if (GetLatestTurn().IsComplete(GetPlayersInRound()) && !IsComplete()) {
     AdvanceTurn();
   }
 }
 
 void Game::Round::AdvanceTurn() {
   auto it = std::find_if(players_.begin(), players_.end(), [this](const Game::Round::RoundPlayer& player) {
-    return player.player_id == this->GetMutableLatestTurn()->player->player_id;
+    return player.player_id == this->GetLatestTurn().player->player_id;
   });
   auto advance = [this](std::vector<Game::Round::RoundPlayer>::iterator& it) {
     it++;

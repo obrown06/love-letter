@@ -21,6 +21,7 @@ class GameInProgress extends React.Component {
     super(props);
     this.drawCard = this.drawCard.bind(this);
     this.discardCard = this.discardCard.bind(this);
+    this.selectPlayer = this.selectPlayer.bind(this);
   }
 
   getCurrentRound() {
@@ -50,12 +51,22 @@ class GameInProgress extends React.Component {
     }));
   }
 
+  selectPlayer(player_id) {
+    this.props.ws.send(JSON.stringify({
+      game_id: this.props.gameId,
+      player_id: UserProfile.getUserName(),
+      update_type: 3,
+      move: {
+        move_type: MoveTypes.SELECT_PLAYER,
+        selected_player_id : player_id
+      }
+    }));
+  }
+
   isPlayerSelectable(player) {
     return this.userHasTurn() &&
            this.getCurrentTurn().selectable_players &&
-           this.getCurrentTurn().selectable_players.find((selectable_player) => {
-             return selectable_player.player_id === player.player_id;
-           });
+           this.getCurrentTurn().selectable_players.includes(player.player_id);
   }
 
   isCardSelectable(cardType) {
@@ -100,6 +111,7 @@ class GameInProgress extends React.Component {
         held_cards={round_player_info.held_cards}
         discarded_cards={round_player_info.discarded_cards}
         selectable={this.isPlayerSelectable(player)}
+        selectCallback={this.selectPlayer}
         has_turn={this.getCurrentTurn().player_id === player.player_id}
       />
     );

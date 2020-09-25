@@ -46,7 +46,7 @@ namespace {
     Card::PRINCE,
   };
 
-  const Card::Type kCardTypeRequiringSelectMoveIncludingSelf = Card::PRINCE;
+  const Card::Type kCardTypeAllowingSelfSelection = Card::PRINCE;
 
   const std::map<Card::Type, std::string> kActionStrings = {
     { Card::KING, " traded with %1%" },
@@ -69,7 +69,11 @@ bool Card::RequiresSelectMove(bool exists_another_player_to_select) const {
   if (exists_another_player_to_select) {
     return kCardTypesRequiringSelectMove.find(type_) != kCardTypesRequiringSelectMove.end();
   }
-  return type_ == kCardTypeRequiringSelectMoveIncludingSelf;
+  return AllowsSelfSelection();
+}
+
+bool Card::AllowsSelfSelection() const {
+  return type_ == kCardTypeAllowingSelfSelection;
 }
 
 int Card::RequiredViewMovesCount() const {

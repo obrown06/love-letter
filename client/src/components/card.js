@@ -28,7 +28,7 @@ class Card extends React.Component {
     const selectable = !this.props.selectable ? null : <div>SELECTABLE</div>;
     const callback = () => { this.props.selectCallback(this.props.type) };
     return (
-      <div onClick={selectable ? callback : undefined}>*/
+      <div onClick={this.props.selectable ? callback : undefined}>
         {TypesToNames[this.props.type]}
         {selectable}
       </div>

@@ -70,6 +70,7 @@ public:
       const std::vector<Turn>& GetTurns() const;
       std::string GetSummary() const;
       std::vector<const RoundPlayer*> GetPlayersInRound() const;
+      const Turn& GetLatestTurn() const;
 
     private:
       Turn* GetMutableLatestTurn();
