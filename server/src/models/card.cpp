@@ -39,14 +39,14 @@ namespace {
 
   const std::string kCardStrings[] = {
     "CARD_UNSPECIFIED",
-    "PRINCESS",
-    "COUNTESS",
-    "KING",
-    "PRINCE",
-    "HANDMAID",
-    "BARON",
-    "PRIEST",
     "GUARD",
+    "PRIEST",
+    "BARON",
+    "HANDMAID",
+    "PRINCE",
+    "KING",
+    "COUNTESS",
+    "PRINCESS",
   };
 
   const std::map<Card::Type, std::string> kActionStrings = {
