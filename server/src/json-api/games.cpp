@@ -94,6 +94,7 @@ Json::Value TurnToJSON(const Game::Round& round, const Game::Round::Turn& turn) 
       for (const auto& selectable_player : round.GetSelectablePlayers()) {
         turn_node["selectable_players"].append(selectable_player.player_id);
       }
+      turn_node["requires_prediction"] = turn.NextMoveRequiresPrediction();
     } else if (next_move_type == GameUpdate::Move::MoveType::VIEW_CARD) {
       for (const auto& [viewer, viewed] : round.GetViewPlayerPairs()) {
         Json::Value view_node;

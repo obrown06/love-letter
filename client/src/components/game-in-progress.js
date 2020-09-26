@@ -4,6 +4,7 @@ import Deck from 'components/deck.js'
 import GameLobby from 'components/game-lobby.js'
 import PublicPlayer from 'components/public-player.js'
 import RoundIcon from 'components/round-icon.js'
+import SelectableDeck from 'components/selectable-deck.js'
 import TokenIcon from 'components/token-icon.js'
 import UserProfile from 'utils/user-profile.js';
 import UpdateType from 'views/game.js'
@@ -22,6 +23,10 @@ class GameInProgress extends React.Component {
     this.drawCard = this.drawCard.bind(this);
     this.discardCard = this.discardCard.bind(this);
     this.selectPlayer = this.selectPlayer.bind(this);
+    this.predictCardType = this.predictCardType.bind(this);
+    this.state = {
+      predictedCardType: 0,
+    }
   }
 
   getCurrentRound() {
@@ -58,7 +63,8 @@ class GameInProgress extends React.Component {
       update_type: 3,
       move: {
         move_type: MoveTypes.SELECT_PLAYER,
-        selected_player_id : player_id
+        selected_player_id : player_id,
+        predicted_card : this.state.predictedCardType > 0 ? this.state.predictedCardType : null
       }
     }));
   }
@@ -66,7 +72,8 @@ class GameInProgress extends React.Component {
   isPlayerSelectable(player) {
     return this.userHasTurn() &&
            this.getCurrentTurn().selectable_players &&
-           this.getCurrentTurn().selectable_players.includes(player.player_id);
+           this.getCurrentTurn().selectable_players.includes(player.player_id) &&
+           !this.requiresPrediction();
   }
 
   isCardSelectable(cardType) {
@@ -80,6 +87,18 @@ class GameInProgress extends React.Component {
   isDeckSelectable() {
     return this.userHasTurn() &&
            this.getCurrentTurn().next_move_type === MoveTypes.DRAW_CARD;
+  }
+
+  requiresPrediction() {
+    return this.getCurrentTurn().next_move_type == MoveTypes.SELECT_PLAYER &&
+           this.getCurrentTurn().requires_prediction &&
+           this.state.predictedCardType === 0;
+  }
+
+  predictCardType(cardType) {
+    this.setState({
+      predictedCardType: cardType
+    });
   }
 
   userHasTurn() {
@@ -135,6 +154,7 @@ class GameInProgress extends React.Component {
     );
     const hand = !this.userInRound() ? null :
                     this.getRoundPlayerForUser().held_cards.map((type) => this.renderCard(type));
+    const cardPredictionDeck = !this.requiresPrediction() ? null : <SelectableDeck selectCallback={this.predictCardType} />;
     return (
       <div>
         GAME IN PROGRESS
@@ -148,6 +168,7 @@ class GameInProgress extends React.Component {
         <div style={{border: '2px solid black'}}>
           HAND: {hand}
         </div>
+        {cardPredictionDeck}
       </div>
     );
   }

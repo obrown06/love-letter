@@ -47,6 +47,7 @@ namespace {
   };
 
   const Card::Type kCardTypeAllowingSelfSelection = Card::PRINCE;
+  const Card::Type kCardTypeRequiringPrediction = Card::GUARD;
 
   const std::map<Card::Type, std::string> kActionStrings = {
     { Card::KING, " traded with %1%" },
@@ -70,6 +71,10 @@ bool Card::RequiresSelectMove(bool exists_another_player_to_select) const {
     return kCardTypesRequiringSelectMove.find(type_) != kCardTypesRequiringSelectMove.end();
   }
   return AllowsSelfSelection();
+}
+
+bool Card::RequiresPrediction() const {
+  return type_ == kCardTypeRequiringPrediction;
 }
 
 bool Card::AllowsSelfSelection() const {

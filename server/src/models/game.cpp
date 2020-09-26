@@ -628,6 +628,14 @@ GameUpdate::Move::MoveType Game::Round::Turn::GetNextMoveType() const {
   return GameUpdate::Move::GetNextMoveType(latest_move_type);
 }
 
+bool Game::Round::Turn::NextMoveRequiresPrediction() const {
+  if (GetNextMoveType() != GameUpdate::Move::MoveType::SELECT_PLAYER) {
+    return false;
+  }
+  return GetNextMoveType() == GameUpdate::Move::MoveType::SELECT_PLAYER &&
+         GetDiscardedCard().RequiresPrediction();
+}
+
 const std::vector<GameUpdate::Move>& Game::Round::Turn::GetMoves() const {
   return previous_moves;
 }

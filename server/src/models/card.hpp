@@ -33,6 +33,7 @@ public:
   int GetValue() const;
   bool RequiresSelectMove(bool exists_another_player_to_select) const;
   bool AllowsSelfSelection() const;
+  bool RequiresPrediction() const;
   int RequiredViewMovesCount() const;
 
 private:
