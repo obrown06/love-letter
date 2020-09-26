@@ -23,6 +23,7 @@ class GameInProgress extends React.Component {
     this.drawCard = this.drawCard.bind(this);
     this.discardCard = this.discardCard.bind(this);
     this.selectPlayer = this.selectPlayer.bind(this);
+    this.viewPlayer = this.viewPlayer.bind(this);
     this.predictCardType = this.predictCardType.bind(this);
     this.state = {
       predictedCardType: 0,
@@ -64,7 +65,19 @@ class GameInProgress extends React.Component {
       move: {
         move_type: MoveTypes.SELECT_PLAYER,
         selected_player_id : player_id,
-        predicted_card : this.state.predictedCardType > 0 ? this.state.predictedCardType : null
+        predicted_card : this.state.predictedCardType > 0 ? this.state.predictedCardType : undefined
+      }
+    }));
+  }
+
+  viewPlayer(player_id) {
+    this.props.ws.send(JSON.stringify({
+      game_id: this.props.gameId,
+      player_id: UserProfile.getUserName(),
+      update_type: 3,
+      move: {
+        move_type: MoveTypes.VIEW_PLAYER,
+        viewed_player_id : player_id,
       }
     }));
   }
@@ -74,6 +87,13 @@ class GameInProgress extends React.Component {
            this.getCurrentTurn().selectable_players &&
            this.getCurrentTurn().selectable_players.includes(player.player_id) &&
            !this.requiresPrediction();
+  }
+
+  isPlayerViewable(player) {
+    return this.getCurrentTurn().viewed_players &&
+           this.getCurrentTurn().viewed_players.find((pair) => {
+             return pair.viewer_id === UserProfile.getUserName() && pair.viewed_id === player.player_id;
+           });
   }
 
   isCardSelectable(cardType) {
@@ -130,6 +150,8 @@ class GameInProgress extends React.Component {
         held_cards={round_player_info.held_cards}
         discarded_cards={round_player_info.discarded_cards}
         selectable={this.isPlayerSelectable(player)}
+        viewable={this.isPlayerViewable(player)}
+        viewCallback={this.viewPlayer}
         selectCallback={this.selectPlayer}
         has_turn={this.getCurrentTurn().player_id === player.player_id}
       />

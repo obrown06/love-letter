@@ -26,6 +26,9 @@ GameUpdate JSONToGameUpdate(const std::string& json) {
         move.selected_card = Card(static_cast<Card::Type>(root["move"]["predicted_card"].asInt()));
       }
     }
+    if (move.move_type == GameUpdate::Move::VIEW_CARD) {
+      move.viewed_player_id = root["move"]["viewed_player_id"].asString();
+    }
     update.move = move;
   }
   return update;

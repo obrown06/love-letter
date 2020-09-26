@@ -546,12 +546,11 @@ void Game::Round::AdvanceTurn() {
       it = players_.begin();
     }
   };
-  advance(it);
   while (true) {
+    advance(it);
     if (it->still_in_round) {
       return MakeNewTurn(it->player_id);
     }
-    advance(it);
   }
 }
 
@@ -641,15 +640,10 @@ const std::vector<GameUpdate::Move>& Game::Round::Turn::GetMoves() const {
 }
 
 std::string Game::Round::Turn::GetSummary() const {
-  auto discard_move = std::find_if(previous_moves.begin(),
-                                   previous_moves.end(),
-  [](const GameUpdate::Move& move) {
-    return move.move_type == GameUpdate::Move::DISCARD_CARD;
-  });
   std::stringstream ss;
   ss << player->player_id
      << " played the "
-     << Card::GetCardTypeString(discard_move->selected_card->GetType())
+     << Card::GetCardTypeString(GetDiscardedCard().GetType())
      << " card";
   auto select_move = std::find_if(previous_moves.begin(),
                                    previous_moves.end(),
@@ -657,10 +651,14 @@ std::string Game::Round::Turn::GetSummary() const {
     return move.move_type == GameUpdate::Move::SELECT_PLAYER;
   });
   if (select_move != previous_moves.end()) {
+    boost::optional<Card> selected_card;
+    if (select_move->selected_card) {
+      selected_card = select_move->selected_card;
+    }
     ss << " and "
-       << Card::GetActionString(discard_move->selected_card->GetType(),
-                                      *select_move->selected_player_id,
-                                      select_move->selected_card);
+       << Card::GetActionString(GetDiscardedCard().GetType(),
+                                      GetSelectedPlayerId(),
+                                      selected_card);
   }
   ss << ".";
   return ss.str();
