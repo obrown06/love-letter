@@ -396,7 +396,7 @@ void Game::Round::ExecuteMove(const GameUpdate::Move& move) {
     case GameUpdate::Move::DISCARD_CARD:
       DiscardCardAndApplyEffect(latest_turn.player->player_id, move.selected_card.get());
       break;
-    case GameUpdate::Move::SELECT_PLAYER:
+    case GameUpdate::Move::SELECT_PLAYER: {
       auto discarded_card = latest_turn.GetDiscardedCard();
       boost::optional<Card::Type> predicted_card_type;
       if (move.selected_card) {
@@ -406,6 +406,18 @@ void Game::Round::ExecuteMove(const GameUpdate::Move& move) {
                   discarded_card,
                   move.selected_player_id,
                   predicted_card_type);
+    }
+    case GameUpdate::Move::VIEW_CARD: {
+      auto discarded_card = latest_turn.GetDiscardedCard();
+      boost::optional<Card::Type> unused_predicted_card_type;
+      if (latest_turn.GetNumViewMoves() == discarded_card.RequiredViewMovesCount() - 1) {
+        ApplyEffect(latest_turn.player->player_id,
+                    discarded_card,
+                    move.viewed_player_id,
+                    unused_predicted_card_type);
+      }
+    }
+
   }
   GetMutableLatestTurn()->ExecuteMove(move);
   MaybeUpdateRoundState();
@@ -603,12 +615,16 @@ bool Game::Round::Turn::IsComplete(std::vector<const Game::Round::RoundPlayer*> 
   } else if (latest_move_type == GameUpdate::Move::MoveType::SELECT_PLAYER) {
     return discarded_card.RequiredViewMovesCount() == 0;
   } else {
-    return discarded_card.RequiredViewMovesCount() == std::count_if(previous_moves.begin(),
-                                                                 previous_moves.end(),
-                                          [] (const GameUpdate::Move& move) {
-                                              return move.move_type == GameUpdate::Move::MoveType::VIEW_CARD;
-                                          });
+    return discarded_card.RequiredViewMovesCount() == GetNumViewMoves();
   }
+}
+
+int Game::Round::Turn::GetNumViewMoves() const {
+  return std::count_if(previous_moves.begin(),
+                       previous_moves.end(),
+                       [] (const GameUpdate::Move& move) {
+                          return move.move_type == GameUpdate::Move::MoveType::VIEW_CARD;
+                        });
 }
 
 GameUpdate::Move* Game::Round::Turn::GetMutableLatestMove() {

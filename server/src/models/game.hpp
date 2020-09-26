@@ -53,6 +53,7 @@ public:
         const GameUpdate::Move& GetLatestMove() const;
         GameUpdate::Move::MoveType GetNextMoveType() const;
         bool NextMoveRequiresPrediction() const;
+        int GetNumViewMoves() const;
         const Card& GetDiscardedCard() const;
         std::string GetSelectedPlayerId() const;
         std::string GetSummary() const;
