@@ -83,8 +83,7 @@ public:
       void AdvanceTurn();
       void MakeNewTurn(const std::string& player_id);
       void DrawCard(const std::string& drawing_player_id);
-      void DiscardCardAndApplyEffect(const std::string& discarding_player_id, const Card& card);
-      void DiscardCard(const std::string& discarding_player_id, const Card& card);
+      void DiscardCard(const Card& card, const std::string& discarding_player_id);
 
       // Cards with Select Effects
       void ApplySelectEffect(const Card& card,

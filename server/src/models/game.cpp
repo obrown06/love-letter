@@ -410,7 +410,8 @@ void Game::Round::ExecuteMove(const GameUpdate::Move& move) {
       DrawCard(latest_turn.player->player_id);
       break;
     case GameUpdate::Move::DISCARD_CARD:
-      DiscardCardAndApplyEffect(latest_turn.player->player_id, move.selected_card.get());
+      DiscardCard(move.selected_card.get(), latest_turn.player->player_id);
+      ApplyDiscardEffect(move.selected_card.get(), latest_turn.player->player_id);
       break;
     case GameUpdate::Move::SELECT_PLAYER: {
       std::cout << "SELECT PLAYER move\n";
@@ -455,12 +456,7 @@ void Game::Round::DrawCard(const std::string& drawing_player_id) {
   std::cout << "FINISHED DRAWING CARD\n";
 }
 
-void Game::Round::DiscardCardAndApplyEffect(const std::string& discarding_player_id, const Card& card) {
-  DiscardCard(discarding_player_id, card);
-  ApplyDiscardEffect(card, discarding_player_id);
-}
-
-void Game::Round::DiscardCard(const std::string& discarding_player_id, const Card& card) {
+void Game::Round::DiscardCard(const Card& card, const std::string& discarding_player_id) {
   std::cout << "Trying to discard card: " << Card::GetCardTypeString(card.GetType()) << "\n";
   Game::Round::RoundPlayer* player = GetMutablePlayer(discarding_player_id);
   auto it = std::find_if(player->held_cards.begin(), player->held_cards.end(), [&card] (const Card& held_card) {
@@ -530,7 +526,7 @@ void Game::Round::ApplyEffectPRINCE(const std::string& selected_player_id)
 {
   auto player = GetMutablePlayer(selected_player_id);
   auto held_card = player->held_cards.front();
-  DiscardCard(selected_player_id, held_card);
+  DiscardCard(held_card, selected_player_id);
   if (held_card.GetType() == Card::Type::PRINCESS) {
     player->still_in_round = false;
   } else {
