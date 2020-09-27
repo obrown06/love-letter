@@ -46,8 +46,8 @@ public:
         Turn(const RoundPlayer* player):
           player(player) {}
 
-        void ExecuteMove(const GameUpdate::Move& move);
-        bool IsComplete(std::vector<const RoundPlayer*> players_in_round) const;
+        void ExecuteMove(const GameUpdate::Move& move, std::vector<const RoundPlayer*> players_in_round);
+        bool IsComplete() const;
         const std::vector<GameUpdate::Move>& GetMoves() const;
         GameUpdate::Move* GetMutableLatestMove();
         const GameUpdate::Move& GetLatestMove() const;
@@ -57,8 +57,10 @@ public:
         const Card& GetDiscardedCard() const;
         std::string GetSelectedPlayerId() const;
         std::string GetSummary() const;
+        void MaybeUpdateTurnState(std::vector<const Game::Round::RoundPlayer*> players_in_round);
         std::vector<GameUpdate::Move> previous_moves;
         const RoundPlayer* player;
+        bool is_complete;
       };
 
       void ExecuteMove(const GameUpdate::Move& move);
@@ -87,13 +89,16 @@ public:
                        const Card& card,
                        const boost::optional<std::string>& selected_player_id,
                        const boost::optional<Card::Type>& predicted_card_type);
+      void ApplyViewEffect(const Card& card,
+                                   const std::string& viewer_id,
+                                   const std::string& viewed_id);
       void ApplyEffectPRINCESS(const std::string& discarding_player_id);
       void ApplyEffectKING(const std::string& discarding_player_id,
                            const boost::optional<std::string>& selected_player_id);
       void ApplyEffectPRINCE(const boost::optional<std::string>& selected_player_id);
       void ApplyEffectHANDMAID(const std::string& discarding_player_id);
-      void ApplyEffectBARON(const std::string& discarding_player_id,
-                            const boost::optional<std::string>& selected_player_id);
+      void ApplyEffectBARON(const std::string& viewer_id,
+                            const std::string& viewed_id);
       void ApplyEffectGUARD(const boost::optional<std::string>& selected_player_id,
                             const boost::optional<Card::Type>& predicted_card_type);
       std::vector<RoundPlayer> players_;

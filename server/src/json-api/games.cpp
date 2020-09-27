@@ -41,11 +41,13 @@ std::string GameToJSON(const Game& game) {
     }
     root["players"].append(player_node);
   }
+  std::cout << "returning from GameToJSON\n";
   Json::StreamWriterBuilder builder;
   return Json::writeString(builder, root);
 }
 
 Json::Value RoundToJSON(const Game::Round& round) {
+  std::cout << "in RoundToJSON\n";
   Json::Value round_node;
   round_node["deck_size"] = round.GetDeckSize();
   for (const auto& player : round.GetPlayers()) {
@@ -73,31 +75,37 @@ Json::Value RoundToJSON(const Game::Round& round) {
       round_node["winners"].append(winner_node);
     }
   }
-
+  std::cout << "returning from RoundToJSON\n";
   return round_node;
 }
 
 Json::Value TurnToJSON(const Game::Round& round, const Game::Round::Turn& turn) {
+  std::cout << "in TurnToJSON\n";
   Json::Value turn_node;
   turn_node["player_id"] = turn.player->player_id;
   for (const auto& move : turn.GetMoves()) {
     turn_node["moves"].append(MoveToJSON(move));
   }
-  if (turn.IsComplete(round.GetPlayersInRound())) {
+  if (turn.IsComplete()) {
+    std::cout << "turn was complete\n";
     turn_node["summary"] = turn.GetSummary();
   } else {
+    std::cout << "turn wasn't complete\n";
     const auto next_move_type = turn.GetNextMoveType();
     turn_node["next_move_type"] = next_move_type;
     if (next_move_type == GameUpdate::Move::MoveType::DISCARD_CARD) {
+      std::cout << "next move type is discard\n";
       for (const auto& discardable_card : turn.player->GetDiscardableCards()) {
         turn_node["discardable_cards"].append(static_cast<int>(discardable_card.GetType()));
       }
     } else if (next_move_type == GameUpdate::Move::MoveType::SELECT_PLAYER) {
+      std::cout << "next move is select\n";
       for (const auto& selectable_player : round.GetSelectablePlayers()) {
         turn_node["selectable_players"].append(selectable_player.player_id);
       }
       turn_node["requires_prediction"] = turn.NextMoveRequiresPrediction();
     } else if (next_move_type == GameUpdate::Move::MoveType::VIEW_CARD) {
+      std::cout << "next move is view\n";
       for (const auto& [viewer, viewed] : round.GetViewPlayerPairs()) {
         Json::Value view_node;
         view_node["viewer_id"] = viewer.player_id;
@@ -106,6 +114,7 @@ Json::Value TurnToJSON(const Game::Round& round, const Game::Round::Turn& turn) 
       }
     }
   }
+  std::cout << "returning from TurnToJSON\n";
   return turn_node;
 }
 

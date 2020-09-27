@@ -69,7 +69,7 @@ class MoveOutOfTurnException : public std::exception {
    MoveOutOfTurnException(const std::string& name) : name_(name) {}
    const char * what () const throw ()
    {
-     return ("Player " + name_ + " is allowed to move!").c_str();
+     return ("Player " + name_ + " is not allowed to move!").c_str();
    }
  private:
    std::string name_;

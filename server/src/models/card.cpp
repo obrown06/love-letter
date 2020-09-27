@@ -4,6 +4,7 @@
 #include <set>
 
 #include <boost/format.hpp>
+#include <iostream>
 
 namespace {
   const std::map<Card::Type, int> kCardTypesToValues = {
@@ -103,13 +104,17 @@ std::string Card::GetActionString(const Card::Type& card_type,
 }
 
 std::vector<Card> Card::GetDiscardableCards(const std::vector<Card>& cards) {
+  std::cout << "in GetDiscardableCards\n";
   std::vector<Card> discardable_cards = cards;
   if (std::find_if(discardable_cards.begin(), discardable_cards.end(), [](const Card& card) {
     return card.GetType() == Card::COUNTESS;
   }) != discardable_cards.end()) {
+    std::cout << "trying to erase\n";
     discardable_cards.erase(std::remove_if(discardable_cards.begin(), discardable_cards.end(), [](const Card& card) {
       return kCardTypesDiscardPreventedByCountess.find(card.GetType()) != kCardTypesDiscardPreventedByCountess.end();
-    }));
+    }), discardable_cards.end());
+    std::cout << "erased\n";
   }
+  std::cout << "returning from GetDiscardableCard\n";
   return discardable_cards;
 }

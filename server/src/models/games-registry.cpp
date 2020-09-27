@@ -36,6 +36,7 @@ void GamesRegistry::UpdateGameAndBroadcast(const GameUpdate& game_update) {
   Game& game = registry_.at(game_update.game_id).first;
   game.ProcessUpdate(game_update);
   std::string json = GameToJSON(game);
+  std::cout << "about to broadcast\n";
   for (auto* session : registry_.at(game.GetId()).second) {
     session->send(json);
   }

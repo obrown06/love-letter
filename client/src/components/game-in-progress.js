@@ -58,6 +58,10 @@ class GameInProgress extends React.Component {
   }
 
   selectPlayer(player_id) {
+    const predictedCardType = this.state.predictedCardType;
+    this.setState({
+      predictedCardType: 0
+    });
     this.props.ws.send(JSON.stringify({
       game_id: this.props.gameId,
       player_id: UserProfile.getUserName(),
@@ -65,7 +69,7 @@ class GameInProgress extends React.Component {
       move: {
         move_type: MoveTypes.SELECT_PLAYER,
         selected_player_id : player_id,
-        predicted_card : this.state.predictedCardType > 0 ? this.state.predictedCardType : undefined
+        predicted_card : predictedCardType > 0 ? predictedCardType : undefined
       }
     }));
   }
@@ -110,7 +114,8 @@ class GameInProgress extends React.Component {
   }
 
   requiresPrediction() {
-    return this.getCurrentTurn().next_move_type == MoveTypes.SELECT_PLAYER &&
+    return this.userHasTurn() &&
+           this.getCurrentTurn().next_move_type == MoveTypes.SELECT_PLAYER &&
            this.getCurrentTurn().requires_prediction &&
            this.state.predictedCardType === 0;
   }
