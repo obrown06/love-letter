@@ -322,7 +322,7 @@ Game::Round::GetViewPlayerPairs() const {
     std::cout << "no required view moves!\n";
     return pairs;
   }
-  auto viewed_player = std::find_if(players_.begin(),
+  auto selected_player = std::find_if(players_.begin(),
                                     players_.end(),
                                     [&latest_turn](const Game::Round::RoundPlayer& player) {
     return player.player_id == latest_turn.GetSelectedPlayerId();
@@ -334,13 +334,13 @@ Game::Round::GetViewPlayerPairs() const {
                        return (move.move_type == GameUpdate::Move::MoveType::VIEW_CARD) && (move.viewed_player_id.get() == id);
                      }) != latest_turn.previous_moves.end();
   };
-  if (!player_viewed(viewed_player->player_id)) {
-    auto pair = std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>(*latest_turn.player, *viewed_player);
+  if (!player_viewed(selected_player->player_id)) {
+    auto pair = std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>(*latest_turn.player, *selected_player);
     pairs.push_back(pair);
   }
 
   if (discarded_card.RequiredViewMovesCount() == 2 && !player_viewed(latest_turn.player->player_id)) {
-    const auto reciprocal_pair = std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>(*viewed_player, *latest_turn.player);
+    const auto reciprocal_pair = std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>(*selected_player, *latest_turn.player);
     pairs.push_back(reciprocal_pair);
   }
   return pairs;
@@ -424,12 +424,7 @@ void Game::Round::ExecuteMove(const GameUpdate::Move& move) {
       break;
     }
     case GameUpdate::Move::VIEW_CARD: {
-      auto discarded_card = latest_turn.GetDiscardedCard();
-      if (latest_turn.GetNumViewMoves() == discarded_card.RequiredViewMovesCount() - 1) {
-        ApplyViewEffect(discarded_card.GetType(),
-                       latest_turn.player->player_id,
-                       move.viewed_player_id.get());
-      }
+      ApplyViewEffect(latest_turn.GetDiscardedCard());
       break;
     }
 
@@ -490,13 +485,15 @@ void Game::Round::ApplySelectEffect(const Card::Type& card_type,
   }
 }
 
-void Game::Round::ApplyViewEffect(const Card::Type& card_type,
-                                  const std::string& viewer_id,
-                                  const std::string& viewed_id)
+void Game::Round::ApplyViewEffect(const Card& discarded_card)
 {
-  switch (card_type) {
+  const auto& latest_turn = GetLatestTurn();
+  if (latest_turn.GetNumViewMoves() != discarded_card.RequiredViewMovesCount() - 1) {
+    return;
+  }
+  switch (discarded_card.GetType()) {
     case Card::Type::BARON:
-      return ApplyEffectBARON(viewer_id, viewed_id);
+      return ApplyEffectBARON(latest_turn.GetPlayerId(), latest_turn.GetSelectedPlayerId());
   }
 }
 
@@ -535,15 +532,15 @@ void Game::Round::ApplyEffectHANDMAID(const std::string& discarding_player_id)
   player->immune = true;
 }
 
-void Game::Round::ApplyEffectBARON(const std::string& viewer_id,
-                                   const std::string& viewed_id)
+void Game::Round::ApplyEffectBARON(const std::string& selecting_player_id,
+                                   const std::string& selected_player_id)
 {
-  Game::Round::RoundPlayer* viewer = GetMutablePlayer(viewer_id);
-  Game::Round::RoundPlayer* viewed = GetMutablePlayer(viewed_id);
-  if (viewer->held_cards.front().GetValue() > viewed->held_cards.front().GetValue()) {
-    viewed->still_in_round = false;
-  } else if (viewer->held_cards.front().GetValue() < viewed->held_cards.front().GetValue()) {
-    viewer->still_in_round = false;
+  Game::Round::RoundPlayer* selector = GetMutablePlayer(selecting_player_id);
+  Game::Round::RoundPlayer* selected = GetMutablePlayer(selected_player_id);
+  if (selector->held_cards.front().GetValue() > selected->held_cards.front().GetValue()) {
+    selected->still_in_round = false;
+  } else if (selector->held_cards.front().GetValue() < selected->held_cards.front().GetValue()) {
+    selector->still_in_round = false;
   }
 }
 
@@ -608,6 +605,10 @@ std::string Game::Round::Turn::GetSelectedPlayerId() const {
       return move.move_type == GameUpdate::Move::MoveType::SELECT_PLAYER;
   });
   return select_move->selected_player_id.get();
+}
+
+std::string Game::Round::Turn::GetPlayerId() const {
+  return player->player_id;
 }
 
 int Game::Round::Turn::GetNumViewMoves() const {
