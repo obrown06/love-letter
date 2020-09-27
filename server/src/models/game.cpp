@@ -457,9 +457,7 @@ void Game::Round::DrawCard(const std::string& drawing_player_id) {
 
 void Game::Round::DiscardCardAndApplyEffect(const std::string& discarding_player_id, const Card& card) {
   DiscardCard(discarding_player_id, card);
-  boost::optional<std::string> unused_selected_player_id;
-  boost::optional<Card::Type> unused_predicted_card_type;
-  ApplyEffect(discarding_player_id, card, unused_selected_player_id, unused_predicted_card_type);
+  ApplyDiscardEffect(card, discarding_player_id);
 }
 
 void Game::Round::DiscardCard(const std::string& discarding_player_id, const Card& card) {
@@ -475,20 +473,27 @@ void Game::Round::DiscardCard(const std::string& discarding_player_id, const Car
   player->discarded_cards.push_back(card);
 }
 
+void Game::Round::ApplyDiscardEffect(const Card& card,
+                                     const std::string& discarding_player_id)
+{
+  switch (card.GetType()) {
+    case Card::Type::PRINCESS:
+      return ApplyEffectPRINCESS(discarding_player_id);
+    case Card::Type::HANDMAID:
+      return ApplyEffectHANDMAID(discarding_player_id);
+  }
+}
+
 void Game::Round::ApplyEffect(const std::string& discarding_player_id,
                               const Card& card,
                               const boost::optional<std::string>& selected_player_id,
                               const boost::optional<Card::Type>& predicted_card_type) {
   std::cout << "in ApplyEffect\n";
   switch (card.GetType()) {
-    case Card::Type::PRINCESS:
-      return ApplyEffectPRINCESS(discarding_player_id);
     case Card::Type::KING:
       return ApplyEffectKING(discarding_player_id, selected_player_id);
     case Card::Type::PRINCE:
       return ApplyEffectPRINCE(selected_player_id);
-    case Card::Type::HANDMAID:
-      return ApplyEffectHANDMAID(discarding_player_id);
     case Card::Type::GUARD:
       return ApplyEffectGUARD(selected_player_id, predicted_card_type);
     case Card::Type::PRIEST:

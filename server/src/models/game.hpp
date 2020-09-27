@@ -92,6 +92,8 @@ public:
       void ApplyViewEffect(const Card& card,
                                    const std::string& viewer_id,
                                    const std::string& viewed_id);
+      void ApplyDiscardEffect(const Card& card,
+                              const std::string& discarding_player_id);
       void ApplyEffectPRINCESS(const std::string& discarding_player_id);
       void ApplyEffectKING(const std::string& discarding_player_id,
                            const boost::optional<std::string>& selected_player_id);
