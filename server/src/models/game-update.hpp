@@ -26,8 +26,9 @@ struct GameUpdate {
     static MoveType GetNextMoveType(const MoveType& move_type);
     MoveType move_type;
     boost::optional<std::string> selected_player_id;
-    boost::optional<Card> selected_card;
+    boost::optional<Card::Type> discarded_card_type;
     boost::optional<std::string> viewed_player_id;
+    boost::optional<Card::Type> predicted_card_type;
   };
 
   UpdateType update_type;

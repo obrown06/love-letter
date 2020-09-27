@@ -83,6 +83,8 @@ bool Card::AllowsSelfSelection() const {
 }
 
 int Card::RequiredViewMovesCount() const {
+  std::cout << "in RequiredViewMovesCount\n";
+  std::cout << "type is: " << type_ << "\n";
   if (kCardTypesToViewMoveCounts.find(type_) == kCardTypesToViewMoveCounts.end()) {
     return 0;
   }
@@ -95,10 +97,10 @@ std::string Card::GetCardTypeString(const Card::Type& card_type) {
 
 std::string Card::GetActionString(const Card::Type& card_type,
                                   const std::string& selected_player_id,
-                                  const boost::optional<Card>& selected_card) {
+                                  const boost::optional<Card::Type>& predicted_card_type) {
   auto fmt = boost::format(kActionStrings.at(card_type)) % selected_player_id;
-  if (selected_card) {
-    fmt % Card::GetCardTypeString(selected_card->GetType());
+  if (predicted_card_type) {
+    fmt % Card::GetCardTypeString(predicted_card_type.get());
   }
   return fmt.str();
 }

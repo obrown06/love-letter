@@ -54,7 +54,7 @@ public:
         GameUpdate::Move::MoveType GetNextMoveType() const;
         bool NextMoveRequiresPrediction() const;
         int GetNumViewMoves() const;
-        const Card& GetDiscardedCard() const;
+        const Card GetDiscardedCard() const;
         std::string GetSelectedPlayerId() const;
         std::string GetSummary() const;
         void MaybeUpdateTurnState(std::vector<const Game::Round::RoundPlayer*> players_in_round);
@@ -83,10 +83,10 @@ public:
       void AdvanceTurn();
       void MakeNewTurn(const std::string& player_id);
       void DrawCard(const std::string& drawing_player_id);
-      void DiscardCard(const Card& card, const std::string& discarding_player_id);
+      void DiscardCard(const Card::Type& card_type, const std::string& discarding_player_id);
 
       // Cards with Select Effects
-      void ApplySelectEffect(const Card& card,
+      void ApplySelectEffect(const Card::Type& card_type,
                              const std::string& discarding_player_id,
                              const std::string& selected_player_id,
                              const boost::optional<Card::Type>& predicted_card_type);
@@ -97,14 +97,14 @@ public:
                             const Card::Type& predicted_card_type);
 
       // Cards with View Effects
-      void ApplyViewEffect(const Card& card,
+      void ApplyViewEffect(const Card::Type& card_type,
                                    const std::string& viewer_id,
                                    const std::string& viewed_id);
       void ApplyEffectBARON(const std::string& viewer_id,
                            const std::string& viewed_id);
 
       // Cards with Discard Effects
-      void ApplyDiscardEffect(const Card& card,
+      void ApplyDiscardEffect(const Card::Type& card_type,
                               const std::string& discarding_player_id);
       void ApplyEffectPRINCESS(const std::string& discarding_player_id);
       void ApplyEffectHANDMAID(const std::string& discarding_player_id);

@@ -313,14 +313,16 @@ std::vector<Game::Round::RoundPlayer> Game::Round::GetSelectablePlayers() const 
 
 std::vector<std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>>
 Game::Round::GetViewPlayerPairs() const {
-  const auto& turns = GetTurns();
-  const auto latest_turn = turns.at(turns.size() - 1);
+  std::cout << "in GetViewPlayerPairs\n";
+  const auto latest_turn = GetLatestTurn();
   const auto& discarded_card = latest_turn.GetDiscardedCard();
+  std::cout << "discarded card was: " << Card::GetCardTypeString(discarded_card.GetType());
   std::vector<std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>> pairs;
   if (discarded_card.RequiredViewMovesCount() == 0) {
+    std::cout << "no required view moves!\n";
     return pairs;
   }
-  auto selected_player = std::find_if(players_.begin(),
+  auto viewed_player = std::find_if(players_.begin(),
                                     players_.end(),
                                     [&latest_turn](const Game::Round::RoundPlayer& player) {
     return player.player_id == latest_turn.GetSelectedPlayerId();
@@ -332,13 +334,13 @@ Game::Round::GetViewPlayerPairs() const {
                        return (move.move_type == GameUpdate::Move::MoveType::VIEW_CARD) && (move.viewed_player_id.get() == id);
                      }) != latest_turn.previous_moves.end();
   };
-  if (!player_viewed(selected_player->player_id)) {
-    auto pair = std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>(*latest_turn.player, *selected_player);
+  if (!player_viewed(viewed_player->player_id)) {
+    auto pair = std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>(*latest_turn.player, *viewed_player);
     pairs.push_back(pair);
   }
 
   if (discarded_card.RequiredViewMovesCount() == 2 && !player_viewed(latest_turn.player->player_id)) {
-    const auto reciprocal_pair = std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>(*selected_player, *latest_turn.player);
+    const auto reciprocal_pair = std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>(*viewed_player, *latest_turn.player);
     pairs.push_back(reciprocal_pair);
   }
   return pairs;
@@ -410,28 +412,21 @@ void Game::Round::ExecuteMove(const GameUpdate::Move& move) {
       DrawCard(latest_turn.player->player_id);
       break;
     case GameUpdate::Move::DISCARD_CARD:
-      DiscardCard(move.selected_card.get(), latest_turn.player->player_id);
-      ApplyDiscardEffect(move.selected_card.get(), latest_turn.player->player_id);
+      DiscardCard(move.discarded_card_type.get(), latest_turn.player->player_id);
+      ApplyDiscardEffect(move.discarded_card_type.get(), latest_turn.player->player_id);
       break;
     case GameUpdate::Move::SELECT_PLAYER: {
-      std::cout << "SELECT PLAYER move\n";
-      auto discarded_card = latest_turn.GetDiscardedCard();
-      std::cout << "got discarded card\n";
-      boost::optional<Card::Type> predicted_card_type;
-      if (move.selected_card) {
-        predicted_card_type = move.selected_card->GetType();
-      }
-      ApplySelectEffect(discarded_card,
+      ApplySelectEffect(latest_turn.GetDiscardedCard().GetType(),
                         latest_turn.player->player_id,
                         move.selected_player_id.get(),
-                        predicted_card_type);
+                        move.predicted_card_type);
       std::cout << "after ApplyEffect\n";
       break;
     }
     case GameUpdate::Move::VIEW_CARD: {
       auto discarded_card = latest_turn.GetDiscardedCard();
       if (latest_turn.GetNumViewMoves() == discarded_card.RequiredViewMovesCount() - 1) {
-        ApplyViewEffect(discarded_card,
+        ApplyViewEffect(discarded_card.GetType(),
                        latest_turn.player->player_id,
                        move.viewed_player_id.get());
       }
@@ -456,23 +451,23 @@ void Game::Round::DrawCard(const std::string& drawing_player_id) {
   std::cout << "FINISHED DRAWING CARD\n";
 }
 
-void Game::Round::DiscardCard(const Card& card, const std::string& discarding_player_id) {
-  std::cout << "Trying to discard card: " << Card::GetCardTypeString(card.GetType()) << "\n";
+void Game::Round::DiscardCard(const Card::Type& card_type, const std::string& discarding_player_id) {
+  std::cout << "Trying to discard card: " << Card::GetCardTypeString(card_type) << "\n";
   Game::Round::RoundPlayer* player = GetMutablePlayer(discarding_player_id);
-  auto it = std::find_if(player->held_cards.begin(), player->held_cards.end(), [&card] (const Card& held_card) {
-    return held_card.GetType() == card.GetType();
+  auto it = std::find_if(player->held_cards.begin(), player->held_cards.end(), [&card_type] (const Card& held_card) {
+    return held_card.GetType() == card_type;
   });
   if (it == player->held_cards.end()) {
-    throw NoCardException(discarding_player_id, card.GetType());
+    throw NoCardException(discarding_player_id, card_type);
   }
   player->held_cards.erase(it);
-  player->discarded_cards.push_back(card);
+  player->discarded_cards.push_back(Card(card_type));
 }
 
-void Game::Round::ApplyDiscardEffect(const Card& card,
+void Game::Round::ApplyDiscardEffect(const Card::Type& card_type,
                                      const std::string& discarding_player_id)
 {
-  switch (card.GetType()) {
+  switch (card_type) {
     case Card::Type::PRINCESS:
       return ApplyEffectPRINCESS(discarding_player_id);
     case Card::Type::HANDMAID:
@@ -480,12 +475,12 @@ void Game::Round::ApplyDiscardEffect(const Card& card,
   }
 }
 
-void Game::Round::ApplySelectEffect(const Card& card,
+void Game::Round::ApplySelectEffect(const Card::Type& card_type,
                                     const std::string& discarding_player_id,
                                     const std::string& selected_player_id,
                                     const boost::optional<Card::Type>& predicted_card_type) {
   std::cout << "in ApplySelectEffect\n";
-  switch (card.GetType()) {
+  switch (card_type) {
     case Card::Type::KING:
       return ApplyEffectKING(discarding_player_id, selected_player_id);
     case Card::Type::PRINCE:
@@ -495,11 +490,11 @@ void Game::Round::ApplySelectEffect(const Card& card,
   }
 }
 
-void Game::Round::ApplyViewEffect(const Card& card,
+void Game::Round::ApplyViewEffect(const Card::Type& card_type,
                                   const std::string& viewer_id,
                                   const std::string& viewed_id)
 {
-  switch (card.GetType()) {
+  switch (card_type) {
     case Card::Type::BARON:
       return ApplyEffectBARON(viewer_id, viewed_id);
   }
@@ -526,7 +521,7 @@ void Game::Round::ApplyEffectPRINCE(const std::string& selected_player_id)
 {
   auto player = GetMutablePlayer(selected_player_id);
   auto held_card = player->held_cards.front();
-  DiscardCard(held_card, selected_player_id);
+  DiscardCard(held_card.GetType(), selected_player_id);
   if (held_card.GetType() == Card::Type::PRINCESS) {
     player->still_in_round = false;
   } else {
@@ -597,13 +592,13 @@ void Game::Round::MakeNewTurn(const std::string& player_id) {
 
 // Game::Round::Turn
 
-const Card& Game::Round::Turn::GetDiscardedCard() const {
+const Card Game::Round::Turn::GetDiscardedCard() const {
   auto discard_move = std::find_if(previous_moves.begin(),
                                    previous_moves.end(),
                                    [] (const GameUpdate::Move& move) {
       return move.move_type == GameUpdate::Move::MoveType::DISCARD_CARD;
   });
-  return discard_move->selected_card.get();
+  return Card(discard_move->discarded_card_type.get());
 }
 
 std::string Game::Round::Turn::GetSelectedPlayerId() const {
@@ -667,15 +662,10 @@ std::string Game::Round::Turn::GetSummary() const {
     return move.move_type == GameUpdate::Move::SELECT_PLAYER;
   });
   if (select_move != previous_moves.end()) {
-    boost::optional<Card> selected_card;
-    if (select_move->selected_card) {
-      std::cout << "Selected card type is: " << select_move->selected_card->GetType() << "\n";
-      selected_card = select_move->selected_card;
-    }
     ss << " and "
        << Card::GetActionString(GetDiscardedCard().GetType(),
                                       GetSelectedPlayerId(),
-                                      selected_card);
+                                      select_move->predicted_card_type);
   }
   ss << ".";
   std::cout << "End GetSummary\n";

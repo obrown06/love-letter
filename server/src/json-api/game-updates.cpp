@@ -18,12 +18,12 @@ GameUpdate JSONToGameUpdate(const std::string& json) {
     GameUpdate::Move move;
     move.move_type = static_cast<GameUpdate::Move::MoveType>(root["move"]["move_type"].asInt());
     if (move.move_type == GameUpdate::Move::DISCARD_CARD) {
-      move.selected_card = Card(static_cast<Card::Type>(root["move"]["selected_card"].asInt()));
+      move.discarded_card_type = static_cast<Card::Type>(root["move"]["discarded_card_type"].asInt());
     }
     if (move.move_type == GameUpdate::Move::SELECT_PLAYER) {
       move.selected_player_id = root["move"]["selected_player_id"].asString();
-      if (root["move"].isMember("predicted_card")) {
-        move.selected_card = Card(static_cast<Card::Type>(root["move"]["predicted_card"].asInt()));
+      if (root["move"].isMember("predicted_card_type")) {
+        move.predicted_card_type = static_cast<Card::Type>(root["move"]["predicted_card_type"].asInt());
       }
     }
     if (move.move_type == GameUpdate::Move::VIEW_CARD) {

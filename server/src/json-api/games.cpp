@@ -124,8 +124,14 @@ Json::Value MoveToJSON(const GameUpdate::Move& move) {
   if (move.selected_player_id) {
     move_node["selected_player_id"] = *move.selected_player_id;
   }
-  if (move.selected_card) {
-    move_node["selected_card_type"] = static_cast<int>(move.selected_card->GetType());
+  if (move.discarded_card_type) {
+    move_node["discarded_card_type"] = static_cast<int>(move.discarded_card_type.get());
+  }
+  if (move.predicted_card_type) {
+    move_node["predicted_card_type"] = static_cast<int>(move.predicted_card_type.get());
+  }
+  if (move.viewed_player_id) {
+    move_node["viewed_player_id"] = move.viewed_player_id.get();
   }
   return move_node;
 }

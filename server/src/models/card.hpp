@@ -25,7 +25,7 @@ public:
   static std::string GetCardTypeString(const Card::Type& type);
   static std::string GetActionString(const Card::Type& card_type,
                                      const std::string& selected_player_id,
-                                     const boost::optional<Card>& selected_card);
+                                     const boost::optional<Card::Type>& predicted_card_type);
 
   static std::vector<Card> GetDiscardableCards(const std::vector<Card>& cards);
 

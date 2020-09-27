@@ -52,7 +52,7 @@ class GameInProgress extends React.Component {
       update_type: 3,
       move: {
         move_type: MoveTypes.DISCARD_CARD,
-        selected_card: cardType
+        discarded_card_type: cardType
       }
     }));
   }
@@ -69,7 +69,7 @@ class GameInProgress extends React.Component {
       move: {
         move_type: MoveTypes.SELECT_PLAYER,
         selected_player_id : player_id,
-        predicted_card : predictedCardType > 0 ? predictedCardType : undefined
+        predicted_card_type : predictedCardType > 0 ? predictedCardType : undefined
       }
     }));
   }
