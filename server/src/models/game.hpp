@@ -85,24 +85,31 @@ public:
       void DrawCard(const std::string& drawing_player_id);
       void DiscardCardAndApplyEffect(const std::string& discarding_player_id, const Card& card);
       void DiscardCard(const std::string& discarding_player_id, const Card& card);
-      void ApplyEffect(const std::string& discarding_player_id,
-                       const Card& card,
-                       const boost::optional<std::string>& selected_player_id,
-                       const boost::optional<Card::Type>& predicted_card_type);
+
+      // Cards with Select Effects
+      void ApplySelectEffect(const Card& card,
+                             const std::string& discarding_player_id,
+                             const std::string& selected_player_id,
+                             const boost::optional<Card::Type>& predicted_card_type);
+      void ApplyEffectKING(const std::string& discarding_player_id,
+                          const std::string& selected_player_id);
+      void ApplyEffectPRINCE(const std::string& selected_player_id);
+      void ApplyEffectGUARD(const std::string& selected_player_id,
+                            const Card::Type& predicted_card_type);
+
+      // Cards with View Effects
       void ApplyViewEffect(const Card& card,
                                    const std::string& viewer_id,
                                    const std::string& viewed_id);
+      void ApplyEffectBARON(const std::string& viewer_id,
+                           const std::string& viewed_id);
+
+      // Cards with Discard Effects
       void ApplyDiscardEffect(const Card& card,
                               const std::string& discarding_player_id);
       void ApplyEffectPRINCESS(const std::string& discarding_player_id);
-      void ApplyEffectKING(const std::string& discarding_player_id,
-                           const boost::optional<std::string>& selected_player_id);
-      void ApplyEffectPRINCE(const boost::optional<std::string>& selected_player_id);
       void ApplyEffectHANDMAID(const std::string& discarding_player_id);
-      void ApplyEffectBARON(const std::string& viewer_id,
-                            const std::string& viewed_id);
-      void ApplyEffectGUARD(const boost::optional<std::string>& selected_player_id,
-                            const boost::optional<Card::Type>& predicted_card_type);
+
       std::vector<RoundPlayer> players_;
       std::vector<Card> deck_;
       boost::optional<Card> extra_card_;

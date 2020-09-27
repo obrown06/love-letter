@@ -420,10 +420,10 @@ void Game::Round::ExecuteMove(const GameUpdate::Move& move) {
       if (move.selected_card) {
         predicted_card_type = move.selected_card->GetType();
       }
-      ApplyEffect(latest_turn.player->player_id,
-                  discarded_card,
-                  move.selected_player_id,
-                  predicted_card_type);
+      ApplySelectEffect(discarded_card,
+                        latest_turn.player->player_id,
+                        move.selected_player_id.get(),
+                        predicted_card_type);
       std::cout << "after ApplyEffect\n";
       break;
     }
@@ -484,22 +484,18 @@ void Game::Round::ApplyDiscardEffect(const Card& card,
   }
 }
 
-void Game::Round::ApplyEffect(const std::string& discarding_player_id,
-                              const Card& card,
-                              const boost::optional<std::string>& selected_player_id,
-                              const boost::optional<Card::Type>& predicted_card_type) {
-  std::cout << "in ApplyEffect\n";
+void Game::Round::ApplySelectEffect(const Card& card,
+                                    const std::string& discarding_player_id,
+                                    const std::string& selected_player_id,
+                                    const boost::optional<Card::Type>& predicted_card_type) {
+  std::cout << "in ApplySelectEffect\n";
   switch (card.GetType()) {
     case Card::Type::KING:
       return ApplyEffectKING(discarding_player_id, selected_player_id);
     case Card::Type::PRINCE:
       return ApplyEffectPRINCE(selected_player_id);
     case Card::Type::GUARD:
-      return ApplyEffectGUARD(selected_player_id, predicted_card_type);
-    case Card::Type::PRIEST:
-    case Card::Type::COUNTESS:
-    case Card::Type::BARON:
-      return;
+      return ApplyEffectGUARD(selected_player_id, predicted_card_type.get());
   }
 }
 
@@ -519,32 +515,26 @@ void Game::Round::ApplyEffectPRINCESS(const std::string& discarding_player_id) {
 }
 
 void Game::Round::ApplyEffectKING(const std::string& discarding_player_id,
-                                  const boost::optional<std::string>& selected_player_id)
+                                  const std::string& selected_player_id)
 {
   std::cout << "in ApplyEffectKING\n";
-  if (!selected_player_id) {
-    return;
-  }
-  std::cout << "selected_player_id: " << selected_player_id.get() << "\n";
+  std::cout << "selected_player_id: " << selected_player_id << "\n";
   Game::Round::RoundPlayer* discarding_player = GetMutablePlayer(discarding_player_id);
-  Game::Round::RoundPlayer* selected_player = GetMutablePlayer(selected_player_id.get());
+  Game::Round::RoundPlayer* selected_player = GetMutablePlayer(selected_player_id);
   std::vector<Card> tmp = discarding_player->held_cards;
   discarding_player->held_cards = selected_player->held_cards;
   selected_player->held_cards = tmp;
 }
 
-void Game::Round::ApplyEffectPRINCE(const boost::optional<std::string>& selected_player_id)
+void Game::Round::ApplyEffectPRINCE(const std::string& selected_player_id)
 {
-  if (!selected_player_id) {
-    return;
-  }
-  auto player = GetMutablePlayer(selected_player_id.get());
+  auto player = GetMutablePlayer(selected_player_id);
   auto held_card = player->held_cards.front();
-  DiscardCard(selected_player_id.get(), held_card);
+  DiscardCard(selected_player_id, held_card);
   if (held_card.GetType() == Card::Type::PRINCESS) {
     player->still_in_round = false;
   } else {
-    DrawCard(selected_player_id.get());
+    DrawCard(selected_player_id);
   }
 }
 
@@ -566,14 +556,11 @@ void Game::Round::ApplyEffectBARON(const std::string& viewer_id,
   }
 }
 
-void Game::Round::ApplyEffectGUARD(const boost::optional<std::string>& selected_player_id,
-                                   const boost::optional<Card::Type>& predicted_card_type)
+void Game::Round::ApplyEffectGUARD(const std::string& selected_player_id,
+                                   const Card::Type& predicted_card_type)
 {
-  if (!selected_player_id) {
-    return;
-  }
-  Game::Round::RoundPlayer* selected_player = GetMutablePlayer(selected_player_id.get());
-  if (selected_player->held_cards.front().GetType() == predicted_card_type.get()) {
+  Game::Round::RoundPlayer* selected_player = GetMutablePlayer(selected_player_id);
+  if (selected_player->held_cards.front().GetType() == predicted_card_type) {
     selected_player->still_in_round = false;
   }
 }
