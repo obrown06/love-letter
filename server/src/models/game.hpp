@@ -69,7 +69,6 @@ public:
       };
 
       void ExecuteMove(const GameUpdate::Move& move);
-      void RemoveFromRound(const std::string& player_id);
       void ValidateMove(const GameUpdate::Move& move, const std::string& player_id);
       bool IsComplete() const;
       int GetDeckSize() const;
@@ -85,6 +84,7 @@ public:
 
     private:
       Turn* GetMutableLatestTurn();
+      void RemoveFromRound(const std::string& player_id);
       RoundPlayer* GetMutablePlayer(const std::string& player_id);
       void MaybeUpdateRoundState();
       void AdvanceTurn();
