@@ -20,18 +20,19 @@ std::string GameToJSON(const Game& game) {
   root["game_id"] = game.GetId();
   root["creator"] = game.GetCreator();
   root["state"] = game.GetState();
-  if (game.GetState() == Game::IN_PROGRESS) {
+  if (game.GetState() != Game::WAITING) {
     root["tokens_to_win"] = game.GetTokensToWin();
     for (const auto& round : game.GetRounds()) {
       root["rounds"].append(RoundToJSON(round));
     }
-  } else if (game.GetState() == Game::COMPLETE) {
-    for (const auto& winner : game.GetWinners()) {
-      Json::Value winner_node;
-      winner_node["player_id"] = winner.player_id;
-      root["winners"].append(winner_node);
+    if (game.GetState() == Game::COMPLETE) {
+      for (const auto& winner : game.GetWinners()) {
+        Json::Value winner_node;
+        winner_node["player_id"] = winner.player_id;
+        root["winners"].append(winner_node);
+      }
+      root["summary"] = game.GetSummary();
     }
-    root["summary"] = game.GetSummary();
   }
   for (const auto& player : game.GetPlayers()) {
     Json::Value player_node;

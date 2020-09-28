@@ -147,7 +147,7 @@ bool Game::IsComplete() const {
 std::vector<Game::GamePlayer> Game::GetWinners() const {
   std::vector<Game::GamePlayer> winners;
   for (auto& player : players_) {
-    if (player.ntokens_held > GetTokensToWin()) {
+    if (player.ntokens_held >= GetTokensToWin()) {
       winners.push_back(player);
     }
   }
