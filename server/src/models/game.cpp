@@ -589,11 +589,11 @@ void Game::Round::AdvanceTurn() {
       it = players_.begin();
     }
   };
-  advance(it);
 
-  while (!it->still_in_round) {
+  do {
     advance(it);
   }
+  while (!it->still_in_round);
 
   MakeNewTurn(it->player_id);
 }
