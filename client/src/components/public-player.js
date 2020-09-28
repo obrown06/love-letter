@@ -7,7 +7,9 @@ class PublicPlayer extends React.Component {
 
   renderCard(type) {
     return (
-      <Card type={type} />
+      <div className={styles.playerCard}>
+        <Card type={type} />
+      </div>
     );
   }
   render() {

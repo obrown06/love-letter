@@ -1,0 +1,10 @@
+.cardContainer {
+  height: 100px;
+  width: 75px;
+}
+
+.img {
+  object-fit: contain;
+  height: 75%;
+  width: 75%;
+}
