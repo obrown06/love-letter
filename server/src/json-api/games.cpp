@@ -82,7 +82,7 @@ Json::Value RoundToJSON(const Game::Round& round) {
 Json::Value TurnToJSON(const Game::Round& round, const Game::Round::Turn& turn) {
   std::cout << "in TurnToJSON\n";
   Json::Value turn_node;
-  turn_node["player_id"] = turn.player->player_id;
+  turn_node["player_id"] = turn.GetPlayerId();
   for (const auto& move : turn.GetMoves()) {
     turn_node["moves"].append(MoveToJSON(move));
   }
@@ -95,7 +95,7 @@ Json::Value TurnToJSON(const Game::Round& round, const Game::Round::Turn& turn) 
     turn_node["next_move_type"] = next_move_type;
     if (next_move_type == GameUpdate::Move::MoveType::DISCARD_CARD) {
       std::cout << "next move type is discard\n";
-      for (const auto& discardable_card : turn.player->GetDiscardableCards()) {
+      for (const auto& discardable_card : turn.GetDiscardableCards()) {
         turn_node["discardable_cards"].append(static_cast<int>(discardable_card.GetType()));
       }
     } else if (next_move_type == GameUpdate::Move::MoveType::SELECT_PLAYER) {

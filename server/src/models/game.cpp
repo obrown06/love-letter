@@ -240,6 +240,16 @@ Game::Round::RoundPlayer* Game::Round::GetMutablePlayer(const std::string& playe
   return nullptr;
 }
 
+const Game::Round::RoundPlayer& Game::Round::GetPlayer(const std::string& player_id) const {
+  auto iter = std::find_if(players_.begin(), players_.end(), [&](const Game::Round::RoundPlayer& player) {
+    return player.player_id == player_id;
+  });
+  if (iter == players_.end()) {
+    throw std::exception();
+  }
+  return *iter;
+}
+
 Game::Round::Turn* Game::Round::GetMutableLatestTurn() {
   std::cout << "in GetMutableLatestTurn\n";
   return &turns_.at(turns_.size() - 1);
@@ -301,12 +311,12 @@ std::vector<Game::Round::RoundPlayer> Game::Round::GetSelectablePlayers() const 
   auto discarded_card = latest_turn.GetDiscardedCard();
   for (auto& player : players_in_round) {
     if (!player->immune &&
-        (player->player_id != latest_turn.player->player_id || discarded_card.AllowsSelfSelection())) {
+        (player->player_id != latest_turn.GetPlayerId() || discarded_card.AllowsSelfSelection())) {
       selectable_players.push_back(*player);
     }
   }
   if (selectable_players.empty()) {
-    selectable_players.push_back(*latest_turn.player);
+    selectable_players.push_back(GetPlayer(latest_turn.GetPlayerId()));
   }
   return selectable_players;
 }
@@ -322,25 +332,16 @@ Game::Round::GetViewPlayerPairs() const {
     std::cout << "no required view moves!\n";
     return pairs;
   }
-  auto selected_player = std::find_if(players_.begin(),
-                                    players_.end(),
-                                    [&latest_turn](const Game::Round::RoundPlayer& player) {
-    return player.player_id == latest_turn.GetSelectedPlayerId();
-  });
-  auto player_viewed = [&](const std::string& id) {
-    return std::find_if(latest_turn.previous_moves.begin(),
-                     latest_turn.previous_moves.end(),
-                     [&](const GameUpdate::Move& move) {
-                       return (move.move_type == GameUpdate::Move::MoveType::VIEW_CARD) && (move.viewed_player_id.get() == id);
-                     }) != latest_turn.previous_moves.end();
-  };
-  if (!player_viewed(selected_player->player_id)) {
-    auto pair = std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>(*latest_turn.player, *selected_player);
+  auto selecting_player = GetPlayer(latest_turn.GetPlayerId());
+  auto selected_player = GetPlayer(latest_turn.GetSelectedPlayerId());
+
+  if (!latest_turn.WasPlayerViewed(selected_player.player_id)) {
+    auto pair = std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>(selecting_player, selected_player);
     pairs.push_back(pair);
   }
 
-  if (discarded_card.RequiredViewMovesCount() == 2 && !player_viewed(latest_turn.player->player_id)) {
-    const auto reciprocal_pair = std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>(*selected_player, *latest_turn.player);
+  if (discarded_card.RequiredViewMovesCount() == 2 && !latest_turn.WasPlayerViewed(selecting_player.player_id)) {
+    const auto reciprocal_pair = std::pair<Game::Round::RoundPlayer, Game::Round::RoundPlayer>(selected_player, selecting_player);
     pairs.push_back(reciprocal_pair);
   }
   return pairs;
@@ -407,17 +408,18 @@ void Game::Round::ValidateMove(const GameUpdate::Move& move,
 void Game::Round::ExecuteMove(const GameUpdate::Move& move) {
   std::cout << "in ExecuteMove\n";
   const auto& latest_turn = GetLatestTurn();
+  const auto& player = GetPlayer(latest_turn.GetPlayerId());
   switch (move.move_type) {
     case GameUpdate::Move::DRAW_CARD:
-      DrawCard(latest_turn.player->player_id);
+      DrawCard(player.player_id);
       break;
     case GameUpdate::Move::DISCARD_CARD:
-      DiscardCard(move.discarded_card_type.get(), latest_turn.player->player_id);
-      ApplyDiscardEffect(move.discarded_card_type.get(), latest_turn.player->player_id);
+      DiscardCard(move.discarded_card_type.get(), player.player_id);
+      ApplyDiscardEffect(move.discarded_card_type.get(), player.player_id);
       break;
     case GameUpdate::Move::SELECT_PLAYER: {
       ApplySelectEffect(latest_turn.GetDiscardedCard().GetType(),
-                        latest_turn.player->player_id,
+                        player.player_id,
                         move.selected_player_id.get(),
                         move.predicted_card_type);
       std::cout << "after ApplyEffect\n";
@@ -498,8 +500,7 @@ void Game::Round::ApplyViewEffect(const Card& discarded_card)
 }
 
 void Game::Round::ApplyEffectPRINCESS(const std::string& discarding_player_id) {
-  Game::Round::RoundPlayer* player = GetMutablePlayer(discarding_player_id);
-  player->still_in_round = false;
+  RemoveFromRound(discarding_player_id);
 }
 
 void Game::Round::ApplyEffectKING(const std::string& discarding_player_id,
@@ -535,22 +536,27 @@ void Game::Round::ApplyEffectHANDMAID(const std::string& discarding_player_id)
 void Game::Round::ApplyEffectBARON(const std::string& selecting_player_id,
                                    const std::string& selected_player_id)
 {
-  Game::Round::RoundPlayer* selector = GetMutablePlayer(selecting_player_id);
-  Game::Round::RoundPlayer* selected = GetMutablePlayer(selected_player_id);
-  if (selector->held_cards.front().GetValue() > selected->held_cards.front().GetValue()) {
-    selected->still_in_round = false;
-  } else if (selector->held_cards.front().GetValue() < selected->held_cards.front().GetValue()) {
-    selector->still_in_round = false;
+  const auto& selector = GetPlayer(selecting_player_id);
+  const auto& selected = GetPlayer(selected_player_id);
+  if (selector.held_cards.front().GetValue() > selected.held_cards.front().GetValue()) {
+    RemoveFromRound(selected_player_id);
+  } else if (selector.held_cards.front().GetValue() < selected.held_cards.front().GetValue()) {
+    RemoveFromRound(selecting_player_id);
   }
 }
 
 void Game::Round::ApplyEffectGUARD(const std::string& selected_player_id,
                                    const Card::Type& predicted_card_type)
 {
-  Game::Round::RoundPlayer* selected_player = GetMutablePlayer(selected_player_id);
-  if (selected_player->held_cards.front().GetType() == predicted_card_type) {
-    selected_player->still_in_round = false;
+  const auto& selected_player = GetPlayer(selected_player_id);
+  if (selected_player.held_cards.front().GetType() == predicted_card_type) {
+    RemoveFromRound(selected_player_id);
   }
+}
+
+void Game::Round::RemoveFromRound(const std::string& player_id) {
+  auto* player = GetMutablePlayer(player_id);
+  player->still_in_round = false;
 }
 
 void Game::Round::MaybeUpdateRoundState() {
@@ -563,7 +569,7 @@ void Game::Round::MaybeUpdateRoundState() {
 
 void Game::Round::AdvanceTurn() {
   auto it = std::find_if(players_.begin(), players_.end(), [this](const Game::Round::RoundPlayer& player) {
-    return player.player_id == this->GetLatestTurn().player->player_id;
+    return player.player_id == this->GetLatestTurn().GetPlayerId();
   });
   auto advance = [this](std::vector<Game::Round::RoundPlayer>::iterator& it) {
     it++;
@@ -617,10 +623,6 @@ int Game::Round::Turn::GetNumViewMoves() const {
                        [] (const GameUpdate::Move& move) {
                           return move.move_type == GameUpdate::Move::MoveType::VIEW_CARD;
                         });
-}
-
-GameUpdate::Move* Game::Round::Turn::GetMutableLatestMove() {
-  return &previous_moves.at(previous_moves.size() - 1);
 }
 
 const GameUpdate::Move& Game::Round::Turn::GetLatestMove() const {
@@ -677,6 +679,16 @@ bool Game::Round::Turn::IsComplete() const {
   return is_complete;
 }
 
+bool Game::Round::Turn::WasPlayerViewed(const std::string& player_id) const {
+  return std::find_if(previous_moves.begin(), previous_moves.end(), [=](const GameUpdate::Move& move) {
+    return (move.move_type == GameUpdate::Move::MoveType::VIEW_CARD) && (move.viewed_player_id.get() == player_id);
+  }) != previous_moves.end();
+}
+
+std::vector<Card> Game::Round::Turn::GetDiscardableCards() const {
+  return Card::GetDiscardableCards(player->held_cards);
+}
+
 void Game::Round::Turn::ExecuteMove(const GameUpdate::Move& move,
                                     std::vector<const Game::Round::RoundPlayer*> players_in_round) {
   std::cout << "in Turn::ExecuteMove\n";
@@ -708,10 +720,4 @@ void Game::Round::Turn::MaybeUpdateTurnState(std::vector<const Game::Round::Roun
   } else {
     is_complete = discarded_card.RequiredViewMovesCount() == GetNumViewMoves();
   }
-}
-
-// Game::Round::RoundPlayer
-
-std::vector<Card> Game::Round::RoundPlayer::GetDiscardableCards() const {
-  return Card::GetDiscardableCards(held_cards);
 }

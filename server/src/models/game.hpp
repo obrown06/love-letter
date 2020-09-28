@@ -42,29 +42,33 @@ public:
         std::vector<Card> GetDiscardableCards() const;
       };
 
-      struct Turn {
-        Turn(const RoundPlayer* player):
-          player(player) {}
+      class Turn {
+        public:
+          Turn(const RoundPlayer* player):
+            player(player) {}
 
-        void ExecuteMove(const GameUpdate::Move& move, std::vector<const RoundPlayer*> players_in_round);
-        bool IsComplete() const;
-        const std::vector<GameUpdate::Move>& GetMoves() const;
-        GameUpdate::Move* GetMutableLatestMove();
-        const GameUpdate::Move& GetLatestMove() const;
-        GameUpdate::Move::MoveType GetNextMoveType() const;
-        bool NextMoveRequiresPrediction() const;
-        int GetNumViewMoves() const;
-        const Card GetDiscardedCard() const;
-        std::string GetSelectedPlayerId() const;
-        std::string GetPlayerId() const;
-        std::string GetSummary() const;
-        void MaybeUpdateTurnState(std::vector<const Game::Round::RoundPlayer*> players_in_round);
-        std::vector<GameUpdate::Move> previous_moves;
-        const RoundPlayer* player;
-        bool is_complete;
+          void ExecuteMove(const GameUpdate::Move& move, std::vector<const RoundPlayer*> players_in_round);
+          bool IsComplete() const;
+          bool WasPlayerViewed(const std::string& player_id) const;
+          const std::vector<GameUpdate::Move>& GetMoves() const;
+          std::vector<Card> GetDiscardableCards() const;
+          const GameUpdate::Move& GetLatestMove() const;
+          GameUpdate::Move::MoveType GetNextMoveType() const;
+          bool NextMoveRequiresPrediction() const;
+          int GetNumViewMoves() const;
+          const Card GetDiscardedCard() const;
+          std::string GetSelectedPlayerId() const;
+          std::string GetPlayerId() const;
+          std::string GetSummary() const;
+        private:
+          void MaybeUpdateTurnState(std::vector<const Game::Round::RoundPlayer*> players_in_round);
+          std::vector<GameUpdate::Move> previous_moves;
+          const RoundPlayer* player;
+          bool is_complete;
       };
 
       void ExecuteMove(const GameUpdate::Move& move);
+      void RemoveFromRound(const std::string& player_id);
       void ValidateMove(const GameUpdate::Move& move, const std::string& player_id);
       bool IsComplete() const;
       int GetDeckSize() const;
@@ -76,6 +80,7 @@ public:
       std::string GetSummary() const;
       std::vector<const RoundPlayer*> GetPlayersInRound() const;
       const Turn& GetLatestTurn() const;
+      const RoundPlayer& GetPlayer(const std::string& player_id) const;
 
     private:
       Turn* GetMutableLatestTurn();
