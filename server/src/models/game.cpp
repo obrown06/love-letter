@@ -49,6 +49,10 @@ Game::Round* Game::GetMutableLatestRound() {
   return &rounds_.at(rounds_.size() - 1);
 }
 
+const Game::Round& Game::GetLatestRound() const {
+  return rounds_.at(rounds_.size() - 1);
+}
+
 const std::vector<Game::Round>& Game::GetRounds() const {
   return rounds_;
 }
@@ -107,12 +111,12 @@ void Game::ExecuteMove(const GameUpdate::Move& move, const std::string& player_i
 
 void Game::MaybeUpdateGameState() {
   std::cout << "starting MaybeUpdateGameState\n";
-  if (!GetMutableLatestRound()->IsComplete()) {
+  if (!GetLatestRound().IsComplete()) {
     std::cout << "round wasn't complete\n";
     return;
   }
   std::cout << "round was complete\n";
-  for (const auto& winner : GetMutableLatestRound()->GetWinners()) {
+  for (const auto& winner : GetLatestRound().GetWinners()) {
     auto it = std::find_if(players_.begin(), players_.end(), [&winner](const Game::GamePlayer& player) {
       return player.player_id == winner.player_id;
     });
@@ -127,7 +131,11 @@ void Game::MaybeUpdateGameState() {
 }
 
 void Game::AdvanceRound() {
-  rounds_.push_back(Round(players_));
+  boost::optional<std::string> previous_winner_id;
+  if (!rounds_.empty()) {
+    previous_winner_id = GetLatestRound().GetWinners()[0].player_id;
+  }
+  rounds_.push_back(Round(players_, previous_winner_id));
 }
 
 bool Game::IsComplete() const {
@@ -193,9 +201,8 @@ void Game::CheckGameInProgress() const {
 
 // Game::Round
 
-Game::Round::Round(const std::vector<Game::GamePlayer>& round_players) {
-  std::random_device rd;
-  std::mt19937 g(rd());
+Game::Round::Round(const std::vector<Game::GamePlayer>& round_players,
+                   const boost::optional<std::string>& previous_winner_id) {
 
   for (const auto& player : round_players) {
     Game::Round::RoundPlayer round_player;
@@ -204,8 +211,9 @@ Game::Round::Round(const std::vector<Game::GamePlayer>& round_players) {
     round_player.immune = false;
     players_.push_back(round_player);
   }
-  std::shuffle(players_.begin(), players_.end(), g);
 
+  std::random_device rd;
+  std::mt19937 g(rd());
   std::vector<Card::Type> shuffled_deck = kUnshuffledDeck;
   std::shuffle(shuffled_deck.begin(), shuffled_deck.end(), g);
 
@@ -223,7 +231,9 @@ Game::Round::Round(const std::vector<Game::GamePlayer>& round_players) {
     shuffled_deck.pop_back();
   }
 
-  turns_.push_back(Turn(&players_[0]));
+  auto player_id = previous_winner_id ? previous_winner_id.get() : players_[0].player_id;
+  std::cout << "player id is : " << player_id << "\n";
+  MakeNewTurn(player_id);
 }
 
 int Game::Round::GetDeckSize() const {
@@ -562,12 +572,14 @@ void Game::Round::RemoveFromRound(const std::string& player_id) {
 void Game::Round::MaybeUpdateRoundState() {
   std::cout << "Starting MaybeUpdateRoundState\n";
   if (GetLatestTurn().IsComplete() && !IsComplete()) {
+    std::cout << "advancing turn\n";
     AdvanceTurn();
   }
   std::cout << "ending MaybeUpdateRoundState\n";
 }
 
 void Game::Round::AdvanceTurn() {
+  std::cout << "in AdvanceTurn\n";
   auto it = std::find_if(players_.begin(), players_.end(), [this](const Game::Round::RoundPlayer& player) {
     return player.player_id == this->GetLatestTurn().GetPlayerId();
   });
@@ -577,12 +589,13 @@ void Game::Round::AdvanceTurn() {
       it = players_.begin();
     }
   };
-  while (true) {
+  advance(it);
+
+  while (!it->still_in_round) {
     advance(it);
-    if (it->still_in_round) {
-      return MakeNewTurn(it->player_id);
-    }
   }
+
+  MakeNewTurn(it->player_id);
 }
 
 void Game::Round::MakeNewTurn(const std::string& player_id) {

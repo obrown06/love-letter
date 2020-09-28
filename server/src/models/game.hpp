@@ -31,7 +31,8 @@ public:
 
   class Round {
     public:
-      Round(const std::vector<Game::GamePlayer>& round_players);
+      Round(const std::vector<Game::GamePlayer>& round_players,
+            const boost::optional<std::string>& previous_winner_id);
 
       struct RoundPlayer {
         std::string player_id;
@@ -141,6 +142,7 @@ private:
   void CheckGameNotStarted() const;
   Game::GamePlayer* GetMutablePlayer(const std::string& player_id);
   Round* GetMutableLatestRound();
+  const Round& GetLatestRound() const;
   std::string id_;
   std::string creator_;
   std::vector<Game::GamePlayer> players_;
