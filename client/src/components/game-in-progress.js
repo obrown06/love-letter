@@ -168,7 +168,8 @@ class GameInProgress extends React.Component {
       <div className={styles.handCard}>
       <Card
         selectCallback={this.discardCard}
-        selectable={this.isCardSelectable(type)}type={type} />
+        selectable={this.isCardSelectable(type)}type={type}
+        visible={true} />
       </div>
     );
   }

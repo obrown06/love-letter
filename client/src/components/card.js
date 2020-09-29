@@ -9,6 +9,7 @@ import handmaid from "img/cards/handmaid.jpg";
 import baron from "img/cards/baron.jpg";
 import priest from "img/cards/priest.jpg";
 import guard from "img/cards/guard.jpg";
+import back from "img/cards/back.png";
 
 const TypesToSrcs = {
   8: princess,
@@ -56,7 +57,7 @@ class Card extends React.Component {
                     this.props.selectable && this.state.isHovered ? commonStyles.hovered : ""].join(" ")}
         onMouseEnter={this.toggleHover}
         onMouseLeave={this.toggleHover}
-        src={TypesToSrcs[this.props.type]}
+        src={this.props.visible ? TypesToSrcs[this.props.type] : back}
         onClick={this.props.selectable ? callback : undefined} />
     );
   }

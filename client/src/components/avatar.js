@@ -1,21 +1,21 @@
 import React from 'react';
-import styles from "components/token-icon.module.css";
-import token from "img/token.png";
+import styles from "components/avatar.module.css";
+import avatar from "img/avatar.png";
 
-class TokenIcon extends React.Component {
+class Avatar extends React.Component {
   render() {
     return (
       <div className={styles.container}>
       <img
         className={styles.img}
-        src={token}>
+        src={avatar}>
       </img>
       <div className={styles.text}>
-      {this.props.number}
+      {this.props.id}
       </div>
       </div>
     );
   }
 }
 
-export default TokenIcon;
+export default Avatar;

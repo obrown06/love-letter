@@ -40,8 +40,11 @@ int main(int argc, char* argv[]) {
   Account account("nick", "meh", "nick@gmail.com");
   storage->InsertOrUpdateAccount(account);
 
-  Account account2("chau", "meh", "nick@gmail.com");
+  Account account2("brick", "meh", "nick@gmail.com");
   storage->InsertOrUpdateAccount(account2);
+
+  Account account3("chau", "meh", "nick@gmail.com");
+  storage->InsertOrUpdateAccount(account3);
 
   auto dispatcher = std::make_unique<HandlerDispatcher>();
   InitAndRegisterHandlers(storage.get(),

@@ -1,4 +1,24 @@
-.playerCard {
-  width: 100px;
-  height: 150px;
+.playerElementContainer {
+  width: 80px;
+  height: 80px;
+  display: inline-block;
+}
+
+.turnArrowContainer {
+  width: 50px;
+  height: 60px;
+  display: inline-block;
+}
+
+.cardsContainer {
+  display: inline-block;
+}
+
+.img {
+  height: 100%;
+  width: 100%;
+}
+
+.faded {
+  opacity: 0.3;
 }
