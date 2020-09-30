@@ -187,16 +187,18 @@ class GameInProgress extends React.Component {
     const cardPredictionDeck = !this.requiresPrediction() ? null : <SelectableDeck selectCallback={this.predictCardType} />;
     return (
       <div>
-        GAME IN PROGRESS
         {players}
-        <Deck
-          selectable={this.isDeckSelectable()}
-          selectCallback={this.drawCard}
-          size={this.getCurrentRound().deck_size} />
-        <RoundIcon number={this.props.data.rounds.length} />
-        <TokenIcon number={this.props.data.tokens_to_win} />
-        <div style={{border: '2px solid black'}}>
-          HAND: {hand}
+        <div className={styles.deckContainer}>
+          <Deck
+            selectable={this.isDeckSelectable()}
+            selectCallback={this.drawCard}
+            size={this.getCurrentRound().deck_size} />
+        </div>
+        <div className={styles.roundIconContainer}>
+          <RoundIcon number={this.props.data.rounds.length} />
+        </div>
+        <div className={styles.handContainer}>
+          {hand}
         </div>
         {cardPredictionDeck}
       </div>

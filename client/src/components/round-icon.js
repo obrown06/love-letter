@@ -1,11 +1,18 @@
 import React from 'react';
-import styles from "components/public-player.module.css";
+import shield from "img/shield.jpg";
+import styles from "components/round-icon.module.css";
 
 class RoundIcon extends React.Component {
   render() {
     return (
-      <div style={{border: '2px solid black'}}>
-        ROUND: {this.props.number}
+      <div className={styles.container}>
+      <img
+        className={styles.img}
+        src={shield}>
+      </img>
+      <div className={styles.text}>
+      {this.props.number}
+      </div>
       </div>
     );
   }

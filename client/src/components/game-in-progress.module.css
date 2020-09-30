@@ -1,4 +1,38 @@
 .handCard {
   width: 150px;
   height: 200px;
+  margin: auto;
+  display: inline-block;
+}
+
+.deckContainer {
+  position: absolute;
+  top: 35%;
+  left: 46.4%;
+  height: 100px;
+  width: 100px;
+}
+
+.tokenContainer {
+  position: absolute;
+  top: 5%;
+  left: 47.3%;
+  height: 100px;
+  width: 100px;
+}
+
+.roundIconContainer {
+  position: absolute;
+  top: 3%;
+  left: 47.3%;
+  height: 100px;
+  width: 100px;
+}
+
+.handContainer {
+  position: absolute;
+  bottom: 0%;
+  width: 100%;
+  height: 155px;
+  text-align: center;
 }

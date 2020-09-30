@@ -1,0 +1,17 @@
+.img {
+  height: 100%;
+  width: 100%;
+}
+
+.container {
+  height: 75%;
+  width: 75%;
+  position: relative;
+}
+
+.text {
+  position: absolute;
+  top: 30%;
+  left: 44%;
+  font-size: 20px;
+}
