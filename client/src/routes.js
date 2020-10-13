@@ -7,6 +7,7 @@ import Header from 'components/header.js';
 import UserProfile from 'utils/user-profile.js';
 import { checkAuthenticated } from 'utils/auth.js';
 import { Route, Switch, Redirect } from 'react-router-dom';
+import {withRouter} from 'react-router';
 import { myaxios } from 'utils/axios.js';
 
 class Routes extends React.Component {
@@ -43,11 +44,12 @@ class Routes extends React.Component {
   }
 
   render() {
+    const excludePath = "/games/";
     return (
       <div>
-        <Header
+        {!this.props.location.pathname.startsWith(excludePath) && <Header
           loggedIn = {this.state.loggedIn}
-          logoutCallback={this.handleLogout}/>
+          logoutCallback={this.handleLogout}/>}
         <Switch>
           <Route exact path="/home" render={props => (
             <Home
@@ -75,4 +77,4 @@ class Routes extends React.Component {
   }
 }
 
-export default Routes;
+export default withRouter(Routes);
