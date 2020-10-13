@@ -1,8 +1,8 @@
 import React from 'react';
 import Card from 'components/card.js'
-import styles from "components/public-player.module.css";
+import styles from "components/selectable-deck.module.css";
 
-class Deck extends React.Component {
+class SelectableDeck extends React.Component {
 
   constructor(props) {
     super(props);
@@ -11,10 +11,13 @@ class Deck extends React.Component {
 
   renderCard(type) {
     return (
-      <Card
-        selectCallback={this.props.selectCallback}
-        selectable={true}
-        type={type} />
+      <div className={styles.cardContainer}>
+        <Card
+          selectCallback={this.props.selectCallback}
+          selectable={true}
+          visible={true}
+          type={type} />
+      </div>
     );
   }
 
@@ -22,12 +25,11 @@ class Deck extends React.Component {
     const cardTypes = [1, 2, 3, 4, 5, 6, 7, 8];
     const cards = cardTypes.map(type => this.renderCard(type));
     return (
-      <div style={{border: '2px solid black'}}>
-        SELECTABLE DECK
+      <div className={styles.cardsContainer}>
         {cards}
       </div>
     );
   }
 }
 
-export default Deck;
+export default SelectableDeck;

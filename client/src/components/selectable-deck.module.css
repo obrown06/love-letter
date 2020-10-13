@@ -1,0 +1,9 @@
+.cardContainer {
+  width: 80px;
+  height: 80px;
+  display: inline-block;
+}
+
+.cardsContainer {
+  display: inline-block;
+}

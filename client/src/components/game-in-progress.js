@@ -20,14 +20,15 @@ const MoveTypes = {
 class GameInProgress extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      predictedCardType: 0,
+    }
+
     this.drawCard = this.drawCard.bind(this);
     this.discardCard = this.discardCard.bind(this);
     this.selectPlayer = this.selectPlayer.bind(this);
     this.viewPlayer = this.viewPlayer.bind(this);
     this.predictCardType = this.predictCardType.bind(this);
-    this.state = {
-      predictedCardType: 0,
-    }
   }
 
   getCurrentRound() {
@@ -174,6 +175,14 @@ class GameInProgress extends React.Component {
     );
   }
 
+  renderSelectableDeck() {
+    return (
+      <div className={styles.selectableDeckContainer}>
+        <SelectableDeck selectCallback={this.predictCardType} />
+      </div>
+    );
+  }
+
   render() {
     const players = this.props.data.players.map((player) =>
       <div key={player.player_id}>
@@ -184,7 +193,7 @@ class GameInProgress extends React.Component {
     );
     const hand = !this.userInRound() ? null :
                     this.getRoundPlayerForUser().held_cards.map((type) => this.renderCard(type));
-    const cardPredictionDeck = !this.requiresPrediction() ? null : <SelectableDeck selectCallback={this.predictCardType} />;
+    const cardPredictionDeck = !this.requiresPrediction() ? null : this.renderSelectableDeck();
     return (
       <div>
         {players}
