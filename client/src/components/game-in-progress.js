@@ -4,6 +4,7 @@ import Deck from 'components/deck.js'
 import GameLobby from 'components/game-lobby.js'
 import PublicPlayer from 'components/public-player.js'
 import RoundIcon from 'components/round-icon.js'
+import Scroll from 'components/scroll.js'
 import SelectableDeck from 'components/selectable-deck.js'
 import TokenIcon from 'components/token-icon.js'
 import UserProfile from 'utils/user-profile.js';
@@ -210,6 +211,9 @@ class GameInProgress extends React.Component {
           {hand}
         </div>
         {cardPredictionDeck}
+        <div className={styles.scrollContainer}>
+          <Scroll data={this.props.data} />
+        </div>
       </div>
     );
   }

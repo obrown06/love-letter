@@ -21,6 +21,14 @@
   width: 400px;
 }
 
+.scrollContainer {
+  position: absolute;
+  top: 120px;
+  right: 50px;
+  height: 350px;
+  width: 350px;
+}
+
 .tokenContainer {
   position: absolute;
   top: 5%;
