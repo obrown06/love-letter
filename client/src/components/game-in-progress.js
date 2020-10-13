@@ -3,7 +3,6 @@ import Card from "components/card.js"
 import Deck from 'components/deck.js'
 import GameLobby from 'components/game-lobby.js'
 import PublicPlayer from 'components/public-player.js'
-import RoundIcon from 'components/round-icon.js'
 import Scroll from 'components/scroll.js'
 import SelectableDeck from 'components/selectable-deck.js'
 import TokenIcon from 'components/token-icon.js'
@@ -203,9 +202,6 @@ class GameInProgress extends React.Component {
             selectable={this.isDeckSelectable()}
             selectCallback={this.drawCard}
             size={this.getCurrentRound().deck_size} />
-        </div>
-        <div className={styles.roundIconContainer}>
-          <RoundIcon number={this.props.data.rounds.length} />
         </div>
         <div className={styles.handContainer}>
           {hand}
