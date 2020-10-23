@@ -1,6 +1,8 @@
 import React from 'react';
 import { myaxios } from 'utils/axios.js';
 import styles from "components/header.module.css";
+import logo from "img/logo.jpg";
+import authbutton from "img/auth-button.jpg";
 import { Link } from 'react-router-dom';
 
 class Header extends React.Component {
@@ -21,14 +23,36 @@ class Header extends React.Component {
     });
   }
 
+  renderAuthButton(text) {
+    return (
+      <div className={styles.authButton}>
+      <img
+        className={styles.authButtonImg}
+        src={authbutton}/>
+        <div className={styles.authButtonText}>
+          {text}
+        </div>
+      </div>
+    );
+  }
+
   render() {
     let authButton = this.props.loggedIn ?
-      <button onClick={this.handleLogout}>Logout</button> :
-      <Link to="/login"><button>Login</button></Link>;
+      <div onClick={this.handleLogout}>{this.renderAuthButton("Log Out")}</div> :
+      <Link to="/login">{this.renderAuthButton("Log In")}</Link>;
     return (
       <div className={styles.container}>
-        I am a header.
-        {authButton}
+        <div className={styles.logoContainer}>
+        <Link to="/">
+        <img
+          className={styles.img}
+          src={logo}>
+        </img>
+        </Link>
+        </div>
+        <div className={styles.authButtonContainer}>
+          {authButton}
+        </div>
       </div>
     );
   }

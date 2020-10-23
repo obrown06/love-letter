@@ -1,5 +1,51 @@
 .container {
-  height: 100px;
+  height: 85px;
   width: 100%;
-  border: 2px solid black;
+  border: 1px solid grey;
+}
+
+.logoContainer {
+  margin-left: 15px;
+  margin-top: 15px;
+  height: 50px;
+  width: auto;
+}
+
+.img {
+  max-height: 50px;
+}
+
+.img:hover {
+  opacity: 0.8;
+  transition: opacity .15s ease-out;
+}
+
+.authButtonImg {
+  max-height: 50px;
+}
+
+.authButtonContainer {
+  position: absolute;
+  right: 15px;
+  top: 15px;
+}
+
+.authButton {
+  height: 100%;
+  width: 100%;
+  position: relative;
+  cursor: pointer;
+}
+
+.authButton:hover {
+  opacity: 0.8;
+  transition: opacity .15s ease-out;
+}
+
+.authButtonText {
+  position: absolute;
+  top: 25%;
+  left: 32%;
+  font-size: 18px;
+  color: black;
 }
