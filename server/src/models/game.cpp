@@ -666,7 +666,7 @@ GameUpdate::Move::MoveType Game::Round::Turn::GetNextMoveType() const {
 
 std::string Game::Round::Turn::GetNextMoveInstruction() const {
   if (NextMoveRequiresPrediction()) {
-    return kPredictAndSelectInstruction;
+    return kInstructionPrefix + kPredictAndSelectInstruction;
   }
   return kInstructionPrefix + kMoveTypesToInstructions.at(GetNextMoveType());
 }

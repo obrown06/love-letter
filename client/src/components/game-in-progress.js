@@ -1,6 +1,7 @@
 import React from 'react';
 import Card from "components/card.js"
 import Deck from 'components/deck.js'
+import ExitButton from 'components/exit-button.js'
 import GameLobby from 'components/game-lobby.js'
 import Instruction from 'components/instruction.js'
 import PublicPlayer from 'components/public-player.js'
@@ -195,10 +196,8 @@ class GameInProgress extends React.Component {
 
   render() {
     const players = this.props.data.players.map((player) =>
-      <div key={player.player_id}>
-        <br></br>
+      <div key={player.player_id} className={styles.playerContainer}>
         {this.renderPlayer(player)}
-        <br></br>
       </div>
     );
 
@@ -208,7 +207,16 @@ class GameInProgress extends React.Component {
     const instruction = !this.userHasTurn() ? null : this.renderInstruction();
     return (
       <div>
-        {players}
+        <div className={styles.playersContainer}>
+          <div className={styles.playersTitle}>
+            The Players
+          </div>
+          <br></br>
+          {players}
+        </div>
+        <div className={styles.exitButtonContainer}>
+          <ExitButton />
+        </div>
         <div className={styles.deckContainer}>
           <Deck
             selectable={this.isDeckSelectable()}

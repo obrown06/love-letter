@@ -45,12 +45,35 @@
   width: 100px;
 }
 
+.playersContainer {
+  position: absolute;
+  top: 6%;
+  left: 20px;
+}
+
+.playerContainer {
+  padding: 5px;
+}
+
+.playersTitle {
+  padding-left: 55px;
+  font-size: 20px;
+}
+
 .roundIconContainer {
   position: absolute;
   top: 3%;
   left: 47.3%;
   height: 100px;
   width: 100px;
+}
+
+.exitButtonContainer {
+  position: absolute;
+  top: 3%;
+  right: 3%;
+  height: 50px;
+  width: 50px;
 }
 
 .handContainer {
