@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <map>
 #include <random>
 #include <sstream>
 
@@ -28,6 +29,16 @@ namespace {
     Card::GUARD,
     Card::GUARD
   };
+
+  const std::map<GameUpdate::Move::MoveType, std::string> kMoveTypesToInstructions = {
+    { GameUpdate::Move::MoveType::DRAW_CARD, "Draw a card from the center." },
+    { GameUpdate::Move::MoveType::DISCARD_CARD, "Play one of the cards in your hand." },
+    { GameUpdate::Move::MoveType::SELECT_PLAYER, "Select a player." },
+    { GameUpdate::Move::MoveType::VIEW_CARD, "View the other player's hand." }
+  };
+
+  const std::string kInstructionPrefix = "NEXT TURN: ";
+  const std::string kPredictAndSelectInstruction = "Select a player and predict their hand.";
 
   const std::string kGameSummaryMessage = "Game won by: ";
   const std::string kRoundSummaryMessage = "Round won by: ";
@@ -651,6 +662,13 @@ GameUpdate::Move::MoveType Game::Round::Turn::GetNextMoveType() const {
   GameUpdate::Move::MoveType type = GameUpdate::Move::GetNextMoveType(latest_move_type);
   std::cout << "returning from GetNextMoveType\n";
   return type;
+}
+
+std::string Game::Round::Turn::GetNextMoveInstruction() const {
+  if (NextMoveRequiresPrediction()) {
+    return kPredictAndSelectInstruction;
+  }
+  return kInstructionPrefix + kMoveTypesToInstructions.at(GetNextMoveType());
 }
 
 bool Game::Round::Turn::NextMoveRequiresPrediction() const {

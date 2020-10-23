@@ -55,6 +55,7 @@ public:
           std::vector<Card> GetDiscardableCards() const;
           const GameUpdate::Move& GetLatestMove() const;
           GameUpdate::Move::MoveType GetNextMoveType() const;
+          std::string GetNextMoveInstruction() const;
           bool NextMoveRequiresPrediction() const;
           int GetNumViewMoves() const;
           const Card GetDiscardedCard() const;

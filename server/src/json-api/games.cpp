@@ -94,6 +94,7 @@ Json::Value TurnToJSON(const Game::Round& round, const Game::Round::Turn& turn) 
     std::cout << "turn wasn't complete\n";
     const auto next_move_type = turn.GetNextMoveType();
     turn_node["next_move_type"] = next_move_type;
+    turn_node["instruction"] = turn.GetNextMoveInstruction();
     if (next_move_type == GameUpdate::Move::MoveType::DISCARD_CARD) {
       std::cout << "next move type is discard\n";
       for (const auto& discardable_card : turn.GetDiscardableCards()) {

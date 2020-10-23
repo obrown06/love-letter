@@ -29,6 +29,14 @@
   width: 350px;
 }
 
+.instructionContainer {
+  position: absolute;
+  top: 500px;
+  right: 50px;
+  height: 50px;
+  width: 300px;
+}
+
 .tokenContainer {
   position: absolute;
   top: 5%;

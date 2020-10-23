@@ -2,6 +2,7 @@ import React from 'react';
 import Card from "components/card.js"
 import Deck from 'components/deck.js'
 import GameLobby from 'components/game-lobby.js'
+import Instruction from 'components/instruction.js'
 import PublicPlayer from 'components/public-player.js'
 import Scroll from 'components/scroll.js'
 import SelectableDeck from 'components/selectable-deck.js'
@@ -29,6 +30,7 @@ class GameInProgress extends React.Component {
     this.selectPlayer = this.selectPlayer.bind(this);
     this.viewPlayer = this.viewPlayer.bind(this);
     this.predictCardType = this.predictCardType.bind(this);
+    this.renderInstruction = this.renderInstruction.bind(this);
   }
 
   getCurrentRound() {
@@ -183,6 +185,14 @@ class GameInProgress extends React.Component {
     );
   }
 
+  renderInstruction() {
+    return (
+      <div className={styles.instructionContainer}>
+        <Instruction data={this.getCurrentTurn().instruction} />
+      </div>
+    );
+  }
+
   render() {
     const players = this.props.data.players.map((player) =>
       <div key={player.player_id}>
@@ -191,9 +201,11 @@ class GameInProgress extends React.Component {
         <br></br>
       </div>
     );
+
     const hand = !this.userInRound() ? null :
                     this.getRoundPlayerForUser().held_cards.map((type) => this.renderCard(type));
     const cardPredictionDeck = !this.requiresPrediction() ? null : this.renderSelectableDeck();
+    const instruction = !this.userHasTurn() ? null : this.renderInstruction();
     return (
       <div>
         {players}
@@ -210,6 +222,7 @@ class GameInProgress extends React.Component {
         <div className={styles.scrollContainer}>
           <Scroll data={this.props.data} />
         </div>
+        {instruction}
       </div>
     );
   }
