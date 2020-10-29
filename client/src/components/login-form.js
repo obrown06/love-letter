@@ -3,6 +3,7 @@ import cookieClient from 'react-cookie';
 import UserProfile from 'utils/user-profile.js';
 import { myaxios } from 'utils/axios.js';
 import { Redirect } from 'react-router-dom';
+import styles from "components/login-form.module.css";
 
 
 class LoginForm extends React.Component {
@@ -37,26 +38,37 @@ class LoginForm extends React.Component {
 
   render() {
     return (
-      <div>
-      <form onSubmit={this.handleSubmit}>
-        <label htmlFor="username">username</label>
+      <div className={styles.container}>
+      <div className={styles.loginFormContainer}>
+      <div className={styles.loginFormTitle}>
+        LOGIN
+      </div>
+      <br></br>
+      <form onSubmit={this.handleSubmit} className={styles.form}>
         <input
           type="text"
           name="username"
+          placeholder="Username"
+          autocomplete="off"
           value={this.state.username}
           onChange={this.handleChange}
+          className={styles.input}
         />
 
-        <label htmlFor="password">password</label>
         <input
           type="password"
           name="password"
+          placeholder="Password"
           value={this.state.password}
           onChange={this.handleChange}
+          className={styles.input}
         />
 
-        <input type="submit" value="Log In" />
+        <br></br><br></br>
+
+        <input type="submit" value="Log In" className={styles.submitButton}/>
       </form>
+      </div>
       </div>
     );
   }

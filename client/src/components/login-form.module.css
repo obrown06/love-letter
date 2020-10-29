@@ -1,0 +1,48 @@
+.container {
+  position: absolute;
+  width: 100%;
+  left: 0%;
+  text-align: center;
+  display: block;
+}
+
+.loginFormContainer {
+  display: inline-block;
+  width: 200px;
+  margin-top: 100px;
+}
+
+.loginFormTitle {
+  font-size: 30px;
+  text-align: center;
+}
+
+.input {
+  height: 30px;
+  margin-bottom: 10px;
+  display: inline-block;
+  font-family: fantasy;
+  padding: 5px;
+  border: 1px solid grey;
+}
+
+.input:focus {
+  outline: none;
+}
+
+.form {
+  display: block;
+  text-align: center;
+}
+
+.submitButton {
+  height: 40px;
+  font-family: fantasy;
+  border: 1px solid grey;
+  width: 80px;
+  cursor: pointer;
+}
+
+.submitButton:hover {
+  background-color: #D7D5D5;
+}
