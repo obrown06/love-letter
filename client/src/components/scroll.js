@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from "components/scroll.module.css";
-import scroll from "img/scroll.jpg";
+import scroll from "img/scroll.png";
 
 
 class Scroll extends React.Component {

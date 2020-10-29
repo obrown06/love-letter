@@ -4,14 +4,11 @@ import avatar from "img/avatar.png";
 
 class Avatar extends React.Component {
   render() {
+    let width = this.props.chars_size * 8;
     return (
-      <div className={styles.container}>
-      <img
-        className={styles.img}
-        src={avatar}>
-      </img>
+      <div className={styles.container} style={{width: `${width}px`}}>
       <div className={styles.text}>
-      {this.props.id}
+        {this.props.id}
       </div>
       </div>
     );

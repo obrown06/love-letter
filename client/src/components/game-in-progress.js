@@ -11,6 +11,7 @@ import TokenIcon from 'components/token-icon.js'
 import UserProfile from 'utils/user-profile.js';
 import UpdateType from 'views/game.js'
 import styles from "components/game-in-progress.module.css";
+import lobby from "img/lobby.jpg";
 
 const MoveTypes = {
   DRAW_CARD: 1,
@@ -147,12 +148,32 @@ class GameInProgress extends React.Component {
     return current_round.turns[current_round.turns.length - 1];
   }
 
-  renderPlayer(player) {
+  renderPlayers(players) {
+    let max_id_len = 0;
+    for (let i = 0; i < players.length; i++) {
+      if (players[i].player_id.length > max_id_len) {
+        max_id_len = players[i].player_id.length;
+      }
+    }
+    const players_displayed = players.map((player) =>
+      <div key={player.player_id} className={styles.playerContainer}>
+        {this.renderPlayer(player, max_id_len)}
+      </div>
+    );
+    return (
+      <div>
+      {players_displayed}
+      </div>
+    );
+  }
+
+  renderPlayer(player, max_id_len) {
     const round_player_info = this.getCurrentRound().players.find((info) => {
       return info.player_id === player.player_id;
     });
     return (
       <PublicPlayer
+        avatar_chars_size={max_id_len}
         id={player.player_id}
         ntokens={player.tokens_held}
         active_in_round={round_player_info.still_in_round}
@@ -195,18 +216,24 @@ class GameInProgress extends React.Component {
   }
 
   render() {
-    const players = this.props.data.players.map((player) =>
-      <div key={player.player_id} className={styles.playerContainer}>
-        {this.renderPlayer(player)}
-      </div>
-    );
+    const players = this.renderPlayers(this.props.data.players);
 
     const hand = !this.userInRound() ? null :
                     this.getRoundPlayerForUser().held_cards.map((type) => this.renderCard(type));
     const cardPredictionDeck = !this.requiresPrediction() ? null : this.renderSelectableDeck();
     const instruction = !this.userHasTurn() ? null : this.renderInstruction();
     return (
-      <div>
+      <div className={styles.backgroundImageContainer}>
+        <img
+          className={styles.backgroundImage}
+          src={lobby}>
+        </img>
+        <div className={styles.titleContainer}>
+          <div
+            className={styles.title}>
+            Game: {this.props.gameId}
+          </div>
+        </div>
         <div className={styles.playersContainer}>
           <div className={styles.playersTitle}>
             The Players

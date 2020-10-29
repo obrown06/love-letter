@@ -4,7 +4,7 @@ import Card from "components/card.js"
 import TokenIcon from "components/token-icon.js"
 import commonStyles from "components/common.module.css"
 import styles from "components/public-player.module.css";
-import arrow from "img/arrow.jpg"
+import arrow from "img/arrow.png"
 
 class PublicPlayer extends React.Component {
 
@@ -68,8 +68,8 @@ class PublicPlayer extends React.Component {
       <div className={styles.turnArrowContainer}>
         {turnArrow}
       </div>
-      <div className={styles.playerElementContainer}>
-        <Avatar id={this.props.id} />
+      <div className={styles.avatarContainer}>
+        <Avatar id={this.props.id} chars_size={this.props.avatar_chars_size} />
       </div>
       <div className={styles.playerElementContainer}>
         <TokenIcon number={this.props.ntokens} />

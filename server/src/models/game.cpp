@@ -37,7 +37,7 @@ namespace {
     { GameUpdate::Move::MoveType::VIEW_CARD, "View the other player's hand." }
   };
 
-  const std::string kInstructionPrefix = "NEXT TURN: ";
+  const std::string kInstructionPrefix = "NEXT MOVE: ";
   const std::string kPredictAndSelectInstruction = "Select a player and predict their hand.";
 
   const std::string kGameSummaryMessage = "Game won by: ";

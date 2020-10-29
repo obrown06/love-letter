@@ -4,6 +4,11 @@
   display: inline-block;
 }
 
+.avatarContainer {
+  height: 60px;
+  display: inline-block;
+}
+
 .turnArrowContainer {
   width: 50px;
   height: 60px;

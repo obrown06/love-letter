@@ -40,6 +40,9 @@ int main(int argc, char* argv[]) {
   Account account("nick", "meh", "nick@gmail.com");
   storage->InsertOrUpdateAccount(account);
 
+  Account account4("reallyreallylongname", "meh", "nick@gmail.com");
+  storage->InsertOrUpdateAccount(account4);
+
   Account account2("brick", "meh", "nick@gmail.com");
   storage->InsertOrUpdateAccount(account2);
 

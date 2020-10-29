@@ -1,3 +1,28 @@
+.backgroundImage {
+  min-height: 100%;
+  max-width: 100%;
+  min-width: 100%;
+  overflow: hidden;
+  object-fit: cover;
+}
+
+.backgroundImageContainer {
+  height: 100vh;
+  margin: 0px;
+}
+
+.titleContainer {
+  position: absolute;
+  top: 5%;
+  width: 100%;
+  text-align: center;
+}
+
+.title {
+  color: white;
+  font-size: 40px;
+}
+
 .handCard {
   width: 150px;
   height: 200px;
@@ -16,15 +41,15 @@
 .selectableDeckContainer {
   position: absolute;
   bottom: 10%;
-  right: 5%;
+  right: 0px;
   height: 100px;
-  width: 400px;
+  width: 355px;
 }
 
 .scrollContainer {
   position: absolute;
-  top: 120px;
-  right: 50px;
+  top: 12%;
+  right: 20px;
   height: 350px;
   width: 350px;
 }
@@ -47,17 +72,14 @@
 
 .playersContainer {
   position: absolute;
-  top: 6%;
+  top: 15%;
   left: 20px;
-}
-
-.playerContainer {
-  padding: 5px;
 }
 
 .playersTitle {
   padding-left: 55px;
-  font-size: 20px;
+  font-size: 30px;
+  color: white;
 }
 
 .roundIconContainer {
@@ -70,8 +92,8 @@
 
 .exitButtonContainer {
   position: absolute;
-  top: 3%;
-  right: 3%;
+  top: 2%;
+  right: 2%;
   height: 50px;
   width: 50px;
 }
