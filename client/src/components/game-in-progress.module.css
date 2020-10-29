@@ -2,13 +2,12 @@
   min-height: 100%;
   max-width: 100%;
   min-width: 100%;
-  overflow: hidden;
   object-fit: cover;
 }
 
 .backgroundImageContainer {
-  height: 100vh;
-  margin: 0px;
+  height: 110vh;
+  overflow: hidden;
 }
 
 .titleContainer {

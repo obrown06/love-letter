@@ -31,6 +31,7 @@ class GameLobby extends React.Component {
             className={styles.players}>
             {players}
           </div>
+          <br></br><br></br>
           <div className={styles.startButton} onClick={this.props.handleStartGame}>
             Start Game
           </div>
