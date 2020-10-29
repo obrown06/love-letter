@@ -1,4 +1,38 @@
-.image {
-  max-width: 50px;
-  max-height: 50px;
+.close {
+  position: absolute;
+  right: 32px;
+  top: 32px;
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  border-radius: 50%;
+  border: 2px solid white;
+  transition: all .1s ease-out;
+}
+.close:hover {
+  background-color: white;
+}
+
+.close:before, .close:after {
+  position: absolute;
+  left: 15px;
+  content: ' ';
+  height: 20px;
+  width: 2px;
+  top: 5.7px;
+  background-color: white;
+}
+.close:before {
+  transform: rotate(45deg);
+}
+.close:after {
+  transform: rotate(-45deg);
+}
+
+.close:hover:before {
+  background-color: black;
+}
+
+.close:hover:after {
+  background-color: black;
 }

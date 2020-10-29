@@ -68,7 +68,10 @@ class Game extends React.Component {
       );
     } else if (!this.state.data.state || this.state.data.state == GameState.WAITING) {
       return (
-        <GameLobby players={this.state.data.players} handleStartGame={this.handleStartGame} />
+        <GameLobby
+          gameId={this.props.match.params.gameId}
+          players={this.state.data.players}
+          handleStartGame={this.handleStartGame} />
       );
     } else {
       return (

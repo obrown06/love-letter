@@ -6,13 +6,10 @@ import styles from "components/exit-button.module.css";
 class ExitButton extends React.Component {
   render() {
     return (
-      <div>
-        <Link to="/">
-          <img className={styles.image}
-          src={exit}>
-        </img>
-        </Link>
-      </div>
+      <Link to="/">
+        <div className={styles.close}>
+        </div>
+      </Link>
     );
   }
 }
