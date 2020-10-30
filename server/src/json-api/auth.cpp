@@ -8,3 +8,17 @@ std::string GetNotLoggedInJson() {
   Json::StreamWriterBuilder builder;
   return Json::writeString(builder, root);
 }
+
+std::string GetIncorrectPasswordJson() {
+  Json::Value root;
+  root["incorrect_password"] = true;
+  Json::StreamWriterBuilder builder;
+  return Json::writeString(builder, root);
+}
+
+std::string GetNoMatchingUsernameJson() {
+  Json::Value root;
+  root["no_matching_username"] = true;
+  Json::StreamWriterBuilder builder;
+  return Json::writeString(builder, root);
+}

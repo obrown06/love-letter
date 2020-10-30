@@ -1,7 +1,7 @@
 .container {
-  height: 85px;
+  height: 70px;
   width: 100%;
-  border: 1px solid grey;
+  border-bottom: 1px solid grey;
 }
 
 .logoContainer {

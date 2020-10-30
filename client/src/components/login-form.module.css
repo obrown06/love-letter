@@ -46,3 +46,15 @@
 .submitButton:hover {
   background-color: #D7D5D5;
 }
+
+.errorNotice {
+  color: red;
+  background-color: #F6C5C5;
+  border: 0.5px solid red;
+  width: 160px;
+  display: inline-block;
+  text-align: center;
+  padding-top: 15px;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}

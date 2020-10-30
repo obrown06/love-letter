@@ -12,6 +12,8 @@ class LoginForm extends React.Component {
     this.state = {
       username: '',
       password: '',
+      incorrect_password: false,
+      incorrect_Username: false
     }
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
@@ -22,6 +24,7 @@ class LoginForm extends React.Component {
   };
 
   handleSubmit(e) {
+    this.setState({ incorrect_password: false, incorrect_username: false })
     e.preventDefault();
     myaxios.post('http://localhost:3000/api/login/',
       {
@@ -29,14 +32,38 @@ class LoginForm extends React.Component {
         password: this.state.password
       },
       { withCredentials: true }
-    ).then(response => {
+    ).then((response) => {
       if (response.status === 200) {
         this.props.loginCallback(this.state.username, response.headers['set-cookie']);
+      }
+    }).catch((error) => {
+      if (error.response.data.incorrect_password) {
+        this.setState({ incorrect_password: true });
+      } else if (error.response.data.no_matching_username) {
+        this.setState({ incorrect_username: true });
       }
     });
   }
 
+  renderIncorrectUsernameNotice() {
+    return (
+      <div className={styles.errorNotice}>
+        No account with matching username!
+      </div>
+    );
+  }
+
+  renderIncorrectPasswordNotice() {
+    return (
+      <div className={styles.errorNotice}>
+        Incorrect Password!
+      </div>
+    );
+  }
+
   render() {
+    const incorrectUsernameNotice = !this.state.incorrect_username ? null : this.renderIncorrectUsernameNotice();
+    const incorrectPasswordNotice = !this.state.incorrect_password ? null : this.renderIncorrectPasswordNotice();
     return (
       <div className={styles.container}>
       <div className={styles.loginFormContainer}>
@@ -45,6 +72,7 @@ class LoginForm extends React.Component {
       </div>
       <br></br>
       <form onSubmit={this.handleSubmit} className={styles.form}>
+      {incorrectUsernameNotice}
         <input
           type="text"
           name="username"
@@ -54,6 +82,8 @@ class LoginForm extends React.Component {
           onChange={this.handleChange}
           className={styles.input}
         />
+
+        {incorrectPasswordNotice}
 
         <input
           type="password"

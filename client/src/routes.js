@@ -20,12 +20,12 @@ class Routes extends React.Component {
     this.handleLogin = this.handleLogin.bind(this);
     this.handleLogout = this.handleLogout.bind(this);
 
-    myaxios.interceptors.response.use(res => res, error => {
-      console.log("logging out!");
+    myaxios.interceptors.response.use((res) => res, (error) => {
       if (!checkAuthenticated(error.response)) {
+        console.log("logging out!");
         this.handleLogout();
       }
-      return error;
+      return Promise.reject(error);
     });
   }
 
