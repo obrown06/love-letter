@@ -1,0 +1,13 @@
+.submitButton {
+  height: 40px;
+  font-family: fantasy;
+  border: 1px solid grey;
+  cursor: pointer;
+  transition: background-color .05s ease-out;
+  padding-left: 22px;
+  padding-right: 22px;
+}
+
+.submitButton:hover {
+  background-color: #D7D5D5;
+}

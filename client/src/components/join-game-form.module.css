@@ -1,0 +1,28 @@
+.input {
+  height: 28px;
+  margin-bottom: 10px;
+  display: inline-block;
+  font-family: fantasy;
+  padding: 5px;
+  border: 1px solid grey;
+  margin-left: 10px;
+}
+
+.input:focus {
+  outline: none;
+}
+
+.submitButton {
+  height: 40px;
+  font-family: fantasy;
+  border: 1px solid grey;
+  cursor: pointer;
+  transition: background-color .05s ease-out;
+  margin-right: 10px;
+  padding-left: 22px;
+  padding-right: 22px;
+}
+
+.submitButton:hover {
+  background-color: #D7D5D5;
+}

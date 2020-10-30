@@ -2,55 +2,43 @@ import React from 'react';
 import UserProfile from 'utils/user-profile.js';
 import { myaxios } from 'utils/axios.js';
 import { Redirect } from 'react-router-dom';
+import styles from 'components/create-game-form.module.css';
+var hri = require('human-readable-ids').hri;
 
 class CreateGameForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      game_id: '',
-      gameCreated: false,
+      game_id: null,
     }
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleChange = this.handleChange.bind(this);
+    this.handleCreateGame = this.handleCreateGame.bind(this);
   }
 
-  handleChange = ({ target }) => {
-    this.setState({ [target.name]: target.value });
-  };
-
-  handleSubmit(e) {
+  handleCreateGame(e) {
     e.preventDefault();
     myaxios.post('http://localhost:3000/api/games/',
       {
-        game_id: this.state.game_id,
+        game_id: hri.random(),
         creator: UserProfile.getUserName(),
       },
       { withCredentials: true }
     ).then(response => {
       if (response.status === 200) {
-        this.setState({ gameCreated: true});
+        this.setState({ game_id: response.data.game_id });
       }
     });
   }
 
   render() {
 
-    if (this.state.gameCreated) {
+    if (this.state.game_id) {
       return ( <Redirect to={"/games/" + this.state.game_id} /> );
     }
 
     return (
       <div>
-      <form onSubmit={this.handleSubmit}>
-        <label htmlFor="game_id">Game ID </label>
-        <input
-          type="text"
-          name="game_id"
-          value={this.state.game_id}
-          onChange={this.handleChange}
-        />
-
-        <input type="submit" value="Create New Game" />
+      <form onSubmit={this.handleCreateGame}>
+        <input type="submit" value="Create New Game" className={styles.submitButton}/>
       </form>
       </div>
     );

@@ -30,7 +30,7 @@ GamesHandler::HandleCreateGameRequest(const http::request<http::string_body>& re
   try {
     Game game = JSONToGame(req.body());
     registry_->InsertGame(game);
-    return MakeJsonHttpResponse(http::status::ok, req, std::string("Created game!"));
+    return MakeJsonHttpResponse(http::status::ok, req, GetCreatedGameResponse(game.GetId())); 
   }
   catch (InvalidJsonException& e) {
     return MakeJsonHttpResponse(http::status::bad_request, req, std::string("Invalid request format!"));

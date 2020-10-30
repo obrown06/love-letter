@@ -3,6 +3,12 @@
 
 #include <iostream>
 
+std::string GetCreatedGameResponse(const std::string& game_id) {
+  Json::Value root;
+  root["game_id"] = game_id;
+  Json::StreamWriterBuilder builder;
+  return Json::writeString(builder, root);
+}
 Game JSONToGame(const std::string& json) {
   Json::Value root;
   Json::CharReaderBuilder builder;

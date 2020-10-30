@@ -19,4 +19,6 @@ Json::Value TurnToJSON(const Game::Round& round, const Game::Round::Turn& turn);
 
 Json::Value MoveToJSON(const GameUpdate::Move& move);
 
+std::string GetCreatedGameResponse(const std::string& game_id);
+
 #endif

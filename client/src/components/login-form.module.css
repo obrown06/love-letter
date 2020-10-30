@@ -41,6 +41,7 @@
   border: 1px solid grey;
   width: 80px;
   cursor: pointer;
+  transition: background-color .05s ease-out;
 }
 
 .submitButton:hover {
