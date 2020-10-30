@@ -60,3 +60,11 @@ MakeNotLoggedInResponse(const http::request<http::string_body>& req) {
   res.prepare_payload();
   return res;
 }
+
+http::response<http::string_body>
+MakeJsonHttpResponseWithLoginCookie(const http::request<http::string_body>& req,
+                                    const std::string& key) {
+  auto res = MakeJsonHttpResponse(http::status::ok, req, std::string("Success!"));
+  res.set(http::field::set_cookie, "sessionid=" + key + "; Path=/");
+  return res;
+}

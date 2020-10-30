@@ -22,3 +22,10 @@ std::string GetNoMatchingUsernameJson() {
   Json::StreamWriterBuilder builder;
   return Json::writeString(builder, root);
 }
+
+std::string GetPreexistingAccountJson() {
+  Json::Value root;
+  root["preexisting_account"] = true;
+  Json::StreamWriterBuilder builder;
+  return Json::writeString(builder, root);
+}

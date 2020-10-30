@@ -9,4 +9,6 @@ std::string GetIncorrectPasswordJson();
 
 std::string GetNoMatchingUsernameJson();
 
+std::string GetPreexistingAccountJson();
+
 #endif

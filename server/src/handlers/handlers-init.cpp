@@ -11,7 +11,7 @@ void InitAndRegisterHandlers(Storage* storage,
                              AccountsRegistry* accounts_registry,
                              GamesRegistry* games_registry,
                              HandlerDispatcher* dispatcher) {
- auto accounts_handler = std::make_shared<AccountsHandler>(storage, authenticator);
+ auto accounts_handler = std::make_shared<AccountsHandler>(storage, authenticator, accounts_registry);
  auto login_handler = std::make_shared<LoginHandler>(storage, authenticator, accounts_registry);
  auto logout_handler = std::make_shared<LogoutHandler>(authenticator, accounts_registry);
  auto games_handler = std::make_shared<GamesHandler>(storage, authenticator, games_registry);

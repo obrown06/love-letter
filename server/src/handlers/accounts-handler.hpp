@@ -16,7 +16,11 @@ namespace http = beast::http;                   // from <boost/beast/http.hpp>
 
 class AccountsHandler : public BaseHandler {
   public:
-    AccountsHandler(Storage* storage, Authenticator* authenticator) : storage_(storage), authenticator_(authenticator) {}
+    AccountsHandler(Storage* storage,
+                    Authenticator* authenticator,
+                    AccountsRegistry* registry) : storage_(storage),
+                                                  authenticator_(authenticator),
+                                                  accounts_registry_(registry) {}
 
     virtual std::string GetRoute() const;
 
@@ -28,6 +32,7 @@ class AccountsHandler : public BaseHandler {
     http::response<http::string_body> HandlePOST(const http::request<http::string_body>& req);
     Storage* storage_;
     Authenticator* authenticator_;
+    AccountsRegistry* accounts_registry_;
 };
 
 #endif

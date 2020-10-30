@@ -25,4 +25,8 @@ MakeRedirectResponse(const http::request<http::string_body>& req,
 http::response<http::string_body>
 MakeNotLoggedInResponse(const http::request<http::string_body>& req);
 
+http::response<http::string_body>
+MakeJsonHttpResponseWithLoginCookie(const http::request<http::string_body>& req,
+                                    const std::string& key);
+
 #endif

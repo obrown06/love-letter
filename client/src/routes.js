@@ -54,7 +54,8 @@ class Routes extends React.Component {
           <Route exact path="/home" render={props => (
             <Home
               {...props}
-              loggedIn={this.state.loggedIn}/>
+              loggedIn={this.state.loggedIn}
+              signupCallback={this.handleLogin}/>
           )} />
           <Route exact path="/">
             <Redirect to="/home" />

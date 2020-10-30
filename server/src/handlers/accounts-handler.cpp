@@ -4,6 +4,7 @@
 #include "models/account.hpp"
 #include "storage/exceptions.hpp"
 #include "json-api/accounts.hpp"
+#include "json-api/auth.hpp"
 #include "json-api/exceptions.hpp"
 
 #include <sstream>
@@ -55,12 +56,13 @@ AccountsHandler::HandlePOST(const http::request<http::string_body>& req) {
   try {
     Account account = JSONToAccount(req.body());
     storage_->InsertAccount(account);
-    return MakeJsonHttpResponse(http::status::ok, req, std::string());
+    std::string session_key = accounts_registry_->InsertAccount(account);
+    return MakeJsonHttpResponseWithLoginCookie(req, session_key);
   }
   catch (InvalidJsonException& e) {
     return MakeJsonHttpResponse(http::status::bad_request, req, std::string("Invalid request format!"));
   }
   catch (StorageException& e) {
-    return MakeJsonHttpResponse(http::status::bad_request, req, std::string("Account with username already exists!"));
+    return MakeJsonHttpResponse(http::status::bad_request, req, GetPreexistingAccountJson());
   }
 }

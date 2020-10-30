@@ -34,9 +34,7 @@ LoginHandler::HandlePOST(const http::request<http::string_body>& req) {
       return MakeJsonHttpResponse(http::status::bad_request, req, GetIncorrectPasswordJson());
     }
     std::string session_key = accounts_registry_->InsertAccount(account);
-    auto res = MakeJsonHttpResponse(http::status::ok, req, std::string("Success!"));
-    res.set(http::field::set_cookie, "sessionid=" + session_key + "; Path=/");
-    return res;
+    return MakeJsonHttpResponseWithLoginCookie(req, session_key);
   }
   catch (InvalidJsonException& e) {
     return MakeJsonHttpResponse(http::status::bad_request, req, std::string("Invalid request format!"));
