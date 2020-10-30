@@ -130,6 +130,7 @@ public:
   std::vector<Game::GamePlayer> GetWinners() const;
   std::string GetSummary() const;
   bool IsComplete() const;
+  void CheckGameNotStarted() const;
 
   void ProcessUpdate(const GameUpdate& update);
 private:
@@ -140,7 +141,6 @@ private:
   void MaybeUpdateGameState();
   void AdvanceRound();
   void CheckGameInProgress() const;
-  void CheckGameNotStarted() const;
   Game::GamePlayer* GetMutablePlayer(const std::string& player_id);
   Round* GetMutableLatestRound();
   const Round& GetLatestRound() const;

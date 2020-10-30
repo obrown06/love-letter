@@ -25,6 +25,9 @@ WebsocketSession::on_accept(beast::error_code ec)
   } catch (NoGameRegisteredException& e){
     ws_.write(net::buffer(GetNoGameWithIdJson(game_id_)));
     return fail("accept", e.what());
+  } catch (GameAlreadyStartedException& e) {
+    ws_.write(net::buffer(GetGameAlreadyStartedJson(game_id_)));
+    return fail("accept", e.what());
   }
 
   do_read();

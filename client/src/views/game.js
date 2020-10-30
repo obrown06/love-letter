@@ -27,6 +27,7 @@ class Game extends React.Component {
     this.state = {
       data: {},
       gameNotFound: false,
+      gameLocked: false,
     };
   }
 
@@ -46,6 +47,9 @@ class Game extends React.Component {
       let parsed = JSON.parse(evt.data);
       if (parsed.game_found !== undefined && parsed.game_found === false) {
         this.setState({ gameNotFound: true });
+        return;
+      } else if (parsed.game_already_started !== undefined) {
+        this.setState({ gameLocked: true });
         return;
       }
       this.setState({
@@ -77,9 +81,10 @@ class Game extends React.Component {
       return (
         <Redirect to="/login" />
       );
-    } else if (!this.state.data.state || this.state.data.state == GameState.WAITING) {
+    } else if (this.state.gameLocked || !this.state.data.state || this.state.data.state == GameState.WAITING) {
       return (
         <GameLobby
+          gameLocked={this.state.gameLocked}
           gameId={this.props.match.params.gameId}
           players={this.state.data.players}
           handleStartGame={this.handleStartGame} />

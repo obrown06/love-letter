@@ -13,8 +13,8 @@
 
 .textContainer {
   position: absolute;
-  top: 100px;
-  left: 200px;
+  top: 20%;
+  left: 12%;
   color: white;
 }
 
@@ -57,4 +57,17 @@
   right: 3%;
   height: 50px;
   width: 50px;
+}
+
+.lockedImageContainer {
+  position: absolute;
+  left: 10.9%;
+  top: 30%;
+  height: 50px;
+  width: 50px;
+}
+
+.lockedImage {
+  max-height: 100%;
+  max-width: 100%;
 }

@@ -23,4 +23,6 @@ std::string GetNoGameWithIdJson(const std::string& game_id);
 
 std::string GetCreatedGameResponse(const std::string& game_id);
 
+std::string GetGameAlreadyStartedJson(const std::string& game_id);
+
 #endif

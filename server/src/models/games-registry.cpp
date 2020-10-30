@@ -19,6 +19,7 @@ void GamesRegistry::InsertSession(const std::string& game_id, WebsocketSession* 
   if (registry_.find(game_id) == registry_.end()) {
     throw NoGameRegisteredException(game_id);
   }
+  registry_.at(game_id).first.CheckGameNotStarted();
   registry_.at(game_id).second.insert(session);
 }
 

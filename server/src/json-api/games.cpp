@@ -10,6 +10,14 @@ std::string GetCreatedGameResponse(const std::string& game_id) {
   return Json::writeString(builder, root);
 }
 
+std::string GetGameAlreadyStartedJson(const std::string& game_id) {
+  Json::Value root;
+  root["game_already_started"] = true;
+  root["game_id"] = game_id;
+  Json::StreamWriterBuilder builder;
+  return Json::writeString(builder, root);
+}
+
 std::string GetNoGameWithIdJson(const std::string& game_id) {
   Json::Value root;
   root["game_found"] = false;
