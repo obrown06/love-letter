@@ -26,6 +26,7 @@ class Game extends React.Component {
     this.ws = new WebSocket('ws://localhost:8000/' + this.props.match.params.gameId);
     this.state = {
       data: {},
+      gameNotFound: false,
     };
   }
 
@@ -42,8 +43,13 @@ class Game extends React.Component {
     this.ws.onmessage = evt => {
       console.log('recieved ping: ');
       console.log(evt.data);
+      let parsed = JSON.parse(evt.data);
+      if (parsed.game_found !== undefined && parsed.game_found === false) {
+        this.setState({ gameNotFound: true });
+        return;
+      }
       this.setState({
-        data: JSON.parse(evt.data),
+        data: parsed,
       });
     }
 
@@ -62,6 +68,11 @@ class Game extends React.Component {
   }
 
   render() {
+    if (this.state.gameNotFound) {
+      return (
+        <Redirect to="/not-found" />
+      );
+    }
     if (!this.props.loggedIn) {
       return (
         <Redirect to="/login" />

@@ -1,5 +1,5 @@
-#ifndef SERVER_JSON_API_GAMES_H
-#define SERVER_JSON_API_GAMES_H
+#ifndef SERVER_JSON_API_GAMES_HPP
+#define SERVER_JSON_API_GAMES_HPP
 
 #include "models/account.hpp"
 #include "models/game.hpp"
@@ -18,6 +18,8 @@ Json::Value RoundToJSON(const Game::Round& round);
 Json::Value TurnToJSON(const Game::Round& round, const Game::Round::Turn& turn);
 
 Json::Value MoveToJSON(const GameUpdate::Move& move);
+
+std::string GetNoGameWithIdJson(const std::string& game_id);
 
 std::string GetCreatedGameResponse(const std::string& game_id);
 

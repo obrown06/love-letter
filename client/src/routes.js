@@ -71,6 +71,9 @@ class Routes extends React.Component {
               {...props}
               loggedIn={this.state.loggedIn}/>
           )} />
+          <Route path="/not-found" render={(props) => (
+            <Route component={NotFound}/>
+          )} />
           <Route component={NotFound}/>
         </Switch>
       </div>

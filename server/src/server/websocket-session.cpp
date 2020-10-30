@@ -1,6 +1,7 @@
 #include "server/websocket-session.hpp"
 #include "models/exceptions.hpp"
 #include "json-api/game-updates.hpp"
+#include "json-api/games.hpp"
 
 #include <iostream>
 
@@ -22,6 +23,7 @@ WebsocketSession::on_accept(beast::error_code ec)
   try {
     registry_->InsertSession(game_id_, this);
   } catch (NoGameRegisteredException& e){
+    ws_.write(net::buffer(GetNoGameWithIdJson(game_id_)));
     return fail("accept", e.what());
   }
 
