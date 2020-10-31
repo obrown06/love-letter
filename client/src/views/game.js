@@ -28,6 +28,7 @@ class Game extends React.Component {
       data: {},
       gameNotFound: false,
       gameLocked: false,
+      leavingPlayerId: null,
     };
   }
 
@@ -50,6 +51,9 @@ class Game extends React.Component {
         return;
       } else if (parsed.game_already_started !== undefined) {
         this.setState({ gameLocked: true });
+        return;
+      } else if (parsed.player_left_and_game_ended !== undefined) {
+        this.setState({ leavingPlayerId: parsed.player_id });
         return;
       }
       this.setState({
@@ -84,7 +88,7 @@ class Game extends React.Component {
     } else if (this.state.gameLocked || !this.state.data.state || this.state.data.state == GameState.WAITING) {
       return (
         <GameLobby
-          gameLocked={this.state.gameLocked}
+          gameLocked={this.state.gameLocked || this.state.leavingPlayerId}
           gameId={this.props.match.params.gameId}
           players={this.state.data.players}
           handleStartGame={this.handleStartGame} />
@@ -94,7 +98,8 @@ class Game extends React.Component {
         <GameInProgress
           ws={this.ws}
           data={this.state.data}
-          gameId={this.props.match.params.gameId}/>
+          gameId={this.props.match.params.gameId}
+          leavingPlayerId={this.state.leavingPlayerId}/>
       );
     }
   }

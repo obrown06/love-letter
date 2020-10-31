@@ -40,10 +40,14 @@ class Scroll extends React.Component {
   renderMessages(game) {
     let gameSummary = !game.summary ? null : <div className={styles.gameSummary}> {game.summary} </div>;
     let roundSummaries = game.rounds.map((round, idx) => this.renderRoundSummary(round, idx + 1)).reverse();
+    let leavingPlayerMessage = this.props.leavingPlayerId ? this.props.leavingPlayerId + " left the game." : null;
     return (
       <div>
         <div className={styles.title}>
           Ye Olde Game History
+        </div>
+        <div className={styles.roundSummary}>
+          {leavingPlayerMessage}
         </div>
         {gameSummary}
         {roundSummaries}

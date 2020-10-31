@@ -104,3 +104,15 @@
   height: 155px;
   text-align: center;
 }
+
+.lockedImageContainer {
+  position: absolute;
+  height: 50px;
+  text-align: center;
+  width: 100%;
+}
+
+.lockedImage {
+  max-height: 100%;
+  max-width: 100%;
+}

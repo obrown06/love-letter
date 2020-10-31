@@ -18,6 +18,15 @@ std::string GetGameAlreadyStartedJson(const std::string& game_id) {
   return Json::writeString(builder, root);
 }
 
+std::string GetPlayerLeftAndGameEndedJson(const std::string& game_id, const std::string& player_id) {
+  Json::Value root;
+  root["player_left_and_game_ended"] = true;
+  root["game_id"] = game_id;
+  root["player_id"] = player_id;
+  Json::StreamWriterBuilder builder;
+  return Json::writeString(builder, root);
+}
+
 std::string GetNoGameWithIdJson(const std::string& game_id) {
   Json::Value root;
   root["game_found"] = false;

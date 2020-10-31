@@ -12,6 +12,7 @@ import UserProfile from 'utils/user-profile.js';
 import UpdateType from 'views/game.js'
 import styles from "components/game-in-progress.module.css";
 import lobby from "img/lobby.jpg";
+import padlock from "img/padlock.png";
 
 const MoveTypes = {
   DRAW_CARD: 1,
@@ -215,6 +216,15 @@ class GameInProgress extends React.Component {
     );
   }
 
+  renderLockedSymbol() {
+    return (
+      <div className={styles.lockedImageContainer}>
+      <img
+        src={padlock} className={styles.lockedImage}></img>
+        </div>
+    );
+  }
+
   render() {
     const players = this.renderPlayers(this.props.data.players);
 
@@ -222,6 +232,7 @@ class GameInProgress extends React.Component {
                     this.getRoundPlayerForUser().held_cards.map((type) => this.renderCard(type));
     const cardPredictionDeck = !this.requiresPrediction() ? null : this.renderSelectableDeck();
     const instruction = !this.userHasTurn() ? null : this.renderInstruction();
+    const lockedSymbol = this.props.leavingPlayerId ? this.renderLockedSymbol() : null;
     return (
       <div className={styles.backgroundImageContainer}>
         <img
@@ -233,6 +244,7 @@ class GameInProgress extends React.Component {
             className={styles.title}>
             Game: {this.props.gameId}
           </div>
+          {lockedSymbol}
         </div>
         <div className={styles.playersContainer}>
           <div className={styles.playersTitle}>
@@ -255,7 +267,7 @@ class GameInProgress extends React.Component {
         </div>
         {cardPredictionDeck}
         <div className={styles.scrollContainer}>
-          <Scroll data={this.props.data} />
+          <Scroll data={this.props.data} leavingPlayerId={this.props.leavingPlayerId}/>
         </div>
         {instruction}
       </div>

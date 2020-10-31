@@ -25,4 +25,6 @@ std::string GetCreatedGameResponse(const std::string& game_id);
 
 std::string GetGameAlreadyStartedJson(const std::string& game_id);
 
+std::string GetPlayerLeftAndGameEndedJson(const std::string& game_id, const std::string& player_id);
+
 #endif

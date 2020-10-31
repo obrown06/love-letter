@@ -28,7 +28,13 @@ void GamesRegistry::RemoveSession(const std::string& game_id, WebsocketSession* 
   if (registry_.find(game_id) == registry_.end()) {
     throw NoGameRegisteredException(game_id);
   }
-  registry_.at(game_id).second.erase(session);
+  std::string json = GetPlayerLeftAndGameEndedJson(game_id, session->GetAccount().GetUsername());
+  for (auto* registered_session : registry_.at(game_id).second) {
+    if (registered_session != session) {
+      registered_session->send(json);
+    }
+  }
+  registry_.erase(game_id);
 }
 
 void GamesRegistry::UpdateGameAndBroadcast(const GameUpdate& game_update) {
