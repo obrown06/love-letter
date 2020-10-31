@@ -10,6 +10,9 @@ std::string AccountsToJSON(const std::vector<Account>& accounts) {
   for (const auto& account : accounts) {
     Json::Value account_node;
     account_node["username"] = account.GetUsername();
+    account_node["wins"] = account.GetWins();
+    account_node["losses"] = account.GetLosses();
+    account_node["points"] = account.GetPoints();
     root["accounts"].append(account_node);
   }
   Json::StreamWriterBuilder builder;
@@ -25,7 +28,12 @@ Account JSONToAccount(const std::string& json) {
   if (!parsingSuccessful || !root.isMember("username") || !root.isMember("password") || !root.isMember("email")) {
     throw InvalidJsonException(json);
   }
-  Account account(root["username"].asString(), root["password"].asString(), root["email"].asString());
+  Account account(root["username"].asString(),
+                  root["password"].asString(),
+                  root["email"].asString(),
+                  /* wins=*/0,
+                  /*losses=*/0,
+                  /*points=*/0);
   return account;
 }
 

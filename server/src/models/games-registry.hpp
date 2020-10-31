@@ -3,6 +3,7 @@
 
 #include "models/game.hpp"
 #include "server/websocket-session.hpp"
+#include "storage/storage.hpp"
 
 #include <map>
 #include <string>
@@ -12,7 +13,7 @@ class WebsocketSession;
 
 class GamesRegistry {
 public:
-  GamesRegistry() {};
+  GamesRegistry(Storage* storage) : storage_(storage) {};
 
   void UpdateGameAndBroadcast(const GameUpdate& game_update);
   void InsertGame(const Game& game);
@@ -20,8 +21,9 @@ public:
   void RemoveSession(const std::string& game_id, WebsocketSession* session);
 
 private:
+  void UpdateAccountsWithGameResults(const Game& game);
   std::map<std::string, std::pair<Game, std::unordered_set<WebsocketSession*>>> registry_;
-
+  Storage* storage_;
 };
 
 #endif

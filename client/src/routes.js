@@ -1,5 +1,6 @@
 import React from 'react';
 import Home from 'views/home.js';
+import LeaderBoard from 'views/leaderboard.js'
 import Login from 'views/login.js';
 import Game from 'views/game.js';
 import NotFound from 'views/not-found.js';
@@ -70,6 +71,9 @@ class Routes extends React.Component {
             <Game
               {...props}
               loggedIn={this.state.loggedIn}/>
+          )} />
+          <Route path="/leaderboard" render={(props) => (
+            <LeaderBoard loggedIn={this.state.loggedIn}/>
           )} />
           <Route path="/not-found" render={(props) => (
             <Route component={NotFound}/>

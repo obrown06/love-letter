@@ -2,11 +2,11 @@
 #include "storage/util.hpp"
 #include "storage/exceptions.hpp"
 
-#include <string>
 #include <iostream>
 #include <stdexcept>
-#include <vector>
 #include <sstream>
+#include <string>
+#include <vector>
 #include <boost/format.hpp>
 
 
@@ -16,24 +16,11 @@ const std::vector<std::pair<std::string, std::string>> kTablesToCreationSQL = {
     "CREATE TABLE ACCOUNTS(" \
       "USERNAME TEXT  PRIMARY KEY    NOT NULL," \
       "PASSWORD TEXT                 NOT NULL," \
-      "EMAIL    TEXT                 NOT NULL);"
+      "EMAIL    TEXT                 NOT NULL," \
+      "WINS     INT                  DEFAULT 0," \
+      "LOSSES   INT                  DEFAULT 0," \
+      "POINTS   INT                  DEFAULT 0);"
   },
-  {
-    "GAMES",
-    "CREATE TABLE GAMES(" \
-      "ID   TEXT PRIMARY KEY    NOT NULL," \
-      "NPLAYERS INT                 NOT NULL);"
-  },
-  {
-    "PERFORMANCE",
-    "CREATE TABLE PERFORMANCE(" \
-      "ID       TEXT PRIMARY KEY    NOT NULL," \
-      "USERNAME INT                 NOT NULL," \
-      "GAME_ID  INT                 NOT NULL," \
-      "RANK     INT                 NOT NULL," \
-      "FOREIGN KEY(USERNAME) REFERENCES ACCOUNTS(USERNAME)," \
-      "FOREIGN KEY(GAME_ID)  REFERENCES GAMES(ID));"
-  }
 };
 
 const std::string kCheckIfTableExistsSQL = "SELECT name FROM sqlite_master WHERE type='table' AND name='%1%';";

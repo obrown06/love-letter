@@ -3,14 +3,15 @@
 #include "storage/util.hpp"
 #include "storage/exceptions.hpp"
 
-#include <iostream>
 #include <boost/format.hpp>
+#include <iostream>
+#include <stdlib.h>
 
 const char kDatabaseFileName[] = "LoveLetter.db";
-const char kInsertOrReplaceAccountSQL[] = "INSERT OR REPLACE INTO ACCOUNTS (USERNAME, PASSWORD, EMAIL) " \
-                                      "VALUES ('%1%', '%2%', '%3%');";
-const char kInsertAccountSQL[] = "INSERT INTO ACCOUNTS (USERNAME, PASSWORD, EMAIL) " \
-                                      "VALUES ('%1%', '%2%', '%3%');";
+const char kInsertOrReplaceAccountSQL[] = "INSERT OR REPLACE INTO ACCOUNTS (USERNAME, PASSWORD, EMAIL, WINS, LOSSES, POINTS) " \
+                                      "VALUES ('%1%', '%2%', '%3%', %4%, %5%, %6%);";
+const char kInsertAccountSQL[] = "INSERT INTO ACCOUNTS (USERNAME, PASSWORD, EMAIL, WINS, LOSSES, POINTS) " \
+                                      "VALUES ('%1%', '%2%', '%3%', %4%, %5%, %6%);";
 const char kLoadAccountByUsernameSQL[] = "SELECT * FROM ACCOUNTS WHERE USERNAME='%1%';";
 const char kLoadAllAccounts[] = "SELECT * FROM ACCOUNTS;";
 
@@ -23,16 +24,23 @@ int unused_callback(void *NotUsed, int argc, char **argv, char **colname) {
 int load_all_accounts_callback(void* accounts, int count, char** data, char** columns) {
   std::vector<Account>* accounts_vec = (std::vector<Account>*) accounts;
   std::string username, password, email;
+  int wins, losses, points;
   for (size_t i = 0; i < count; i++) {
     if (!strcmp(columns[i], "USERNAME")) {
       username = data[i];
     } else if (!strcmp(columns[i], "PASSWORD")) {
       password = data[i];
+    } else if (!strcmp(columns[i], "WINS")) {
+      wins = atoi(data[i]);
+    } else if (!strcmp(columns[i], "LOSSES")) {
+      losses = atoi(data[i]);
+    } else if (!strcmp(columns[i], "POINTS")) {
+      points = atoi(data[i]);
     } else {
       email = data[i];
     }
   }
-  accounts_vec->push_back(Account(username, password, email));
+  accounts_vec->push_back(Account(username, password, email, wins, losses, points));
   return 0;
 }
 
@@ -49,9 +57,12 @@ Storage::~Storage() {
 
 void Storage::InsertOrUpdateAccount(const Account& account) {
   std::string sql = (boost::format(kInsertOrReplaceAccountSQL)
-                      % account.GetUsername()
-                      % account.GetPassword()
-                      % account.GetEmail()).str();
+  % account.GetUsername()
+  % account.GetPassword()
+  % account.GetEmail()
+  % account.GetWins()
+  % account.GetLosses()
+  % account.GetPoints()).str();
   int unused;
   ExecuteSql(sql, unused_callback, database_, &unused);
 }
@@ -60,7 +71,10 @@ void Storage::InsertAccount(const Account& account) {
   std::string sql = (boost::format(kInsertAccountSQL)
                       % account.GetUsername()
                       % account.GetPassword()
-                      % account.GetEmail()).str();
+                      % account.GetEmail()
+                      % account.GetWins()
+                      % account.GetLosses()
+                      % account.GetPoints()).str();
   int unused;
   ExecuteSql(sql, unused_callback, database_, &unused);
 }

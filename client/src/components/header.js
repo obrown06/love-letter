@@ -23,34 +23,35 @@ class Header extends React.Component {
     });
   }
 
-  renderAuthButton(text) {
+  renderLink(text) {
     return (
-      <div className={styles.authButton}>
-      <img
-        className={styles.authButtonImg}
-        src={authbutton}/>
-        <div className={styles.authButtonText}>
-          {text}
-        </div>
+      <div className={styles.headerLink}>
+        <span className={styles.underline}>{text}</span>
       </div>
     );
   }
 
   render() {
     let authButton = this.props.loggedIn ?
-      <div onClick={this.handleLogout}>{this.renderAuthButton("Log Out")}</div> :
-      <Link to="/login">{this.renderAuthButton("Log In")}</Link>;
+      <div onClick={this.handleLogout}>{this.renderLink("Log Out")}</div> :
+      <Link to="/login">{this.renderLink("Log In")}</Link>;
+    let leaderboardButton = this.props.loggedIn ?
+      <Link to="/leaderboard">{this.renderLink("Leaderboard")}</Link> :
+      null;
     return (
       <div className={styles.container}>
         <div className={styles.logoContainer}>
-        <Link to="/">
-        <img
-          className={styles.img}
-          src={logo}>
-        </img>
-        </Link>
+          <Link to="/">
+            <img
+              className={styles.img}
+              src={logo}>
+            </img>
+          </Link>
         </div>
-        <div className={styles.authButtonContainer}>
+        <div className={styles.leaderboardContainer}>
+          {leaderboardButton}
+        </div>
+        <div className={styles.authContainer}>
           {authButton}
         </div>
       </div>

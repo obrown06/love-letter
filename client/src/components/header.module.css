@@ -20,32 +20,39 @@
   transition: opacity .15s ease-out;
 }
 
-.authButtonImg {
-  max-height: 50px;
-}
-
-.authButtonContainer {
-  position: absolute;
-  right: 15px;
-  top: 15px;
-}
-
-.authButton {
-  height: 100%;
-  width: 100%;
-  position: relative;
+.headerLink {
+  font-size: 24px;
+  display: inline-block;
+  color: black;
   cursor: pointer;
 }
 
-.authButton:hover {
-  opacity: 0.8;
-  transition: opacity .15s ease-out;
+.leaderboardContainer {
+  position: absolute;
+  right: 200px;
+  top: 30px;
 }
 
-.authButtonText {
+.authContainer {
   position: absolute;
-  top: 25%;
-  left: 32%;
-  font-size: 18px;
-  color: black;
+  right: 50px;
+  display: inline-block;
+  top: 30px;
+}
+
+.underline {
+  display: inline-block;
+}
+
+.underline::after {
+  content: '';
+  width: 0px;
+  height: 2px;
+  display: block;
+  background: black;
+  transition: 100ms;
+}
+
+.underline:hover::after {
+  width: 100%;
 }

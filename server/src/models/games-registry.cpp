@@ -3,6 +3,7 @@
 
 #include "json-api/games.hpp"
 
+#include <set>
 #include <utility>
 
 void GamesRegistry::InsertGame(const Game& game) {
@@ -36,9 +37,30 @@ void GamesRegistry::UpdateGameAndBroadcast(const GameUpdate& game_update) {
   }
   Game& game = registry_.at(game_update.game_id).first;
   game.ProcessUpdate(game_update);
+  if (game.IsComplete()) {
+    UpdateAccountsWithGameResults(game);
+  }
   std::string json = GameToJSON(game);
   std::cout << "about to broadcast\n";
   for (auto* session : registry_.at(game.GetId()).second) {
     session->send(json);
+  }
+}
+
+void GamesRegistry::UpdateAccountsWithGameResults(const Game& game) {
+  auto players = game.GetPlayers();
+  std::vector<int> tokens;
+  for (const auto& player : players) {
+    if (std::find(tokens.begin(), tokens.end(), player.ntokens_held) == tokens.end()) {
+      tokens.push_back(player.ntokens_held);
+    }
+  }
+  std::sort(tokens.begin(), tokens.end());
+  for (const auto& player : players) {
+    Account account = storage_->LoadAccount(player.player_id);
+    account.AddGamePerformance(
+      players.size(),
+      std::find(tokens.begin(), tokens.end(), player.ntokens_held) - tokens.begin() + 1);
+    storage_->InsertOrUpdateAccount(account);
   }
 }

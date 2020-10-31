@@ -33,20 +33,20 @@ int main(int argc, char* argv[]) {
 
   auto storage = std::make_unique<Storage>(kDatabaseFileName);
   auto accounts_registry = std::make_unique<AccountsRegistry>();
-  auto games_registry = std::make_unique<GamesRegistry>();
+  auto games_registry = std::make_unique<GamesRegistry>(storage.get());
   auto authenticator = std::make_unique<Authenticator>(accounts_registry.get());
 
   // For testing purposes
-  Account account("nick", "meh", "nick@gmail.com");
+  Account account("nick", "meh", "nick@gmail.com", 0, 0, 0);
   storage->InsertOrUpdateAccount(account);
 
-  Account account4("reallyreallylongname", "meh", "nick@gmail.com");
+  Account account4("reallyreallylongname", "meh", "nick@gmail.com", 0, 0, 0);
   storage->InsertOrUpdateAccount(account4);
 
-  Account account2("brick", "meh", "nick@gmail.com");
+  Account account2("brick", "meh", "nick@gmail.com", 0, 0, 0);
   storage->InsertOrUpdateAccount(account2);
 
-  Account account3("chau", "meh", "nick@gmail.com");
+  Account account3("chau", "meh", "nick@gmail.com", 0, 0, 0);
   storage->InsertOrUpdateAccount(account3);
 
   auto dispatcher = std::make_unique<HandlerDispatcher>();

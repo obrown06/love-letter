@@ -6,6 +6,7 @@
 #include <memory>
 #include <string>
 #include <sqlite3.h>
+#include <utility>
 
 class Storage {
  public:
