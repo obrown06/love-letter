@@ -35,28 +35,12 @@ const CardTypes = {
 
 class Card extends React.Component {
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      isHovered: false,
-    };
-
-    this.toggleHover = this.toggleHover.bind(this);
-  }
-
-  toggleHover() {
-    this.setState(prevState => ({isHovered: !prevState.isHovered}));
-  }
-
   render() {
     const callback = () => { this.props.selectCallback(this.props.type) };
     return (
       <img
         className={[styles.img,
-                    this.props.selectable && !this.state.isHovered ? commonStyles.selectable : "",
-                    this.props.selectable && this.state.isHovered ? commonStyles.hovered : ""].join(" ")}
-        onMouseEnter={this.toggleHover}
-        onMouseLeave={this.toggleHover}
+                    this.props.selectable ? commonStyles.selectable : ""].join(" ")}
         src={this.props.visible ? TypesToSrcs[this.props.type] : back}
         onClick={this.props.selectable ? callback : undefined} />
     );

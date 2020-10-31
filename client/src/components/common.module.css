@@ -26,6 +26,11 @@
   -webkit-animation-iteration-count: infinite;
 }
 
+.selectable:hover {
+  -webkit-animation-name: none;
+  cursor: pointer;
+}
+
 .hovered {
   cursor: pointer
 }

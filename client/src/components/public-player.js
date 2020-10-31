@@ -10,11 +10,7 @@ class PublicPlayer extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {
-      isHovered: false,
-    };
-
-    this.toggleHover = this.toggleHover.bind(this);
+    this.executeCallback = this.executeCallback.bind(this);
   }
 
   renderCard(type, visible) {
@@ -37,10 +33,6 @@ class PublicPlayer extends React.Component {
     );
   }
 
-  toggleHover() {
-    this.setState(prevState => ({isHovered: !prevState.isHovered}));
-  }
-
   renderTurnArrow() {
     return (
       <img
@@ -50,21 +42,25 @@ class PublicPlayer extends React.Component {
     );
   }
 
+  executeCallback() {
+    if (this.props.selectable) {
+      this.props.selectCallback(this.props.id)
+    } else {
+      this.props.viewCallback(this.props.id)
+    }
+  }
+
   render() {
     const is_turn = !this.props.has_turn ? null : <div> TURN </div>;
-    const callback = this.props.selectable ?
-                       () => { this.props.selectCallback(this.props.id) } :
-                       () => { this.props.viewCallback(this.props.id) };
     const turnArrow = !this.props.has_turn ? null : this.renderTurnArrow();
     let hasCallback = this.props.selectable || this.props.viewable;
     return (
       <div
-        className={[hasCallback && !this.state.isHovered ? commonStyles.selectable : "",
-                    hasCallback && this.state.isHovered ? commonStyles.hovered : "",
+        className={[hasCallback ? commonStyles.selectable : "",
                     !this.props.active_in_round ? styles.faded : ""].join(" ")}
         onMouseEnter={this.toggleHover}
         onMouseLeave={this.toggleHover}
-        onClick={hasCallback ? callback : undefined}>
+        onClick={hasCallback ? this.executeCallback : undefined}>
       <div className={styles.turnArrowContainer}>
         {turnArrow}
       </div>
