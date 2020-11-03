@@ -1,6 +1,15 @@
 #include "json-api/games.hpp"
 #include "json-api/exceptions.hpp"
 
+bool IsPing(const std::string& json) {
+  Json::Value root;
+  Json::CharReaderBuilder builder;
+  Json::CharReader * reader = builder.newCharReader();
+  std::string errors;
+  bool parsingSuccessful = reader->parse(json.c_str(), json.c_str() + json.size(), &root, &errors);
+  return parsingSuccessful && root.isMember("is_ping");
+}
+
 GameUpdate JSONToGameUpdate(const std::string& json) {
   Json::Value root;
   Json::CharReaderBuilder builder;

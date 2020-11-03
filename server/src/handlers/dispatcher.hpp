@@ -12,6 +12,8 @@
 namespace beast = boost::beast;                 // from <boost/beast.hpp>
 namespace http = beast::http;                   // from <boost/beast/http.hpp>
 
+#include <iostream>
+
 namespace {
   const char kLoginRouteName[] = "/login/";
 };
@@ -33,10 +35,15 @@ class HandlerDispatcher {
        return send(MakeJsonHttpResponse(http::status::not_found, req, not_found_body));
      }
      std::shared_ptr<BaseHandler> handler = routes_to_handlers_.at(route);
+     if (req.method() == http::verb::options) {
+       // For CORS
+       return send(MakeJsonHttpResponse(http::status::ok, req, std::string()));
+     }
      try {
        return send(handler->HandleRequest(req));
      }
      catch (NotLoggedInException& e) {
+       std::cout << "not logged in!" << std::endl;
        return send(MakeNotLoggedInResponse(req));
      }
    }

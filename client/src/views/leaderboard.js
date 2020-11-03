@@ -6,6 +6,7 @@ import UserProfile from 'utils/user-profile.js';
 import { myaxios } from 'utils/axios.js';
 import { Redirect } from 'react-router-dom';
 import styles from 'views/leaderboard.module.css';
+import { apiEndpoint } from 'utils/axios.js'
 import "common.module.css";
 
 class LeaderBoard extends React.Component {
@@ -18,7 +19,7 @@ class LeaderBoard extends React.Component {
 
   componentDidMount() {
     console.log("requesting");
-    myaxios.get('http://localhost:3000/api/accounts/',
+    myaxios.get('https://' + apiEndpoint + '/api/accounts/',
       {},
       { withCredentials: true }
     ).then(response => {

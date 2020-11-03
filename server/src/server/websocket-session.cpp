@@ -69,8 +69,16 @@ WebsocketSession::on_read(
   }
 
   try {
-    GameUpdate update = JSONToGameUpdate(beast::buffers_to_string(buffer_.data()));
-    registry_->UpdateGameAndBroadcast(update);
+    std::string data = beast::buffers_to_string(buffer_.data());
+    if (!IsPing(data)) {
+      GameUpdate update = JSONToGameUpdate(data);
+      if (update.update_type == GameUpdate::UpdateType::JOIN_GAME_REQUEST) {
+        player_id_ = update.player_id;
+      }
+      std::cout << "before calling UpdateGameAndBroadcast" << std::endl;
+      registry_->UpdateGameAndBroadcast(update);
+      std::cout << "after calling UpdateGameAndBroadcast" << std::endl;
+    }
     buffer_.consume(buffer_.size());
   } catch (std::exception& e) {
     fail("read", e.what());
@@ -104,6 +112,10 @@ WebsocketSession::on_write(
   }
 }
 
-Account WebsocketSession::GetAccount() {
-  return account_;
+bool WebsocketSession::HasPlayerId() const {
+  return player_id_ != boost::none;
+}
+
+std::string WebsocketSession::GetPlayerId() const {
+  return player_id_.get();
 }

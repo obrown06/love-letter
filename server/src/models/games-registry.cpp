@@ -5,6 +5,7 @@
 
 #include <set>
 #include <utility>
+#include <iostream>
 
 void GamesRegistry::InsertGame(const Game& game) {
   if (registry_.find(game.GetId()) != registry_.end()) {
@@ -28,7 +29,10 @@ void GamesRegistry::RemoveSession(const std::string& game_id, WebsocketSession* 
   if (registry_.find(game_id) == registry_.end()) {
     throw NoGameRegisteredException(game_id);
   }
-  std::string json = GetPlayerLeftAndGameEndedJson(game_id, session->GetAccount().GetUsername());
+  if (!session->HasPlayerId()) {
+    return;
+  }
+  std::string json = GetPlayerLeftAndGameEndedJson(game_id, session->GetPlayerId());
   for (auto* registered_session : registry_.at(game_id).second) {
     if (registered_session != session) {
       registered_session->send(json);
@@ -42,10 +46,14 @@ void GamesRegistry::UpdateGameAndBroadcast(const GameUpdate& game_update) {
     throw NoGameRegisteredException(game_update.game_id);
   }
   Game& game = registry_.at(game_update.game_id).first;
+  std::cout << "before calling ProcessUpdate" << std::endl;
   game.ProcessUpdate(game_update);
+  std::cout << "after calling ProcessUpdate" << std::endl;
   if (game.IsComplete()) {
+    std::cout << "calling UpdateAccountsWithGameResults " << std::endl;
     UpdateAccountsWithGameResults(game);
   }
+  std::cout << "before calling GameToJSON" << std::endl;
   std::string json = GameToJSON(game);
   std::cout << "about to broadcast\n";
   for (auto* session : registry_.at(game.GetId()).second) {
@@ -64,6 +72,7 @@ void GamesRegistry::UpdateAccountsWithGameResults(const Game& game) {
   std::sort(tokens.begin(), tokens.end());
   for (const auto& player : players) {
     Account account = storage_->LoadAccount(player.player_id);
+    std::cout << "player: " << account.GetUsername() << std::endl;
     account.AddGamePerformance(
       players.size(),
       std::find(tokens.begin(), tokens.end(), player.ntokens_held) - tokens.begin() + 1);

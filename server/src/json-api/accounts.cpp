@@ -1,7 +1,7 @@
 #include "json-api/accounts.hpp"
 #include "json-api/exceptions.hpp"
 
-#include <json/json.h>
+#include <jsoncpp/json/json.h>
 
 #include <iostream>
 

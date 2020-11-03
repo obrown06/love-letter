@@ -4,6 +4,7 @@ import UserProfile from 'utils/user-profile.js';
 import { myaxios } from 'utils/axios.js';
 import { Redirect } from 'react-router-dom';
 import styles from "components/login-form.module.css";
+import { apiEndpoint } from 'utils/axios.js'
 
 const kEmailPoorlyFormed = "Not a valid email address!";
 const kUsernameTooShort = "Username must be at least five characters long!";
@@ -71,13 +72,12 @@ class SignupForm extends React.Component {
       this.setState({ error: foundError });
       return;
     }
-    myaxios.post('http://localhost:3000/api/accounts/',
+    myaxios.post('https://' + apiEndpoint + '/api/accounts/',
       {
         username: this.state.username,
         password: this.state.password,
         email: this.state.email
-      },
-      { withCredentials: true }
+      }
     ).then((response) => {
       if (response.status === 200) {
         this.props.signupCallback(this.state.username, response.headers['set-cookie']);

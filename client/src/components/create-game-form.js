@@ -3,6 +3,7 @@ import UserProfile from 'utils/user-profile.js';
 import { myaxios } from 'utils/axios.js';
 import { Redirect } from 'react-router-dom';
 import styles from 'components/create-game-form.module.css';
+import { apiEndpoint } from 'utils/axios.js'
 var hri = require('human-readable-ids').hri;
 
 class CreateGameForm extends React.Component {
@@ -16,12 +17,11 @@ class CreateGameForm extends React.Component {
 
   handleCreateGame(e) {
     e.preventDefault();
-    myaxios.post('http://localhost:3000/api/games/',
+    myaxios.post('https://' + apiEndpoint + '/api/games/',
       {
         game_id: hri.random(),
         creator: UserProfile.getUserName(),
-      },
-      { withCredentials: true }
+      }
     ).then(response => {
       if (response.status === 200) {
         this.setState({ game_id: response.data.game_id });

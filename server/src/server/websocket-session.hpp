@@ -26,11 +26,9 @@ class WebsocketSession : public std::enable_shared_from_this<WebsocketSession>
 {
   public:
     explicit WebsocketSession(tcp::socket&& socket,
-                              GamesRegistry* registry,
-                              const Account& account) :
+                              GamesRegistry* registry) :
       ws_(std::move(socket)),
-      registry_(registry),
-      account_(account) {}
+      registry_(registry) {}
 
     ~WebsocketSession();
 
@@ -58,8 +56,9 @@ class WebsocketSession : public std::enable_shared_from_this<WebsocketSession>
     }
 
     void send(const std::string& msg);
+    bool HasPlayerId() const;
+    std::string GetPlayerId() const;
 
-    Account GetAccount();
 
   private:
     void on_accept(beast::error_code ec);
@@ -75,7 +74,7 @@ class WebsocketSession : public std::enable_shared_from_this<WebsocketSession>
     std::vector<std::string> queue_;
     GamesRegistry* registry_;
     std::string game_id_;
-    Account account_;
+    boost::optional<std::string> player_id_;
 };
 
 #endif

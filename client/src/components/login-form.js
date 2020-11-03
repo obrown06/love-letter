@@ -3,6 +3,7 @@ import cookieClient from 'react-cookie';
 import UserProfile from 'utils/user-profile.js';
 import { myaxios } from 'utils/axios.js';
 import { Redirect } from 'react-router-dom';
+import { apiEndpoint } from 'utils/axios.js'
 import styles from "components/login-form.module.css";
 
 
@@ -26,12 +27,11 @@ class LoginForm extends React.Component {
   handleSubmit(e) {
     this.setState({ incorrect_password: false, incorrect_username: false })
     e.preventDefault();
-    myaxios.post('http://localhost:3000/api/login/',
+    myaxios.post('https://' + apiEndpoint + '/api/login/',
       {
         username: this.state.username,
         password: this.state.password
-      },
-      { withCredentials: true }
+      }
     ).then((response) => {
       if (response.status === 200) {
         this.props.loginCallback(this.state.username, response.headers['set-cookie']);

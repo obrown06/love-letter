@@ -46,7 +46,7 @@ public:
       class Turn {
         public:
           Turn(const RoundPlayer* player):
-            player(player) {}
+            player(player), is_complete(false) {}
 
           void ExecuteMove(const GameUpdate::Move& move, std::vector<const RoundPlayer*> players_in_round);
           bool IsComplete() const;
@@ -128,6 +128,7 @@ public:
   const std::vector<Game::Round>& GetRounds() const;
   int GetTokensToWin() const;
   std::vector<Game::GamePlayer> GetWinners() const;
+
   std::string GetSummary() const;
   bool IsComplete() const;
   void CheckGameNotStarted() const;

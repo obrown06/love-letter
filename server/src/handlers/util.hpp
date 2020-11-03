@@ -29,4 +29,6 @@ http::response<http::string_body>
 MakeJsonHttpResponseWithLoginCookie(const http::request<http::string_body>& req,
                                     const std::string& key);
 
+void SetCorsHeaders(http::response<http::string_body>* res);
+
 #endif

@@ -134,10 +134,14 @@ void Game::MaybeUpdateGameState() {
     it->ntokens_held++;
   }
 
+  if (std::find_if(players_.begin(), players_.end(), [this](const Game::GamePlayer& player) {
+    return player.ntokens_held >= GetTokensToWin();
+  }) != players_.end()) {
+    state_ = Game::State::COMPLETE;
+  }
+
   if (!IsComplete()) {
     AdvanceRound();
-  } else {
-    state_ = Game::State::COMPLETE;
   }
 }
 
@@ -150,9 +154,7 @@ void Game::AdvanceRound() {
 }
 
 bool Game::IsComplete() const {
-  return (std::find_if(players_.begin(), players_.end(), [this](const Game::GamePlayer& player) {
-    return player.ntokens_held >= GetTokensToWin();
-  }) != players_.end());
+  return state_ == Game::State::COMPLETE;
 }
 
 std::vector<Game::GamePlayer> Game::GetWinners() const {
@@ -620,11 +622,16 @@ void Game::Round::MakeNewTurn(const std::string& player_id) {
 // Game::Round::Turn
 
 const Card Game::Round::Turn::GetDiscardedCard() const {
+  std::cout << "in GetDiscardedCard" << std::endl;
   auto discard_move = std::find_if(previous_moves.begin(),
                                    previous_moves.end(),
                                    [] (const GameUpdate::Move& move) {
       return move.move_type == GameUpdate::Move::MoveType::DISCARD_CARD;
   });
+  std::cout << "discard move found? " << (discard_move != previous_moves.end()) << std::endl;
+  std::cout << "looking for card type" << std::endl;
+  discard_move->discarded_card_type.get();
+  std::cout << "constructing Card" << std::endl;
   return Card(discard_move->discarded_card_type.get());
 }
 
@@ -684,25 +691,35 @@ const std::vector<GameUpdate::Move>& Game::Round::Turn::GetMoves() const {
 }
 
 std::string Game::Round::Turn::GetSummary() const {
-  std::cout << "In GetSummary\n";
+  std::cout << "In GetSummary" << std::endl;
+  std::cout << "getting player id: " << std::endl;
+  std::cout << player->player_id << std::endl;
+  std::cout << "getting card type string " << std::endl;
+  std::cout << Card::GetCardTypeString(GetDiscardedCard().GetType()) << std::endl;
   std::stringstream ss;
   ss << player->player_id
      << " played the "
      << Card::GetCardTypeString(GetDiscardedCard().GetType())
      << " card";
+  std::cout << "looking for select move" << std::endl;
   auto select_move = std::find_if(previous_moves.begin(),
                                    previous_moves.end(),
   [](const GameUpdate::Move& move) {
     return move.move_type == GameUpdate::Move::SELECT_PLAYER;
   });
   if (select_move != previous_moves.end()) {
+    std::cout << "Getting SelectedPlayerId" << std::endl;
+    GetSelectedPlayerId();
+    std::cout << "Getting selected card type" << std::endl;
+    GetDiscardedCard().GetType();
+    std::cout << "Getting Action String" << std::endl;
     ss << " and "
        << Card::GetActionString(GetDiscardedCard().GetType(),
                                       GetSelectedPlayerId(),
                                       select_move->predicted_card_type);
   }
   ss << ".";
-  std::cout << "End GetSummary\n";
+  std::cout << "End GetSummary" << std::endl;
   return ss.str();
 }
 

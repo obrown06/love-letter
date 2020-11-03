@@ -9,6 +9,7 @@
 #include "storage/exceptions.hpp"
 
 #include <sstream>
+#include <iostream>
 
 const char kRouteName[] = "/api/login";
 
@@ -27,6 +28,7 @@ LoginHandler::HandleRequest(const http::request<http::string_body>& req) {
 
 http::response<http::string_body>
 LoginHandler::HandlePOST(const http::request<http::string_body>& req) {
+  std::cout << "In LoginHandler::HandlePOST" << std::endl;
   try {
     std::pair<std::string, std::string> username_password_pair = JSONToUsernamePasswordPair(req.body());
     Account account = storage_->LoadAccount(username_password_pair.first);

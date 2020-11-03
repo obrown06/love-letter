@@ -8,6 +8,7 @@
 #include "json-api/exceptions.hpp"
 
 #include <sstream>
+#include <iostream>
 
 const char kRouteName[] = "/api/accounts";
 
@@ -28,6 +29,7 @@ AccountsHandler::HandleRequest(const http::request<http::string_body>& req) {
 
 http::response<http::string_body>
 AccountsHandler::HandleGET(const http::request<http::string_body>& req) {
+  std::cout << "IN AccountsHandler::HandleGET" << std::endl;
   authenticator_->Authenticate(req);
   std::string body;
   http::status status;
@@ -41,6 +43,7 @@ AccountsHandler::HandleGET(const http::request<http::string_body>& req) {
       accounts_vec->push_back(storage_->LoadAccount(target));
     }
     body = AccountsToJSON(*accounts_vec);
+    std::cout << "Returning accounts!" << std::endl;
     return MakeJsonHttpResponse(http::status::ok, req, body);
   }
   catch (NotFoundException& e) {

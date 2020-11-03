@@ -3,6 +3,7 @@ import { myaxios } from 'utils/axios.js';
 import styles from "components/header.module.css";
 import logo from "img/logo.jpg";
 import authbutton from "img/auth-button.jpg";
+import { apiEndpoint } from 'utils/axios.js'
 import { Link } from 'react-router-dom';
 
 class Header extends React.Component {
@@ -14,8 +15,7 @@ class Header extends React.Component {
 
   handleLogout(e) {
     e.preventDefault();
-    myaxios.post('http://localhost:3000/api/logout/', {},
-      { withCredentials: true }
+    myaxios.post('https://' + apiEndpoint + '/api/logout/', {}
     ).then(response => {
       if (response.status === 200) {
         this.props.logoutCallback();

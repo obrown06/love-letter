@@ -1,5 +1,7 @@
 #include "models/account.hpp"
 
+#include <iostream>
+
 std::string Account::GetUsername() const {
   return username_;
 }
@@ -25,9 +27,12 @@ int Account::GetPoints() const {
 }
 
 void Account::AddGamePerformance(int game_size, int rank) {
+  std::cout << "AddGamePerformance for player " << username_ << " game_size: " << game_size << " rank " << rank << std::endl;
   if (rank == game_size) {
+    std::cout << "incrementing wins " << std::endl;
     wins_++;
   } else {
+    std::cout << "incrementing losses " << std::endl;
     losses_++;
   }
 
@@ -37,6 +42,8 @@ void Account::AddGamePerformance(int game_size, int rank) {
   if (game_size % 2 != 0 || rank <= game_size / 2) {
     points--;
   }
+
+  std::cout << "adding the following points: " << points << std::endl;
 
   points_ += points;
 }

@@ -4,6 +4,7 @@
 #include "storage/exceptions.hpp"
 
 #include <boost/format.hpp>
+#include <cstring>
 #include <iostream>
 #include <stdlib.h>
 

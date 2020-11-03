@@ -92,6 +92,9 @@ int Card::RequiredViewMovesCount() const {
 }
 
 std::string Card::GetCardTypeString(const Card::Type& card_type) {
+  std::cout << "in GetCardTypeString" << std::endl;
+  kCardTypesToStrings.at(card_type);
+  std::cout << "could get type" << std::endl;
   return kCardTypesToStrings.at(card_type);
 }
 

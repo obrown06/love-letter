@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Redirect } from 'react-router-dom';
 import GameLobby from 'components/game-lobby.js'
 import GameInProgress from 'components/game-in-progress.js'
+import { apiEndpoint } from 'utils/axios.js'
 
 axios.defaults.withCredentials = true;
 
@@ -20,16 +21,20 @@ const GameState = {
 };
 
 class Game extends React.Component {
+  heartbeatIntervalId = 0;
   constructor(props) {
     super(props);
     this.handleStartGame = this.handleStartGame.bind(this);
-    this.ws = new WebSocket('ws://localhost:8000/' + this.props.match.params.gameId);
+    console.log("apiEndpoint: " + apiEndpoint);
+    this.ws = new WebSocket('wss://' + apiEndpoint + '/' + this.props.match.params.gameId);
     this.state = {
       data: {},
       gameNotFound: false,
       gameLocked: false,
       leavingPlayerId: null,
     };
+
+    this.heartbeat = this.heartbeat.bind(this);
   }
 
   componentDidMount() {
@@ -40,6 +45,7 @@ class Game extends React.Component {
         player_id: UserProfile.getUserName(),
         update_type: UpdateType.JOIN_GAME_REQUEST
       }));
+      this.heartbeatIntervalId = setInterval(this.heartbeat, 5000);
     }
 
     this.ws.onmessage = evt => {
@@ -64,6 +70,18 @@ class Game extends React.Component {
     this.ws.onclose = () => {
       console.log('disconnected');
     }
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.heartbeatIntervalId);
+  }
+
+  heartbeat() {
+    console.log("sending heartbeat");
+    if (this.ws.readyState !== 1) return;
+    this.ws.send(JSON.stringify({
+      is_ping: true,
+    }));
   }
 
   handleStartGame(e) {

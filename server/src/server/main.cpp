@@ -22,8 +22,12 @@ using tcp = boost::asio::ip::tcp;
 const char kDatabaseFileName[] = "LoveLetter.db";
 
 int main(int argc, char* argv[]) {
-  if (argc != 3) {
+  if (argc < 3) {
     std::cerr << "Usage: love-letter <address> <port>\n";
+    std::cerr << "argc is: " << argc << "\n";
+    for (int i = 0; i < argc; i++) {
+      std::cerr << i << ": " << argv[i] << "\n";
+    }
     return EXIT_FAILURE;
   }
   const auto address = net::ip::make_address(argv[1]);

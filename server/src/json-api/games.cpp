@@ -48,13 +48,20 @@ Game JSONToGame(const std::string& json) {
 }
 
 std::string GameToJSON(const Game& game) {
+  std::cout << "start of GameToJSON" << std::endl;
   Json::Value root;
+  std::cout << "before GetId()" << std::endl;
   root["game_id"] = game.GetId();
+  std::cout << "before GetCreator()" << std::endl;
   root["creator"] = game.GetCreator();
+  std::cout << "before GetState()" << std::endl;
   root["state"] = game.GetState();
   if (game.GetState() != Game::WAITING) {
+    std::cout << "before GetTokensToWin()" << std::endl;
     root["tokens_to_win"] = game.GetTokensToWin();
+    std::cout << "before GetRounds()" << std::endl;
     for (const auto& round : game.GetRounds()) {
+      std::cout << "before RoundToJSON" << std::endl;
       root["rounds"].append(RoundToJSON(round));
     }
     if (game.GetState() == Game::COMPLETE) {
@@ -80,10 +87,11 @@ std::string GameToJSON(const Game& game) {
 }
 
 Json::Value RoundToJSON(const Game::Round& round) {
-  std::cout << "in RoundToJSON\n";
+  std::cout << "in RoundToJSON" << std::endl;
   Json::Value round_node;
   round_node["deck_size"] = round.GetDeckSize();
   for (const auto& player : round.GetPlayers()) {
+    std::cout << " examining player " << player.player_id << std::endl;
     Json::Value player_node;
     player_node["player_id"] = player.player_id;
     for (const auto& discarded_card : player.discarded_cards) {
@@ -113,33 +121,36 @@ Json::Value RoundToJSON(const Game::Round& round) {
 }
 
 Json::Value TurnToJSON(const Game::Round& round, const Game::Round::Turn& turn) {
-  std::cout << "in TurnToJSON\n";
+  std::cout << "in TurnToJSON" << std::endl;
   Json::Value turn_node;
+  std::cout << "before GetPlayerId" << std::endl;
   turn_node["player_id"] = turn.GetPlayerId();
+  std::cout << "after GetPlayerId" << std::endl;
   for (const auto& move : turn.GetMoves()) {
+    std::cout << "about to call MoveToJSON" << std::endl;
     turn_node["moves"].append(MoveToJSON(move));
   }
   if (turn.IsComplete()) {
-    std::cout << "turn was complete\n";
+    std::cout << "turn was complete" << std::endl;
     turn_node["summary"] = turn.GetSummary();
   } else {
-    std::cout << "turn wasn't complete\n";
+    std::cout << "turn wasn't complete" << std::endl;
     const auto next_move_type = turn.GetNextMoveType();
     turn_node["next_move_type"] = next_move_type;
     turn_node["instruction"] = turn.GetNextMoveInstruction();
     if (next_move_type == GameUpdate::Move::MoveType::DISCARD_CARD) {
-      std::cout << "next move type is discard\n";
+      std::cout << "next move type is discard" << std::endl;
       for (const auto& discardable_card : turn.GetDiscardableCards()) {
         turn_node["discardable_cards"].append(static_cast<int>(discardable_card.GetType()));
       }
     } else if (next_move_type == GameUpdate::Move::MoveType::SELECT_PLAYER) {
-      std::cout << "next move is select\n";
+      std::cout << "next move is select" << std::endl;
       for (const auto& selectable_player : round.GetSelectablePlayers()) {
         turn_node["selectable_players"].append(selectable_player.player_id);
       }
       turn_node["requires_prediction"] = turn.NextMoveRequiresPrediction();
     } else if (next_move_type == GameUpdate::Move::MoveType::VIEW_CARD) {
-      std::cout << "next move is view\n";
+      std::cout << "next move is view" << std::endl;
       for (const auto& [viewer, viewed] : round.GetViewPlayerPairs()) {
         Json::Value view_node;
         view_node["viewer_id"] = viewer.player_id;
@@ -148,11 +159,12 @@ Json::Value TurnToJSON(const Game::Round& round, const Game::Round::Turn& turn) 
       }
     }
   }
-  std::cout << "returning from TurnToJSON\n";
+  std::cout << "returning from TurnToJSON" << std::endl;
   return turn_node;
 }
 
 Json::Value MoveToJSON(const GameUpdate::Move& move) {
+  std::cout << "in MoveToJSON" << std::endl;
   Json::Value move_node;
   move_node["move_type"] = static_cast<int>(move.move_type);
   if (move.selected_player_id) {

@@ -51,6 +51,7 @@ void HTTPSession::do_read() {
 }
 
 void HTTPSession::on_read(beast::error_code ec, std::size_t bytes_transferred) {
+  std::cout << "on_read called" << std::endl;
   boost::ignore_unused(bytes_transferred);
 
   // They closed the connection
@@ -64,11 +65,11 @@ void HTTPSession::on_read(beast::error_code ec, std::size_t bytes_transferred) {
 
   if (websocket::is_upgrade(parser_->get()))
   {
+    std::cout << "upgrading to websocket" << std::endl;
     try {
-      Account account = authenticator_->Authenticate(parser_->get());
       // Create a WebSocket session by transferring the socket
       std::make_shared<WebsocketSession>(
-          stream_.release_socket(), registry_, account)->do_accept(parser_->release());
+          stream_.release_socket(), registry_)->do_accept(parser_->release());
       return;
     } catch (NotLoggedInException& e) {
       return queue_(MakeNotLoggedInResponse(parser_->get()));
