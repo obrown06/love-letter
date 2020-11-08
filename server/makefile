@@ -1,6 +1,6 @@
 CXX = g++
 TARGET_EXEC ?= a.out
-LFLAGS = -lsqlite3 -ljsoncpp -lpthread
+LFLAGS = -lsqlite3 -ljsoncpp -lpthread -lpqxx -lpq
 
 BUILD_DIR ?= ./build
 SRC_DIRS ?= ./src

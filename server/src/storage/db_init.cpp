@@ -3,17 +3,19 @@
 #include "storage/exceptions.hpp"
 
 #include <iostream>
+#include <regex>
 #include <stdexcept>
 #include <sstream>
 #include <string>
 #include <vector>
 #include <boost/format.hpp>
+#include <pqxx/pqxx>
 
 
 const std::vector<std::pair<std::string, std::string>> kTablesToCreationSQL = {
   {
     "ACCOUNTS",
-    "CREATE TABLE ACCOUNTS(" \
+    "CREATE TABLE IF NOT EXISTS ACCOUNTS(" \
       "USERNAME TEXT  PRIMARY KEY    NOT NULL," \
       "PASSWORD TEXT                 NOT NULL," \
       "EMAIL    TEXT                 NOT NULL," \
@@ -23,53 +25,57 @@ const std::vector<std::pair<std::string, std::string>> kTablesToCreationSQL = {
   },
 };
 
-const std::string kCheckIfTableExistsSQL = "SELECT name FROM sqlite_master WHERE type='table' AND name='%1%';";
-
-bool TableExists(sqlite3* db, const std::string& table_name) {
-  bool table_exists = false;
-  auto check_if_table_exists = [](void* table_exists, int count, char** data, char **columns) -> int {
-    bool* result = (bool*) table_exists;
-    *result = count > 0;
-    return 0;
-  };
-  std::string sql = (boost::format(kCheckIfTableExistsSQL) % table_name).str();
-  ExecuteSql(sql, check_if_table_exists, db, &table_exists);
-  return table_exists;
-}
-
-void InitializeTable(sqlite3* db, const std::string& creation_sql) {
-  auto unused_callback = [](void* unused, int count, char** data, char **columns) -> int {
-    return 0;
-  };
-  int unused;
-  ExecuteSql(creation_sql, unused_callback, db, &unused);
+void InitializePostgresTable(pqxx::connection& conn, const std::string& creation_sql) {
+  pqxx::work W(conn);
+  W.exec(creation_sql);
+  W.commit();
   std::cout << "Initializing table!\n";
   return;
 }
 
-void InitializeTables(sqlite3* db) {
+void InitializePostgresTables(pqxx::connection& conn) {
   for (const auto& table_pair : kTablesToCreationSQL) {
-    if (!TableExists(db, table_pair.first)) {
-      InitializeTable(db, table_pair.second);
-    }
+    InitializePostgresTable(conn, table_pair.second);
   }
 }
 
-sqlite3* InitializeDB(const std::string& file_path) {
-  sqlite3* db;
-  int rc;
-  rc = sqlite3_open(file_path.c_str(), &db);
-  if (rc != SQLITE_OK) {
-    std::cerr << "Failed to initialize Database: " << sqlite3_errmsg(db) << "\n";
-  } else {
-    std::cout << "Opened database successfully!\n";
-  }
+std::vector<std::string> ParseDatabaseUrl() {
+  std::cout << "url is: " << std::getenv("DATABASE_URL") << std::endl;
+  std::string url = std::string(std::getenv("DATABASE_URL"));
+  std::regex re("postgres://([^:]*):([^@]*)@([^:]*):([^/]*)/(.*)");
 
+  std::vector<std::string> parsed;
+
+  std::smatch m;
+  std::regex_search(url, m, re);
+  std::cout << "match size = " << m.size() << std::endl;
+  for (int i = 1; i < 6; i++) {
+    std::cout << "pushing back: " << m.str(i) << std::endl;
+    parsed.push_back(m.str(i));
+  }
+  return parsed;
+}
+
+std::unique_ptr<pqxx::connection> InitializePostgres(const std::string& name) {
+  std::cout << "name is: " << name << std::endl;
   try {
-    InitializeTables(db);
-  } catch(SqliteException& e) {
+    std::vector<std::string> parsed = ParseDatabaseUrl();
+
+    auto conn = std::make_unique<pqxx::connection>(
+      "user = " + parsed[0] + \
+      " password = " + parsed[1] + \
+      " host = " + parsed[2] + \
+      " port = " + parsed[3] + \
+      " dbname = " + parsed[4]);
+    if (conn->is_open()) {
+      std::cout << "Opened database successfully!" << std::endl;
+    } else {
+      throw std::runtime_error("Can't open database!");
+    }
+    InitializePostgresTables(*conn);
+    std::cout << "Initialized db!" << std::endl;
+    return conn;
+  } catch(const std::exception& e) {
     std::cerr << e.what() << "\n";
   }
-
-  return db;
 }

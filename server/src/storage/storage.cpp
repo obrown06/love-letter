@@ -8,55 +8,24 @@
 #include <iostream>
 #include <stdlib.h>
 
-const char kDatabaseFileName[] = "LoveLetter.db";
-const char kInsertOrReplaceAccountSQL[] = "INSERT OR REPLACE INTO ACCOUNTS (USERNAME, PASSWORD, EMAIL, WINS, LOSSES, POINTS) " \
-                                      "VALUES ('%1%', '%2%', '%3%', %4%, %5%, %6%);";
+const char kInsertOrReplaceAccountSQL[] = "INSERT INTO ACCOUNTS (USERNAME, PASSWORD, EMAIL, WINS, LOSSES, POINTS) " \
+                                      "VALUES ('%1%', '%2%', '%3%', %4%, %5%, %6%)" \
+                                      "ON CONFLICT(USERNAME) DO UPDATE " \
+                                      "SET PASSWORD = excluded.PASSWORD, " \
+                                      "    EMAIL    = excluded.EMAIL, " \
+                                      "    WINS     = excluded.WINS, " \
+                                      "    LOSSES   = excluded.LOSSES, " \
+                                      "    POINTS   = excluded.POINTS;";
 const char kInsertAccountSQL[] = "INSERT INTO ACCOUNTS (USERNAME, PASSWORD, EMAIL, WINS, LOSSES, POINTS) " \
                                       "VALUES ('%1%', '%2%', '%3%', %4%, %5%, %6%);";
 const char kLoadAccountByUsernameSQL[] = "SELECT * FROM ACCOUNTS WHERE USERNAME='%1%';";
 const char kLoadAllAccounts[] = "SELECT * FROM ACCOUNTS;";
 
-namespace {
-
-int unused_callback(void *NotUsed, int argc, char **argv, char **colname) {
-  return 0;
-}
-
-int load_all_accounts_callback(void* accounts, int count, char** data, char** columns) {
-  std::vector<Account>* accounts_vec = (std::vector<Account>*) accounts;
-  std::string username, password, email;
-  int wins, losses, points;
-  for (size_t i = 0; i < count; i++) {
-    if (!strcmp(columns[i], "USERNAME")) {
-      username = data[i];
-    } else if (!strcmp(columns[i], "PASSWORD")) {
-      password = data[i];
-    } else if (!strcmp(columns[i], "WINS")) {
-      wins = atoi(data[i]);
-    } else if (!strcmp(columns[i], "LOSSES")) {
-      losses = atoi(data[i]);
-    } else if (!strcmp(columns[i], "POINTS")) {
-      points = atoi(data[i]);
-    } else {
-      email = data[i];
-    }
-  }
-  accounts_vec->push_back(Account(username, password, email, wins, losses, points));
-  return 0;
-}
-
-}  // namespace
-
-Storage::Storage(const std::string& file_path) {
-  database_ = InitializeDB(file_path);
-}
-
-Storage::~Storage() {
-  std::cout << "Closing database\n";
-  sqlite3_close(database_);
-}
+Storage::Storage(const std::string& name) : database_(std::move(InitializePostgres(name))) {}
 
 void Storage::InsertOrUpdateAccount(const Account& account) {
+  std::cout << "inserting account " << account.GetUsername() << std::endl;
+  pqxx::work txn(*database_);
   std::string sql = (boost::format(kInsertOrReplaceAccountSQL)
   % account.GetUsername()
   % account.GetPassword()
@@ -64,11 +33,12 @@ void Storage::InsertOrUpdateAccount(const Account& account) {
   % account.GetWins()
   % account.GetLosses()
   % account.GetPoints()).str();
-  int unused;
-  ExecuteSql(sql, unused_callback, database_, &unused);
+  txn.exec(sql);
+  txn.commit();
 }
 
 void Storage::InsertAccount(const Account& account) {
+  pqxx::work txn(*database_);
   std::string sql = (boost::format(kInsertAccountSQL)
                       % account.GetUsername()
                       % account.GetPassword()
@@ -76,29 +46,46 @@ void Storage::InsertAccount(const Account& account) {
                       % account.GetWins()
                       % account.GetLosses()
                       % account.GetPoints()).str();
-  int unused;
-  ExecuteSql(sql, unused_callback, database_, &unused);
+  txn.exec(sql);
+  txn.commit();
 }
 
 Account Storage::LoadAccount(const std::string& username) {
+  std::cout << "loading account for username: " << username << std::endl;
   std::vector<Account> accounts;
+  pqxx::work txn(*database_);
   std::string sql = (boost::format(kLoadAccountByUsernameSQL) % username).str();
-  ExecuteSql(sql, load_all_accounts_callback, database_, &accounts);
+  pqxx::result R( txn.exec( sql ));
+  for (auto row : R) {
+    std::cout << "got row" << std::endl;
+    accounts.push_back(Account(row["USERNAME"].c_str(),
+                               row["PASSWORD"].c_str(),
+                               row["EMAIL"].c_str(),
+                               row["WINS"].as<int>(),
+                               row["LOSSES"].as<int>(),
+                               row["POINTS"].as<int>()));
+  }
   if (accounts.empty()) {
     throw NotFoundException("No account found with username!");
   } else if (accounts.size() > 1) {
     throw std::runtime_error("More than one account found with username!");
   }
-
   return accounts[0];
 }
 
+
 std::unique_ptr<std::vector<Account>> Storage::LoadAllAccounts() {
   auto accounts = std::make_unique<std::vector<Account>>();
-  ExecuteSql(std::string(kLoadAllAccounts),
-             load_all_accounts_callback,
-             database_,
-             accounts.get());
+  pqxx::work txn(*database_);
+  pqxx::result R( txn.exec( kLoadAllAccounts ));
+  for (auto row : R) {
+    accounts->push_back(Account(row["USERNAME"].c_str(),
+                               row["PASSWORD"].c_str(),
+                               row["EMAIL"].c_str(),
+                               row["WINS"].as<int>(),
+                               row["LOSSES"].as<int>(),
+                               row["POINTS"].as<int>()));
+  }
   return accounts;
 }
 

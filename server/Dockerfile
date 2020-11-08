@@ -22,9 +22,13 @@ RUN cd /home \
 # Install JSONCPP
 RUN apt-get install -y libjsoncpp-dev
 
+# Install pqxx
+RUN apt-get install -y libpqxx-dev
+
 COPY . /cpp/src/project/
 WORKDIR /cpp/src/project/
 
+RUN make clean
 RUN make
 
 ENTRYPOINT ["build/a.out", "0.0.0.0", "$PORT"]

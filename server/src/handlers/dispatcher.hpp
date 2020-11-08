@@ -36,6 +36,7 @@ class HandlerDispatcher {
      }
      std::shared_ptr<BaseHandler> handler = routes_to_handlers_.at(route);
      if (req.method() == http::verb::options) {
+       std::cout << "options request" << std::endl;
        // For CORS
        return send(MakeJsonHttpResponse(http::status::ok, req, std::string()));
      }

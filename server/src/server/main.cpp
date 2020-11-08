@@ -6,6 +6,7 @@
 #include "auth/accounts-registry.hpp"
 #include "auth/authenticator.hpp"
 #include "models/games-registry.hpp"
+#include "storage/db_init.hpp"
 
 #include <boost/beast/core.hpp>
 #include <boost/beast/version.hpp>
@@ -19,7 +20,7 @@ namespace http = beast::http;
 namespace net = boost::asio;
 using tcp = boost::asio::ip::tcp;
 
-const char kDatabaseFileName[] = "LoveLetter.db";
+const char kDatabaseFileName[] = "loveletter";
 
 int main(int argc, char* argv[]) {
   if (argc < 3) {
@@ -35,7 +36,9 @@ int main(int argc, char* argv[]) {
 
   net::io_context ioc;
 
+  std::cout << "before initializing storage" << std::endl;
   auto storage = std::make_unique<Storage>(kDatabaseFileName);
+  std::cout << "after initializing storage" << std::endl;
   auto accounts_registry = std::make_unique<AccountsRegistry>();
   auto games_registry = std::make_unique<GamesRegistry>(storage.get());
   auto authenticator = std::make_unique<Authenticator>(accounts_registry.get());

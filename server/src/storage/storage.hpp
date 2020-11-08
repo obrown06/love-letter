@@ -4,6 +4,7 @@
 #include "models/account.hpp"
 
 #include <memory>
+#include <pqxx/pqxx>
 #include <string>
 #include <sqlite3.h>
 #include <utility>
@@ -11,11 +12,11 @@
 
 class Storage {
  public:
-  explicit Storage(const std::string& db_path);
+  explicit Storage(const std::string& name);
   Storage(const Storage&) = delete;
   Storage& operator=(const Storage&) = delete;
 
-  ~Storage();
+  ~Storage() {};
 
   // Inserts a new database row with `account.GetUsername()` as its primary key.
   void InsertAccount(const Account& account);
@@ -32,7 +33,7 @@ class Storage {
   std::unique_ptr<std::vector<Account>> LoadAllAccounts();
 
  private:
-  sqlite3* database_;
+  std::unique_ptr<pqxx::connection> database_;
 };
 
 #endif

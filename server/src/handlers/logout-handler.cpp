@@ -9,6 +9,7 @@
 #include "json-api/exceptions.hpp"
 
 #include <sstream>
+#include <iostream>
 
 const char kRouteName[] = "/api/logout";
 
@@ -18,6 +19,7 @@ std::string LogoutHandler::GetRoute() const {
 
 http::response<http::string_body>
 LogoutHandler::HandleRequest(const http::request<http::string_body>& req) {
+  std::cout << "in logoutHandler handle request" << std::endl;
   authenticator_->Authenticate(req);
   if (req.method() == http::verb::post) {
     return HandlePOST(req);
@@ -28,14 +30,15 @@ LogoutHandler::HandleRequest(const http::request<http::string_body>& req) {
 
 http::response<http::string_body>
 LogoutHandler::HandlePOST(const http::request<http::string_body>& req) {
+  std::cout << "logging out!" << std::endl;
   try {
     accounts_registry_->RemoveAccount(GetSessionCookie(req));
     return MakeJsonHttpResponse(http::status::ok, req, std::string());
   }
   catch (NotLoggedInException& e) {
-    return MakeNotLoggedInResponse(req);
+    return MakeJsonHttpResponse(http::status::ok, req, std::string());
   }
   catch (NotFoundException& e) {
-    return MakeJsonHttpResponse(http::status::bad_request, req, std::string("No account with matching username!"));
+    return MakeJsonHttpResponse(http::status::ok, req, std::string());
   }
 }
