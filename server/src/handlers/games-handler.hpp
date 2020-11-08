@@ -25,6 +25,9 @@ private:
   HandlePOST(const http::request<http::string_body>& req);
 
   http::response<http::string_body>
+  HandleGET(const http::request<http::string_body>& req);
+
+  http::response<http::string_body>
   HandleCreateGameRequest(const http::request<http::string_body>& req);
 
   Storage* storage_;

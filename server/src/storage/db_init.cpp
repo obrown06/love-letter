@@ -25,6 +25,9 @@ const std::vector<std::pair<std::string, std::string>> kTablesToCreationSQL = {
   },
 };
 
+constexpr char kDatabaseUrlEnvVarName[] = "DATABASE_URL";
+constexpr char kDatabaseUrlRegex[] = "postgres://([^:]*):([^@]*)@([^:]*):([^/]*)/(.*)";
+
 void InitializePostgresTable(pqxx::connection& conn, const std::string& creation_sql) {
   pqxx::work W(conn);
   W.exec(creation_sql);
@@ -40,9 +43,9 @@ void InitializePostgresTables(pqxx::connection& conn) {
 }
 
 std::vector<std::string> ParseDatabaseUrl() {
-  std::cout << "url is: " << std::getenv("DATABASE_URL") << std::endl;
-  std::string url = std::string(std::getenv("DATABASE_URL"));
-  std::regex re("postgres://([^:]*):([^@]*)@([^:]*):([^/]*)/(.*)");
+  std::cout << "url is: " << std::getenv(kDatabaseUrlEnvVarName) << std::endl;
+  std::string url = std::string(std::getenv(kDatabaseUrlEnvVarName));
+  std::regex re(kDatabaseUrlRegex);
 
   std::vector<std::string> parsed;
 

@@ -15,9 +15,17 @@ GamesHandler::HandleRequest(const http::request<http::string_body>& req) {
   authenticator_->Authenticate(req);
   if (req.method() == http::verb::post) {
     return HandlePOST(req);
+  } else if (req.method() == http::verb::get) {
+    return HandleGET(req);
   }
 
   return MakeJsonHttpResponse(http::status::not_implemented, req, std::string());
+}
+
+http::response<http::string_body>
+GamesHandler::HandleGET(const http::request<http::string_body>& req) {
+  authenticator_->Authenticate(req);
+  return MakeJsonHttpResponse(http::status::ok, req, std::string());
 }
 
 http::response<http::string_body>
@@ -30,7 +38,7 @@ GamesHandler::HandleCreateGameRequest(const http::request<http::string_body>& re
   try {
     Game game = JSONToGame(req.body());
     registry_->InsertGame(game);
-    return MakeJsonHttpResponse(http::status::ok, req, GetCreatedGameResponse(game.GetId())); 
+    return MakeJsonHttpResponse(http::status::ok, req, GetCreatedGameResponse(game.GetId()));
   }
   catch (InvalidJsonException& e) {
     return MakeJsonHttpResponse(http::status::bad_request, req, std::string("Invalid request format!"));

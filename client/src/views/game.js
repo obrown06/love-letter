@@ -1,12 +1,10 @@
 import React from 'react';
 import UserProfile from 'utils/user-profile.js';
-import axios from 'axios';
+import { myaxios } from 'utils/axios.js';
 import { Redirect } from 'react-router-dom';
 import GameLobby from 'components/game-lobby.js'
 import GameInProgress from 'components/game-in-progress.js'
 import { apiEndpoint } from 'utils/axios.js'
-
-axios.defaults.withCredentials = true;
 
 const UpdateType = {
   JOIN_GAME_REQUEST: 1,
@@ -26,7 +24,6 @@ class Game extends React.Component {
     super(props);
     this.handleStartGame = this.handleStartGame.bind(this);
     console.log("apiEndpoint: " + apiEndpoint);
-    this.ws = new WebSocket('wss://' + apiEndpoint + '/' + this.props.match.params.gameId);
     this.state = {
       data: {},
       gameNotFound: false,
@@ -35,9 +32,12 @@ class Game extends React.Component {
     };
 
     this.heartbeat = this.heartbeat.bind(this);
+    this.setupWebsocket = this.setupWebsocket.bind(this);
   }
 
-  componentDidMount() {
+  setupWebsocket() {
+    console.log("setting up websocket");
+    this.ws = new WebSocket('wss://' + apiEndpoint + '/' + this.props.match.params.gameId);
     this.ws.onopen = () => {
       console.log('connected');
       this.ws.send(JSON.stringify({
@@ -70,6 +70,19 @@ class Game extends React.Component {
     this.ws.onclose = () => {
       console.log('disconnected');
     }
+  }
+
+  componentDidMount() {
+    myaxios.get('https://' + apiEndpoint + '/api/games/',
+      {},
+      { withCredentials: true }
+    ).then(response => {
+      console.log("processing response");
+      if (response.status === 200) {
+        console.log("status ok");
+        this.setupWebsocket();
+      }
+    });
   }
 
   componentWillUnmount() {
