@@ -16,7 +16,11 @@ class PublicPlayer extends React.Component {
   renderCard(type, visible) {
     return (
       <div className={styles.playerElementContainer}>
-        <Card type={type} visible={visible} />
+        <Card
+          type={type}
+          visible={visible}
+          onMouseOver={this.props.onHoverCard}
+          onMouseLeave={this.props.onLeaveCard}/>
       </div>
     );
   }
@@ -26,9 +30,11 @@ class PublicPlayer extends React.Component {
       return null;
     }
 
+    const reversed = types.slice().reverse();
+
     return (
       <div className={styles.cardsContainer}>
-        {types.map((type) => this.renderCard(type, visible))}
+        {reversed.map((type) => this.renderCard(type, visible))}
       </div>
     );
   }

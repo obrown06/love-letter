@@ -16,7 +16,9 @@ class SelectableDeck extends React.Component {
           selectCallback={this.props.selectCallback}
           selectable={true}
           visible={true}
-          type={type} />
+          type={type}
+          onMouseOver={this.props.onHoverCard}
+          onMouseLeave={this.props.onLeaveCard}/>
       </div>
     );
   }

@@ -128,6 +128,7 @@ public:
   const std::vector<Game::Round>& GetRounds() const;
   int GetTokensToWin() const;
   std::vector<Game::GamePlayer> GetWinners() const;
+  bool HasPlayer(const std::string& player_id) const;
 
   std::string GetSummary() const;
   bool IsComplete() const;
@@ -143,6 +144,7 @@ private:
   void AdvanceRound();
   void CheckGameInProgress() const;
   Game::GamePlayer* GetMutablePlayer(const std::string& player_id);
+  const Game::GamePlayer* GetPlayer(const std::string& player_id) const;
   Round* GetMutableLatestRound();
   const Round& GetLatestRound() const;
   std::string id_;

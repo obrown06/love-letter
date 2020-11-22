@@ -48,6 +48,10 @@ std::string Game::GetId() const {
   return id_;
 }
 
+bool Game::HasPlayer(const std::string& player_id) const {
+  return GetPlayer(player_id) != nullptr;
+}
+
 std::string Game::GetCreator() const {
   return creator_;
 }
@@ -76,6 +80,16 @@ std::vector<Game::GamePlayer> Game::GetPlayers() const {
   return players_;
 }
 
+const Game::GamePlayer* Game::GetPlayer(const std::string& player_id) const {
+  auto iter = std::find_if(players_.begin(), players_.end(), [&](const GamePlayer& player) {
+    return player.player_id == player_id;
+  });
+  if (iter != players_.end()) {
+    return &(*iter);
+  }
+  return nullptr;
+}
+
 Game::GamePlayer* Game::GetMutablePlayer(const std::string& player_id) {
   auto iter = std::find_if(players_.begin(), players_.end(), [&](const GamePlayer& player) {
     return player.player_id == player_id;
@@ -87,10 +101,12 @@ Game::GamePlayer* Game::GetMutablePlayer(const std::string& player_id) {
 }
 
 void Game::AddPlayer(const std::string& player_id) {
-  CheckGameNotStarted();
-  if (GetMutablePlayer(player_id) != nullptr) {
-    throw DuplicatePlayerException(player_id, id_);
+  std::cout << "ADDING PLAYER: " << player_id << std::endl;
+  if (HasPlayer(player_id)) {
+    std::cout << "PLAYER ALREADY IN GAME" << std::endl;
+    return;
   }
+  CheckGameNotStarted();
   Game::GamePlayer player(player_id);
   players_.push_back(player);
 }
@@ -108,7 +124,7 @@ void Game::ProcessUpdate(const GameUpdate& update) {
 
 void Game::ValidateMove(const GameUpdate::Move& move, const std::string& player_id) {
   CheckGameInProgress();
-  if (GetMutablePlayer(player_id) == nullptr) {
+  if (!HasPlayer(player_id)) {
     throw NoSuchPlayerException(player_id, id_);
   }
   GetMutableLatestRound()->ValidateMove(move, player_id);

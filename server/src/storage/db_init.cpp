@@ -25,7 +25,7 @@ const std::vector<std::pair<std::string, std::string>> kTablesToCreationSQL = {
   },
 };
 
-constexpr char kDatabaseUrlEnvVarName[] = "DATABASE_URL";
+constexpr char kDatabaseUrlEnvVarName = "DATABASE_URL";
 constexpr char kDatabaseUrlRegex[] = "postgres://([^:]*):([^@]*)@([^:]*):([^/]*)/(.*)";
 
 void InitializePostgresTable(pqxx::connection& conn, const std::string& creation_sql) {

@@ -4,7 +4,7 @@
 #include "models/account.hpp"
 #include "models/game.hpp"
 
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 
 #include <string>
 #include <vector>
@@ -25,6 +25,6 @@ std::string GetCreatedGameResponse(const std::string& game_id);
 
 std::string GetGameAlreadyStartedJson(const std::string& game_id);
 
-std::string GetPlayerLeftAndGameEndedJson(const std::string& game_id, const std::string& player_id);
+std::string GetPlayerLeftGameJson(const std::string& game_id, const std::string& player_id);
 
 #endif

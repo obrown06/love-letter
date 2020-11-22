@@ -54,17 +54,15 @@ class Game extends React.Component {
       let parsed = JSON.parse(evt.data);
       if (parsed.game_found !== undefined && parsed.game_found === false) {
         this.setState({ gameNotFound: true });
-        return;
       } else if (parsed.game_already_started !== undefined) {
         this.setState({ gameLocked: true });
-        return;
-      } else if (parsed.player_left_and_game_ended !== undefined) {
+      } else if (parsed.player_left !== undefined) {
         this.setState({ leavingPlayerId: parsed.player_id });
-        return;
+      } else {
+        this.setState({
+          data: parsed,
+        });
       }
-      this.setState({
-        data: parsed,
-      });
     }
 
     this.ws.onclose = () => {
@@ -86,6 +84,7 @@ class Game extends React.Component {
   }
 
   componentWillUnmount() {
+    this.ws.close();
     clearInterval(this.heartbeatIntervalId);
   }
 
@@ -119,7 +118,7 @@ class Game extends React.Component {
     } else if (this.state.gameLocked || !this.state.data.state || this.state.data.state == GameState.WAITING) {
       return (
         <GameLobby
-          gameLocked={this.state.gameLocked || this.state.leavingPlayerId}
+          gameLocked={this.state.gameLocked}
           gameId={this.props.match.params.gameId}
           players={this.state.data.players}
           handleStartGame={this.handleStartGame} />

@@ -1,6 +1,6 @@
 #include "json-api/auth.hpp"
 
-#include <jsoncpp/json/json.h>
+#include <json/json.h>
 
 std::string GetNotLoggedInJson() {
   Json::Value root;

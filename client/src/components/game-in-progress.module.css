@@ -53,6 +53,14 @@
   width: 350px;
 }
 
+.hoveredCardContainer {
+  position: absolute;
+  top: 17%;
+  right: 0px;
+  height: 400px;
+  width: 300px;
+}
+
 .instructionContainer {
   position: absolute;
   top: 450px;

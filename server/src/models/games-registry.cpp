@@ -21,7 +21,6 @@ void GamesRegistry::InsertSession(const std::string& game_id, WebsocketSession* 
   if (registry_.find(game_id) == registry_.end()) {
     throw NoGameRegisteredException(game_id);
   }
-  registry_.at(game_id).first.CheckGameNotStarted();
   registry_.at(game_id).second.insert(session);
 }
 
@@ -29,16 +28,21 @@ void GamesRegistry::RemoveSession(const std::string& game_id, WebsocketSession* 
   if (registry_.find(game_id) == registry_.end()) {
     throw NoGameRegisteredException(game_id);
   }
+  std::cout << "REMOVING SESSION FOR GAME: " << game_id << std::endl;
+  registry_.at(game_id).second.erase(session);
   if (!session->HasPlayerId()) {
+    std::cout << "SESSION HAD NO PLAYER ID " << std::endl;
     return;
   }
-  std::string json = GetPlayerLeftAndGameEndedJson(game_id, session->GetPlayerId());
-  for (auto* registered_session : registry_.at(game_id).second) {
-    if (registered_session != session) {
+  if (registry_.at(game_id).second.empty()) {
+    std::cout << "REMOVING GAME: " << game_id << std::endl;
+    registry_.erase(game_id);
+  } else {
+    std::string json = GetPlayerLeftGameJson(game_id, session->GetPlayerId());
+    for (auto* registered_session : registry_.at(game_id).second) {
       registered_session->send(json);
     }
   }
-  registry_.erase(game_id);
 }
 
 void GamesRegistry::UpdateGameAndBroadcast(const GameUpdate& game_update) {

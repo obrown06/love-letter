@@ -18,9 +18,9 @@ std::string GetGameAlreadyStartedJson(const std::string& game_id) {
   return Json::writeString(builder, root);
 }
 
-std::string GetPlayerLeftAndGameEndedJson(const std::string& game_id, const std::string& player_id) {
+std::string GetPlayerLeftGameJson(const std::string& game_id, const std::string& player_id) {
   Json::Value root;
-  root["player_left_and_game_ended"] = true;
+  root["player_left"] = true;
   root["game_id"] = game_id;
   root["player_id"] = player_id;
   Json::StreamWriterBuilder builder;

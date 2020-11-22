@@ -26,6 +26,7 @@ class GameInProgress extends React.Component {
     super(props);
     this.state = {
       predictedCardType: 0,
+      hoveredCardType: null,
     }
 
     this.drawCard = this.drawCard.bind(this);
@@ -34,6 +35,23 @@ class GameInProgress extends React.Component {
     this.viewPlayer = this.viewPlayer.bind(this);
     this.predictCardType = this.predictCardType.bind(this);
     this.renderInstruction = this.renderInstruction.bind(this);
+    this.renderHoveredCard = this.renderHoveredCard.bind(this);
+    this.renderScroll = this.renderScroll.bind(this);
+    this.setHoveredCard = this.setHoveredCard.bind(this);
+    this.clearHoveredCard = this.clearHoveredCard.bind(this);
+  }
+
+  setHoveredCard(cardType) {
+    console.log("in setHoveredCard");
+    this.setState({
+      hoveredCardType: cardType
+    });
+  }
+
+  clearHoveredCard(cardType) {
+    this.setState({
+      hoveredCardType: null
+    });
   }
 
   getCurrentRound() {
@@ -185,6 +203,8 @@ class GameInProgress extends React.Component {
         viewCallback={this.viewPlayer}
         selectCallback={this.selectPlayer}
         has_turn={this.getCurrentTurn().player_id === player.player_id}
+        onHoverCard={this.setHoveredCard}
+        onLeaveCard={this.clearHoveredCard}
       />
     );
   }
@@ -194,8 +214,11 @@ class GameInProgress extends React.Component {
       <div className={styles.handCard}>
       <Card
         selectCallback={this.discardCard}
-        selectable={this.isCardSelectable(type)}type={type}
-        visible={true} />
+        selectable={this.isCardSelectable(type)}
+        visible={true}
+        onMouseOver={this.setHoveredCard}
+        onMouseLeave={this.clearHoveredCard}
+        type={type} />
       </div>
     );
   }
@@ -203,7 +226,10 @@ class GameInProgress extends React.Component {
   renderSelectableDeck() {
     return (
       <div className={styles.selectableDeckContainer}>
-        <SelectableDeck selectCallback={this.predictCardType} />
+        <SelectableDeck
+          selectCallback={this.predictCardType}
+          onHoverCard={this.setHoveredCard}
+          onLeaveCard={this.clearHoveredCard} />
       </div>
     );
   }
@@ -216,12 +242,23 @@ class GameInProgress extends React.Component {
     );
   }
 
-  renderLockedSymbol() {
+  renderHoveredCard() {
+    console.log("in renderHoveredCard");
     return (
-      <div className={styles.lockedImageContainer}>
-      <img
-        src={padlock} className={styles.lockedImage}></img>
-        </div>
+      <div className={styles.hoveredCardContainer}>
+        <Card
+          selectable={false}
+          type={this.state.hoveredCardType}
+          visible={true} />
+      </div>
+    );
+  }
+
+  renderScroll() {
+    return (
+      <div className={styles.scrollContainer}>
+        <Scroll data={this.props.data} leavingPlayerId={this.props.leavingPlayerId}/>
+      </div>
     );
   }
 
@@ -232,7 +269,8 @@ class GameInProgress extends React.Component {
                     this.getRoundPlayerForUser().held_cards.map((type) => this.renderCard(type));
     const cardPredictionDeck = !this.requiresPrediction() ? null : this.renderSelectableDeck();
     const instruction = !this.userHasTurn() ? null : this.renderInstruction();
-    const lockedSymbol = this.props.leavingPlayerId ? this.renderLockedSymbol() : null;
+    const hoveredCard = (this.state.hoveredCardType !== null) ? this.renderHoveredCard() : null;
+    const scroll = (this.state.hoveredCardType === null) ? this.renderScroll() : null;
     return (
       <div className={styles.backgroundImageContainer}>
         <img
@@ -244,7 +282,6 @@ class GameInProgress extends React.Component {
             className={styles.title}>
             Game: {this.props.gameId}
           </div>
-          {lockedSymbol}
         </div>
         <div className={styles.playersContainer}>
           <div className={styles.playersTitle}>
@@ -266,9 +303,8 @@ class GameInProgress extends React.Component {
           {hand}
         </div>
         {cardPredictionDeck}
-        <div className={styles.scrollContainer}>
-          <Scroll data={this.props.data} leavingPlayerId={this.props.leavingPlayerId}/>
-        </div>
+        {hoveredCard}
+        {scroll}
         {instruction}
       </div>
     );

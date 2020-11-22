@@ -35,6 +35,31 @@ const CardTypes = {
 
 class Card extends React.Component {
 
+  constructor(props) {
+    super(props);
+
+    this.onMouseOver = this.onMouseOver.bind(this);
+    this.onMouseLeave = this.onMouseLeave.bind(this);
+  }
+
+  onMouseOver() {
+    if (this.props.onMouseOver !== undefined && this.props.visible) {
+      this.props.onMouseOver(this.props.type);
+    }
+  }
+
+  onMouseLeave() {
+    if (this.props.onMouseLeave !== undefined && this.props.visible) {
+      this.props.onMouseLeave();
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.props.onMouseLeave !== undefined) {
+      this.props.onMouseLeave();
+    }
+  }
+
   render() {
     const callback = () => { this.props.selectCallback(this.props.type) };
     return (
@@ -42,7 +67,9 @@ class Card extends React.Component {
         className={[styles.img,
                     this.props.selectable ? commonStyles.selectable : ""].join(" ")}
         src={this.props.visible ? TypesToSrcs[this.props.type] : back}
-        onClick={this.props.selectable ? callback : undefined} />
+        onClick={this.props.selectable ? callback : undefined}
+        onMouseOver={this.onMouseOver}
+        onMouseLeave={this.onMouseLeave} />
     );
   }
 }

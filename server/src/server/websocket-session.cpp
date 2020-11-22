@@ -72,14 +72,17 @@ WebsocketSession::on_read(
     std::string data = beast::buffers_to_string(buffer_.data());
     if (!IsPing(data)) {
       GameUpdate update = JSONToGameUpdate(data);
-      if (update.update_type == GameUpdate::UpdateType::JOIN_GAME_REQUEST) {
-        player_id_ = update.player_id;
-      }
       std::cout << "before calling UpdateGameAndBroadcast" << std::endl;
       registry_->UpdateGameAndBroadcast(update);
       std::cout << "after calling UpdateGameAndBroadcast" << std::endl;
+      if (update.update_type == GameUpdate::UpdateType::JOIN_GAME_REQUEST) {
+        player_id_ = update.player_id;
+      }
     }
     buffer_.consume(buffer_.size());
+  } catch (GameAlreadyStartedException& e) {
+    registry_->RemoveSession(game_id_, this);
+    ws_.write(net::buffer(GetGameAlreadyStartedJson(game_id_)));
   } catch (std::exception& e) {
     fail("read", e.what());
   }
