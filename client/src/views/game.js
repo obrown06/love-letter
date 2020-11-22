@@ -84,7 +84,9 @@ class Game extends React.Component {
   }
 
   componentWillUnmount() {
-    this.ws.close();
+    if (this.ws !== undefined) {
+      this.ws.close();
+    }
     clearInterval(this.heartbeatIntervalId);
   }
 

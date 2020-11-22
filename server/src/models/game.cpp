@@ -103,8 +103,7 @@ Game::GamePlayer* Game::GetMutablePlayer(const std::string& player_id) {
 void Game::AddPlayer(const std::string& player_id) {
   std::cout << "ADDING PLAYER: " << player_id << std::endl;
   if (HasPlayer(player_id)) {
-    std::cout << "PLAYER ALREADY IN GAME" << std::endl;
-    return;
+    throw DuplicatePlayerException(player_id, id_);
   }
   CheckGameNotStarted();
   Game::GamePlayer player(player_id);

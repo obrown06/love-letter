@@ -49,7 +49,7 @@ class Card extends React.Component {
   }
 
   onMouseLeave() {
-    if (this.props.onMouseLeave !== undefined && this.props.visible) {
+    if (this.props.onMouseLeave !== undefined) {
       this.props.onMouseLeave();
     }
   }

@@ -49,13 +49,17 @@ void GamesRegistry::UpdateGameAndBroadcast(const GameUpdate& game_update) {
   if (registry_.find(game_update.game_id) == registry_.end()) {
     throw NoGameRegisteredException(game_update.game_id);
   }
-  Game& game = registry_.at(game_update.game_id).first;
-  std::cout << "before calling ProcessUpdate" << std::endl;
-  game.ProcessUpdate(game_update);
-  std::cout << "after calling ProcessUpdate" << std::endl;
-  if (game.IsComplete()) {
-    std::cout << "calling UpdateAccountsWithGameResults " << std::endl;
-    UpdateAccountsWithGameResults(game);
+  try {
+    Game& game = registry_.at(game_update.game_id).first;
+    std::cout << "before calling ProcessUpdate" << std::endl;
+    game.ProcessUpdate(game_update);
+    std::cout << "after calling ProcessUpdate" << std::endl;
+    if (game.IsComplete() && !game.) {
+      std::cout << "calling UpdateAccountsWithGameResults " << std::endl;
+      UpdateAccountsWithGameResults(game);
+    }
+  } catch (DuplicatePlayerException& e) {
+    // we shouldn't update accounts for re-entry requests
   }
   std::cout << "before calling GameToJSON" << std::endl;
   std::string json = GameToJSON(game);
